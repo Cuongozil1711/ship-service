@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import vn.clmart.manager_service.model.Employee;
@@ -15,11 +16,10 @@ import vn.clmart.manager_service.repository.UserRepository;
 import vn.clmart.manager_service.untils.Constants;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-@Service
-public class CustomUserDetailsService{
+@Service("userDetailsService")
+public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
     UserRepository userRepository;
@@ -51,5 +51,10 @@ public class CustomUserDetailsService{
         } else {
             throw new UsernameNotFoundException("Username Not Found");
         }
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return null;
     }
 }

@@ -4,14 +4,12 @@ import lombok.*;
 import org.springframework.context.annotation.Description;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

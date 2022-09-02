@@ -43,7 +43,7 @@ public class PositionService {
 
     public Position getById(Long cid, String uid, Long id){
         try {
-            return positionRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            return positionRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElse(new Position());
         }
         catch (Exception ex){
             throw new RuntimeException(ex);
