@@ -1,52 +1,51 @@
 package vn.clmart.manager_service.api;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import vn.clmart.manager_service.dto.EmployeeDto;
 import vn.clmart.manager_service.dto.UserLoginDto;
 import vn.clmart.manager_service.service.UserService;
 import vn.clmart.manager_service.untils.ResponseAPI;
 
-@RestController
+@Controller
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserApi {
 
     private final UserService userService;
 
-    public UserApi(UserService userService) {
-        this.userService = userService;
-    }
-
     @PostMapping("/login")
     protected @ResponseBody
-    ResponseAPI login(
+    ResponseEntity<Object> login(
             @RequestHeader Long cid,
             @RequestBody UserLoginDto userLoginDto
     ) {
         try {
-            return ResponseAPI.handlerSuccess(userService.authenticateUserHandler(userLoginDto, cid));
+            return new ResponseEntity<>(userService.authenticateUserHandler(userLoginDto, cid), HttpStatus.OK);
         } catch (BadCredentialsException e) {
-            return ResponseAPI.handlerError("PASSWORD_INCORRECT", HttpStatus.INTERNAL_SERVER_ERROR.value());
-
+            return new ResponseEntity<>("PASSWORD_INCORRECT",  HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (NullPointerException ex) {
-            return ResponseAPI.handlerError("DATA_NOT_VALID", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return new ResponseEntity<>("DATA_NOT_VALID",  HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception ex) {
-            return ResponseAPI.handlerException(ex);
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
 
     @PostMapping("/create")
     protected @ResponseBody
-    ResponseAPI create(
+    ResponseEntity<Object> create(
             @RequestHeader Long cid,
             @RequestHeader String uid,
             @RequestBody EmployeeDto employeeDto
     ) {
         try {
-            return ResponseAPI.handlerSuccess(userService.createEmployee(employeeDto, cid, uid));
+            return new ResponseEntity<>(userService.createEmployee(employeeDto, cid, uid), HttpStatus.OK);
         }
         catch (Exception ex) {
-            return ResponseAPI.handlerException(ex);
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
 }

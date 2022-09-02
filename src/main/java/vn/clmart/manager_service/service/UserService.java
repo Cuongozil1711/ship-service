@@ -1,6 +1,5 @@
 package vn.clmart.manager_service.service;
 
-import lombok.extern.log4j.Log4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.config.security.JwtTokenProvider;
 import vn.clmart.manager_service.dto.EmployeeDto;
 import vn.clmart.manager_service.dto.LoginDto;
@@ -29,7 +29,7 @@ import vn.clmart.manager_service.untils.ResponseAPI;
 import java.util.Date;
 
 @Service
-@Log4j
+@Transactional
 public class UserService {
 
     @Autowired

@@ -1,7 +1,9 @@
-package vn.clmart.manager_service.api;
+package vn.clmart.manager_service.api.empoyee;
 
 import org.hibernate.annotations.Parameter;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.clmart.manager_service.dto.PositionDto;
 import vn.clmart.manager_service.service.PositionService;
@@ -19,71 +21,71 @@ public class PositionApi {
 
     @PostMapping("/search")
     protected @ResponseBody
-    ResponseAPI search(
+    ResponseEntity<Object> search(
            @RequestHeader Long cid,
            @RequestHeader String uid
             , Pageable pageable) {
         try {
-            return ResponseAPI.handlerSuccess(positionService.search(cid, pageable));
+            return new ResponseEntity<>(positionService.search(cid, pageable), HttpStatus.OK);
         } catch (Exception ex) {
-            return ResponseAPI.handlerException(ex);
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
 
     @GetMapping("{id}")
     protected @ResponseBody
-    ResponseAPI getById(
+    ResponseEntity<Object> getById(
             @RequestHeader Long cid,
             @RequestHeader String uid,
             @PathVariable("id") Long id
-            , Pageable pageable) {
+            ) {
         try {
-            return ResponseAPI.handlerSuccess(positionService.getById(cid, uid, id));
+            return new ResponseEntity<>(positionService.getById(cid, uid, id), HttpStatus.OK);
         } catch (Exception ex) {
-            return ResponseAPI.handlerException(ex);
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
 
     @PutMapping("{id}")
     protected @ResponseBody
-    ResponseAPI update(
+    ResponseEntity<Object> update(
             @RequestHeader Long cid,
             @RequestHeader String uid,
             @PathVariable("id") Long id,
             @RequestBody PositionDto positionDto
             ) {
         try {
-            return ResponseAPI.handlerSuccess(positionService.update(positionDto, cid, uid, id));
+            return new ResponseEntity<>(positionService.update(positionDto, cid, uid, id), HttpStatus.OK);
         } catch (Exception ex) {
-            return ResponseAPI.handlerException(ex);
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
 
     @PostMapping()
     protected @ResponseBody
-    ResponseAPI create(
+    ResponseEntity<Object> create(
             @RequestHeader Long cid,
             @RequestHeader String uid,
             @RequestBody PositionDto positionDto
             ) {
         try {
-            return ResponseAPI.handlerSuccess(positionService.create(positionDto, cid, uid));
+            return new ResponseEntity<>(positionService.create(positionDto, cid, uid), HttpStatus.OK);
         } catch (Exception ex) {
-            return ResponseAPI.handlerException(ex);
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
 
     @PutMapping("/delete/{id}")
     protected @ResponseBody
-    ResponseAPI delete(
+    ResponseEntity<Object> delete(
             @RequestHeader Long cid,
             @RequestHeader String uid,
             @PathVariable("id") Long id
     ) {
         try {
-            return ResponseAPI.handlerSuccess(positionService.delete(cid, uid, id));
+            return new ResponseEntity<>(positionService.delete(cid, uid, id), HttpStatus.OK);
         } catch (Exception ex) {
-            return ResponseAPI.handlerException(ex);
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
 }

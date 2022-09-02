@@ -10,7 +10,6 @@ import vn.clmart.manager_service.model.User;
 import vn.clmart.manager_service.repository.EmployeeRepository;
 import vn.clmart.manager_service.untils.Constants;
 
-@Log4j
 public class BaseApi {
     @Autowired
     EmployeeRepository employeeRepository;
