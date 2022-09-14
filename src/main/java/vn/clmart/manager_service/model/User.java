@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 import vn.clmart.manager_service.dto.UserLoginDto;
 import vn.clmart.manager_service.model.config.PersistableEntity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -25,6 +26,7 @@ public class User extends PersistableEntity<String> {
     @GenericGenerator(name = "uuid", strategy = "org.hibernate.id.UUIDGenerator")
     private String uid;
     private String code;
+    @Column(name = "user_name")
     private String username;
     private String password;
 

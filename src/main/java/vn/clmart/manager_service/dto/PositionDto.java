@@ -6,4 +6,5 @@ import lombok.Data;
 public class PositionDto {
     private String code;
     private String name;
+    private String authority;
 }

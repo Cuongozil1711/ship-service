@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.clmart.manager_service.config.exceptions.BusinessException;
 import vn.clmart.manager_service.dto.PositionDto;
 import vn.clmart.manager_service.dto.SupplierDto;
 import vn.clmart.manager_service.model.Position;
@@ -20,8 +21,15 @@ public class SupplierService {
     @Autowired
     SupplierRepository supplierRepository;
 
+    public void validateDto(SupplierDto supplierDto){
+        if(supplierDto.getName().isEmpty()){
+            throw new BusinessException("Tên không được để trống");
+        }
+    }
+
     public Supplier create(SupplierDto supplierDto, Long cid, String uid){
         try {
+            validateDto(supplierDto);
             Supplier supplier = Supplier.of(supplierDto, cid, uid);
             return  supplierRepository.save(supplier);
         }
@@ -67,7 +75,7 @@ public class SupplierService {
     public Supplier delete(Long cid, String uid, Long id){
         try {
             Supplier supplier = supplierRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
-            supplier.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
+            supplier.setDeleteFlg(Constants.DELETE_FLG.DELETE);
             supplier.setCompanyId(cid);
             supplier.setUpdateBy(uid);
             return supplierRepository.save(supplier);
