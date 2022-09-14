@@ -4,6 +4,7 @@ package vn.clmart.manager_service.model;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.context.annotation.Description;
+import vn.clmart.manager_service.dto.OrderDto;
 import vn.clmart.manager_service.model.config.ListHashMapConverter;
 import vn.clmart.manager_service.model.config.PersistableEntity;
 
@@ -30,6 +31,15 @@ public class Order extends PersistableEntity<Long> {
     private Long idCustomer;
     @Convert(converter = ListHashMapConverter.class)
     @Column(columnDefinition = "text")
-    private List<Map<Long, Integer>> detailItems;// bỏ
-    private Long idEmployee;
+    private List<Map<String, Integer>> detailItems;// bỏ
+
+    public static Order of(OrderDto orderDto, Long cid, String uid){
+        Order order = Order.builder()
+                .name(orderDto.getName())
+                .code(orderDto.getCode())
+                .idCustomer(orderDto.getIdCustomer()).build();
+        order.setCompanyId(cid);
+        order.setCreateBy(uid);
+        return order;
+    }
 }

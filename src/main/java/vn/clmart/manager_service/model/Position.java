@@ -23,12 +23,14 @@ public class Position extends PersistableEntity<Long> {
     @GeneratedValue(generator = "id")
     private Long id;
     private String code;
+    private String authority;
     private String name;
 
     public static Position of(Long cid, String uid, PositionDto positionDto){
         Position position = Position.builder()
                 .code(positionDto.getCode())
                 .name(positionDto.getName())
+                .authority(positionDto.getAuthority())
                 .build();
         position.setCreateBy(uid);
         position.setCompanyId(cid);

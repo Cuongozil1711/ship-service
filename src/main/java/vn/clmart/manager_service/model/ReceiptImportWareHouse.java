@@ -3,6 +3,8 @@ package vn.clmart.manager_service.model;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.context.annotation.Description;
+import vn.clmart.manager_service.dto.ReceiptImportWareHouseDto;
+import vn.clmart.manager_service.dto.StallsDto;
 import vn.clmart.manager_service.model.config.PersistableEntity;
 
 import javax.persistence.Entity;
@@ -25,8 +27,23 @@ public class ReceiptImportWareHouse extends PersistableEntity<Long> {
     @GeneratedValue(generator = "id")
     private Long id;
     private String name;
+    private String state;
+    private String code;
     private Date dateImport;
     private Double totalPrice;
     private Long idWareHouse;
-    private Long idEmployee;
+
+    public static ReceiptImportWareHouse of(ReceiptImportWareHouseDto receiptImportWareHouseDto, Long cid, String uid){
+        ReceiptImportWareHouse receiptImportWareHouse = ReceiptImportWareHouse.builder()
+                .code(receiptImportWareHouseDto.getCode())
+                .name(receiptImportWareHouseDto.getName())
+                .state(receiptImportWareHouseDto.getState())
+                .dateImport(receiptImportWareHouseDto.getDateImport())
+                .totalPrice(receiptImportWareHouseDto.getTotalPrice())
+                .idWareHouse(receiptImportWareHouseDto.getIdWareHouse())
+                .build();
+        receiptImportWareHouse.setCreateBy(uid);
+        receiptImportWareHouse.setCompanyId(cid);
+        return receiptImportWareHouse;
+    }
 }

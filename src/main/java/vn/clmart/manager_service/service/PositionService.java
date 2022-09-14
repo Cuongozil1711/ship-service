@@ -63,7 +63,7 @@ public class PositionService {
     public Position delete(Long cid, String uid, Long id){
         try {
             Position position = positionRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
-            position.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
+            position.setDeleteFlg(Constants.DELETE_FLG.DELETE);
             position.setCompanyId(cid);
             position.setUpdateBy(uid);
             return positionRepository.save(position);

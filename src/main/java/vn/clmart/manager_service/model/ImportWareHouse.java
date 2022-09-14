@@ -3,6 +3,8 @@ package vn.clmart.manager_service.model;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.context.annotation.Description;
+import vn.clmart.manager_service.dto.ImportWareHouseDto;
+import vn.clmart.manager_service.dto.ReceiptImportWareHouseDto;
 import vn.clmart.manager_service.model.config.PersistableEntity;
 
 import javax.persistence.Entity;
@@ -23,8 +25,23 @@ public class ImportWareHouse extends PersistableEntity<Long> {
     @GenericGenerator(name = "id",strategy = "vn.clmart.manager_service.generator.SnowflakeId")
     @GeneratedValue(generator = "id")
     private Long id;
+    private String code;
+    private Integer numberBox;
     private Integer quantity;
-    private Double totalPrice;
-    private Long idReceiptExport;
+    private Double totalPrice; // gia tien 1 item
+    private Long idReceiptImport;
     private Long idItems;
+
+    public static ImportWareHouse of(ImportWareHouseDto importWareHouseDto, Long cid, String uid){
+        ImportWareHouse receiptImportWareHouse = ImportWareHouse.builder()
+                .quantity(importWareHouseDto.getQuantity())
+                .totalPrice(importWareHouseDto.getTotalPrice())
+                .numberBox(importWareHouseDto.getNumberBox())
+                .idReceiptImport(importWareHouseDto.getIdReceiptImport())
+                .idItems(importWareHouseDto.getIdItems())
+                .build();
+        receiptImportWareHouse.setCreateBy(uid);
+        receiptImportWareHouse.setCompanyId(cid);
+        return receiptImportWareHouse;
+    }
 }

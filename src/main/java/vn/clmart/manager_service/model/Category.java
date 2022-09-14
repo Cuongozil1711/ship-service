@@ -3,6 +3,7 @@ package vn.clmart.manager_service.model;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.context.annotation.Description;
+import vn.clmart.manager_service.dto.CategoryDto;
 import vn.clmart.manager_service.model.config.PersistableEntity;
 
 import javax.persistence.Entity;
@@ -25,4 +26,14 @@ public class Category extends PersistableEntity<Long> {
     private Long id;
     private String code;
     private String name;
+
+    public static Category of(CategoryDto categoryDto, Long cid, String uid){
+        Category category = Category.builder()
+                .code(categoryDto.getCode())
+                .name(categoryDto.getName())
+                .build();
+        category.setCreateBy(uid);
+        category.setCompanyId(cid);
+        return category;
+    }
 }
