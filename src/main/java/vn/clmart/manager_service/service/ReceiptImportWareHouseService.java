@@ -1,5 +1,6 @@
 package vn.clmart.manager_service.service;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -8,10 +9,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.dto.ReceiptImportWareHouseDto;
 import vn.clmart.manager_service.dto.StallsDto;
+import vn.clmart.manager_service.dto.request.ReceiptImportWareHouseResponseDTO;
 import vn.clmart.manager_service.model.ReceiptImportWareHouse;
 import vn.clmart.manager_service.model.Stalls;
 import vn.clmart.manager_service.repository.ReceiptImportWareHouseRepository;
 import vn.clmart.manager_service.untils.Constants;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @Transactional
@@ -20,10 +26,13 @@ public class ReceiptImportWareHouseService {
     @Autowired
     ReceiptImportWareHouseRepository receiptImportWareHouseRepository;
 
+    @Autowired
+    WareHouseService wareHouseService;
 
     public ReceiptImportWareHouse create(ReceiptImportWareHouseDto receiptImportWareHouseDto, Long cid, String uid){
         try {
             ReceiptImportWareHouse receiptImportWareHouse = ReceiptImportWareHouse.of(receiptImportWareHouseDto, cid, uid);
+            receiptImportWareHouse.setCode("RI" + new Date().getTime());
             receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.INIT.name());
             return receiptImportWareHouseRepository.save(receiptImportWareHouse);
         }
@@ -70,10 +79,19 @@ public class ReceiptImportWareHouseService {
         }
     }
 
-    public PageImpl<ReceiptImportWareHouse> search(Long cid, Pageable pageable){
+    public PageImpl<ReceiptImportWareHouseResponseDTO> search(Long cid, Pageable pageable){
         try {
             Page<ReceiptImportWareHouse> pageSearch = receiptImportWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
-            return new PageImpl(pageSearch.getContent(), pageable, pageSearch.getTotalElements());
+            List<ReceiptImportWareHouseResponseDTO> list = new ArrayList<>();
+            for(ReceiptImportWareHouse receiptImportWareHouse : pageSearch.getContent()){
+                ReceiptImportWareHouseResponseDTO responseDTO = new ReceiptImportWareHouseResponseDTO();
+                BeanUtils.copyProperties(receiptImportWareHouse, responseDTO);
+                if(responseDTO.getIdWareHouse() != null){
+                    responseDTO.setNameWareHouse(wareHouseService.getById(cid, responseDTO.getIdWareHouse()).getName());
+                }
+                list.add(responseDTO);
+            }
+            return new PageImpl(list, pageable, pageSearch.getTotalElements());
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

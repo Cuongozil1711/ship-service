@@ -11,10 +11,12 @@ public class LoginDto {
     private String tokenType = "Bearer";
     private Long companyId;
     private String uId;
+    private String role;
 
-    public LoginDto(String accessToken, Long companyId, String uId) {
+    public LoginDto(String accessToken, Long companyId, String uId, String role) {
         this.setAccessToken(accessToken);
         this.companyId = companyId;
         this.uId = uId;
+        this.role = role;
     }
 }

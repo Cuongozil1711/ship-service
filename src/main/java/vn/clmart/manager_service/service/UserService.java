@@ -58,7 +58,7 @@ public class UserService {
     private static final Logger logger = LogManager.getLogger(UserService.class);
 
     public LoginDto authenticateUserHandler(UserLoginDto userLoginDto, Long cid,  HttpServletRequest request) {
-        LoginDto result = new LoginDto(null, null, null);
+        LoginDto result = new LoginDto(null, null, null, null);
         try {
             User user = userRepository.findAllByUsernameAndCompanyIdAndDeleteFlg(userLoginDto.getUsername(), cid, Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
             if(user != null ){
@@ -78,7 +78,7 @@ public class UserService {
             String jwt = tokenProvider.generateToken(user);
             logger.info("Login on: " + new Date() + " username: " + userLoginDto.getUsername());
 //            Employee employee = employeeRepository.findAllByIdUserAndDeleteFlgAndCompanyId(user.getId(), Constants.DELETE_FLG.NON_DELETE, cid).stream().findFirst().orElse(null);
-            result = new LoginDto(jwt, user.getCompanyId(), user.getUid());
+            result = new LoginDto(jwt, user.getCompanyId(), user.getUid(), userDetails.getAuthorities().toString());
         } catch (BadCredentialsException e) {
             logger.error(e.getMessage(), e);
             throw new BadCredentialsException(e.getMessage(), e);
@@ -90,7 +90,6 @@ public class UserService {
     }
 
     public Employee createEmployee(EmployeeDto employeeDto, Long cid, String uid) {
-        LoginDto result = new LoginDto(null, null, null);
         try {
             // check account có trùng tài khoản hay không
             User user = userRepository.findAllByUsernameAndCompanyIdAndDeleteFlg(employeeDto.getUserLoginDto().getUsername(), cid, Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
