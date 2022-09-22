@@ -1,6 +1,7 @@
 package vn.clmart.manager_service.api.shophouse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,5 +34,31 @@ public class OrderApi {
         }
     }
 
+    @PostMapping("/search")
+    protected @ResponseBody
+    ResponseEntity<Object> search(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @RequestParam(value = "", required = false) String search
+            , Pageable pageable) {
+        try {
+            return new ResponseEntity<>(orderService.search(cid, pageable, search), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
 
+    @GetMapping("{id}")
+    protected @ResponseBody
+    ResponseEntity<Object> getById(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable("id") Long id
+            , Pageable pageable) {
+        try {
+            return new ResponseEntity<>(orderService.getOrderById(cid, id), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
 }

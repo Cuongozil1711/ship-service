@@ -33,6 +33,10 @@ public class Order extends PersistableEntity<Long> {
     @Column(columnDefinition = "text")
     private List<Map<String, Integer>> detailItems;// bỏ
 
+    public List<Map<String, Integer>> getDetailItems() {
+        return detailItems;
+    }
+
     public static Order of(OrderDto orderDto, Long cid, String uid){
         Order order = Order.builder()
                 .name(orderDto.getName())

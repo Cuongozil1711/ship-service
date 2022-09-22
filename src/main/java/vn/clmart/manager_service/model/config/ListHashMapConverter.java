@@ -14,14 +14,14 @@ import java.util.List;
 import java.util.Map;
 
 @Converter
-public class ListHashMapConverter implements AttributeConverter<List<Map<Long, Integer>>, String>{
+public class ListHashMapConverter implements AttributeConverter<List<Map<String, Integer>>, String>{
     private static final Logger log = LogManager.getLogger(ListHashMapConverter.class);
 
     public ListHashMapConverter() {
     }
 
     @Override
-    public String convertToDatabaseColumn(List<Map<Long, Integer>> content) {
+    public String convertToDatabaseColumn(List<Map<String, Integer>> content) {
         if (content != null && !content.isEmpty()) {
             String result = null;
 
@@ -37,13 +37,13 @@ public class ListHashMapConverter implements AttributeConverter<List<Map<Long, I
         }
     }
 
-    public List<Map<Long, Integer>> convertToEntityAttribute(String content) {
-        List<Map<Long, Integer>> result = null;
+    public List<Map<String, Integer>> convertToEntityAttribute(String content) {
+        List<Map<String, Integer>> result = null;
         if (StringUtils.isEmpty(content)) {
             return new ArrayList();
         } else {
             try {
-                result = (List)(new ObjectMapper()).readValue(content, new TypeReference<List<Map<Long, Integer>>>() {
+                result = (List)(new ObjectMapper()).readValue(content, new TypeReference<List<Map<String, Integer>>>() {
                 });
             } catch (IOException var4) {
                 log.error("JSON reading error", var4);

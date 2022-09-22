@@ -13,10 +13,13 @@ public class LoginDto {
     private String uId;
     private String role;
 
-    public LoginDto(String accessToken, Long companyId, String uId, String role) {
+    private String fullName;
+
+    public LoginDto(String accessToken, Long companyId, String uId, String role, String fullName) {
         this.setAccessToken(accessToken);
         this.companyId = companyId;
         this.uId = uId;
         this.role = role;
+        this.fullName = fullName;
     }
 }

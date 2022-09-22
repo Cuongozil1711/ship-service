@@ -19,5 +19,5 @@ public class OrderDto {
     private String name;
     private String code;
     private Long idCustomer;
-    private List<Map<String, Integer>> detailItems;// bỏ
+    private List<Map<Long, Integer>> detailItems;
 }
