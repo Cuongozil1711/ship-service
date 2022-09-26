@@ -19,14 +19,14 @@ public class PositionApi {
         this.positionService = positionService;
     }
 
-    @PostMapping("/search")
+    @GetMapping("/search")
     protected @ResponseBody
     ResponseEntity<Object> search(
            @RequestHeader Long cid,
            @RequestHeader String uid
-            , Pageable pageable) {
+            ) {
         try {
-            return new ResponseEntity<>(positionService.search(cid, pageable), HttpStatus.OK);
+            return new ResponseEntity<>(positionService.search(cid), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

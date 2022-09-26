@@ -7,6 +7,7 @@ import vn.clmart.manager_service.model.config.PersistableEntity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -23,9 +24,10 @@ public class Employee extends PersistableEntity<Long> {
     private Long id;
     private String code;
     private String tel;
-    private String state;
     private Long idFullName;
     private String idUser;
     private Long idAddress;
     private Long idPosition;
+    private Date birthDay;
+    private String image;
 }

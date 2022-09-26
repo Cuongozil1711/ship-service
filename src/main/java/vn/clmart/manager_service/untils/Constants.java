@@ -10,4 +10,9 @@ public class Constants {
         INIT, PENDING, PROCESSING, APPROVED, REJECTED, CANCELED, COMPLETE,
         EXTEND
     }
+
+    public enum EMPLOYEE_WARE_HOUSE{
+        INIT, PENDING, PROCESSING, APPROVED, REJECTED, CANCELED, COMPLETE,
+        EXTEND
+    }
 }

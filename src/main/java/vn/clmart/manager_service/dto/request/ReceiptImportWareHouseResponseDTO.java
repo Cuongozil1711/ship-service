@@ -21,4 +21,5 @@ public class ReceiptImportWareHouseResponseDTO {
     private Long idWareHouse;
     private String nameWareHouse;
     private String stateName;
+    private String nameCreate;
 }

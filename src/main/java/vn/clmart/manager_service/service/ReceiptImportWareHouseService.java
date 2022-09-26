@@ -10,9 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.dto.ReceiptImportWareHouseDto;
 import vn.clmart.manager_service.dto.StallsDto;
 import vn.clmart.manager_service.dto.request.ReceiptImportWareHouseResponseDTO;
-import vn.clmart.manager_service.model.ReceiptImportWareHouse;
-import vn.clmart.manager_service.model.Stalls;
+import vn.clmart.manager_service.model.*;
+import vn.clmart.manager_service.repository.EmployeeRepository;
+import vn.clmart.manager_service.repository.FullNameRepository;
 import vn.clmart.manager_service.repository.ReceiptImportWareHouseRepository;
+import vn.clmart.manager_service.repository.UserRepository;
 import vn.clmart.manager_service.untils.Constants;
 
 import java.util.ArrayList;
@@ -28,6 +30,15 @@ public class ReceiptImportWareHouseService {
 
     @Autowired
     WareHouseService wareHouseService;
+
+    @Autowired
+    FullNameRepository fullNameRepository;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    EmployeeRepository employeeRepository;
 
     public ReceiptImportWareHouse create(ReceiptImportWareHouseDto receiptImportWareHouseDto, Long cid, String uid){
         try {
@@ -88,6 +99,14 @@ public class ReceiptImportWareHouseService {
                 BeanUtils.copyProperties(receiptImportWareHouse, responseDTO);
                 if(responseDTO.getIdWareHouse() != null){
                     responseDTO.setNameWareHouse(wareHouseService.getById(cid, responseDTO.getIdWareHouse()).getName());
+                }
+                if(receiptImportWareHouse.getCreateBy() != null){
+                    User user = userRepository.findUserByUidAndCompanyIdAndDeleteFlg(receiptImportWareHouse.getCreateBy(), cid, Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
+                    Employee employee = employeeRepository.findAllByIdUserAndDeleteFlgAndCompanyId(user.getId(), Constants.DELETE_FLG.NON_DELETE, cid).stream().findFirst().orElse(null);
+                    if(employee != null){
+                        FullName fullName = fullNameRepository.findById(employee.getIdFullName()).orElse(null);
+                        responseDTO.setNameCreate(fullName.getFirstName() + " " + fullName.getLastName());
+                    }
                 }
                 list.add(responseDTO);
             }

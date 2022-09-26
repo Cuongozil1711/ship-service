@@ -18,11 +18,11 @@ import vn.clmart.manager_service.model.ExportWareHouse;
 import vn.clmart.manager_service.model.ImportWareHouse;
 import vn.clmart.manager_service.model.Items;
 import vn.clmart.manager_service.model.Order;
-import vn.clmart.manager_service.repository.ItemsRepository;
 import vn.clmart.manager_service.repository.OrderRepositorry;
 import vn.clmart.manager_service.untils.Constants;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -179,6 +179,58 @@ public class OrderService {
         catch (Exception ex){
             throw new RuntimeException(ex);
         }
+    }
+
+    public List<Map<String, Object>> getEmpoyeeOrder(Long cid){
+        try {
+            List<Map<String, Object>> listOrder = orderRepositorry.getOrdersByEmployee(cid, Constants.DELETE_FLG.NON_DELETE);
+            return listOrder;
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public List<OrderItemResponseDTO> getItemOrder(Long cid, String uid){
+        try {
+            List<Order> listOrder = orderRepositorry.getItemOrder(cid, uid, Constants.DELETE_FLG.NON_DELETE);
+            return listOrder.stream().map(order -> getOrderById(cid, order.getId())).collect(Collectors.toList());
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public Long getRevenueNow(Long cid, String uid){
+        try {
+            Calendar calendar = new GregorianCalendar();
+            List<Order> listOrderNow = orderRepositorry.getItemOrderByDateOrder(cid, calendar.getTime(), Constants.DELETE_FLG.NON_DELETE);
+            return this.getRevenuePrice(listOrderNow, cid);
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public Long getRevenueAfter(Long cid, String uid){
+        try {
+            Calendar calendar = new GregorianCalendar();
+            calendar.add(Calendar.MONTH, -1);
+            List<Order> listOrderAfter = orderRepositorry.getItemOrderByDateOrder(cid, calendar.getTime(), Constants.DELETE_FLG.NON_DELETE);
+            return this.getRevenuePrice(listOrderAfter, cid);
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private Long getRevenuePrice(List<Order> orderList, Long cid){
+        List<OrderItemResponseDTO> list = orderList.stream().map(order -> getOrderById(cid, order.getId())).collect(Collectors.toList());
+        Long sumPrice = 0l;
+        for(OrderItemResponseDTO orderItemResponseDTO : list){
+            sumPrice += orderItemResponseDTO.getTotalPrice().longValue();
+        }
+        return sumPrice;
     }
 
 }
