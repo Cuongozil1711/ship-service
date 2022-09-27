@@ -1,24 +1,32 @@
 package vn.clmart.manager_service.service;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.config.exceptions.BusinessException;
+import vn.clmart.manager_service.dto.ImportListDataWareHouseDto;
 import vn.clmart.manager_service.dto.ImportWareHouseDto;
+import vn.clmart.manager_service.dto.request.ImportWareHouseResponseDTO;
 import vn.clmart.manager_service.model.ImportWareHouse;
+import vn.clmart.manager_service.model.Items;
+import vn.clmart.manager_service.model.Position;
 import vn.clmart.manager_service.model.ReceiptImportWareHouse;
 import vn.clmart.manager_service.repository.ImportWareHouseRepository;
 import vn.clmart.manager_service.repository.ItemsRepository;
 import vn.clmart.manager_service.repository.ReceiptImportWareHouseRepository;
 import vn.clmart.manager_service.untils.Constants;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Service
 @Transactional
 public class ImportWareHouseService {
-
     @Autowired
     ImportWareHouseRepository importWareHouseRepository;
 
@@ -51,11 +59,30 @@ public class ImportWareHouseService {
         try {
             validateDto(importWareHouseDto, cid, uid);
             ReceiptImportWareHouse receiptImportWareHouse = receiptImportWareHouseService.getById(cid, uid, importWareHouseDto.getIdReceiptImport());
-            receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.PROCESSING.name());
+            receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
             ImportWareHouse importWareHouse = ImportWareHouse.of(importWareHouseDto, cid, uid);
             String codeExport = "I" + itemsRepository.findById(importWareHouseDto.getIdItems()).get().getName().trim() + new Date();
             importWareHouse.setCode(codeExport);
+            importWareHouse.setIdReceiptImport(importWareHouseDto.getIdReceiptImport());
             importWareHouseRepository.save(importWareHouse);
+            return true;
+        }
+        catch (Exception ex){
+            throw new BusinessException(ex.getMessage());
+        }
+    }
+
+    public boolean importListWareHouse(ImportListDataWareHouseDto importListDataWareHouseDto, Long cid, String uid){
+        try {
+            ReceiptImportWareHouse receiptImportWareHouse = receiptImportWareHouseService.getById(cid, uid, importListDataWareHouseDto.getIdReceiptImport());
+            receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
+            for(ImportWareHouseDto item : importListDataWareHouseDto.getData()){
+                ImportWareHouse importWareHouse = ImportWareHouse.of(item, cid, uid);
+                String codeExport = "I" + itemsRepository.findById(item.getIdItems()).get().getName().trim() + new Date().getTime();
+                importWareHouse.setCode(codeExport);
+                importWareHouse.setIdReceiptImport(item.getIdReceiptImport());
+                importWareHouseRepository.save(importWareHouse);
+            }
             return true;
         }
         catch (Exception ex){
@@ -116,13 +143,35 @@ public class ImportWareHouseService {
             if(importWareHouses.size() == 0) return 0l;
             Long total = 0l;
             for(ImportWareHouse importWareHouse : importWareHouses){
-                if(importWareHouse.getNumberBox() == 0 || importWareHouse.getNumberBox() == null) importWareHouse.setNumberBox(1);
+                if(importWareHouse.getNumberBox() == null) importWareHouse.setNumberBox(1);
                 total += importWareHouse.getQuantity() * importWareHouse.getNumberBox();
             }
             return total;
         }
         catch (Exception ex){
             throw new BusinessException(ex.getMessage());
+        }
+    }
+
+    public PageImpl<ImportWareHouse> search(Long cid, Pageable pageable){
+        try {
+            Page<ImportWareHouse> pageSearch = importWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
+            List<ImportWareHouseResponseDTO> responseDTOS = new ArrayList<>();
+            for(ImportWareHouse item : pageSearch.getContent()){
+                ImportWareHouseResponseDTO importWareHouseResponseDTO = new ImportWareHouseResponseDTO();
+                BeanUtils.copyProperties(item, importWareHouseResponseDTO);
+                if(importWareHouseResponseDTO.getIdReceiptImport() != null){
+                    importWareHouseResponseDTO.setReceiptImportName(receiptImportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(importWareHouseResponseDTO.getIdReceiptImport(), cid, Constants.DELETE_FLG.NON_DELETE).orElse(new ReceiptImportWareHouse()).getName());
+                }
+                if(importWareHouseResponseDTO.getIdItems() != null){
+                    importWareHouseResponseDTO.setItemsName(itemsRepository.findByIdAndCompanyIdAndDeleteFlg(importWareHouseResponseDTO.getIdItems(), cid, Constants.DELETE_FLG.NON_DELETE).orElse(new Items()).getName());
+                }
+                responseDTOS.add(importWareHouseResponseDTO);
+            }
+            return new PageImpl(responseDTOS, pageable, pageSearch.getTotalElements());
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
         }
     }
 }

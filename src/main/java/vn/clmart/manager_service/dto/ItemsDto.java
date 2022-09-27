@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
@@ -16,4 +17,5 @@ public class ItemsDto {
     private Long idCategory;
     private Long idPubliser;
     private Long idStall;
+    private List<PriceItemsDto> priceItemsDtos;
 }

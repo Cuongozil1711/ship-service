@@ -1,8 +1,62 @@
 package vn.clmart.manager_service.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import vn.clmart.manager_service.model.Order;
 
+import java.util.Optional;
+import java.util.*;
+
 public interface OrderRepositorry extends JpaRepository<Order, Long> {
+
+    @Query("select i from Order as i where i.companyId = :cid  and ((lower(concat(coalesce(i.code, ''), coalesce(i.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) ")
+    Page<Order> findAllByCompanyId(Long cid, String search, Pageable pageable);
+
+    Optional<Order> findByCompanyIdAndId(Long cid, Long id);
+
+    List<Order> findAllByCompanyIdAndDeleteFlgAndCode(Long cid, Integer deleteFlg, String code);
+
+    @Query(value = "select count(o.create_by) as sumOrder, o.create_by as createBy from `order` as o where date_format(o.create_date,'%Y, %m') = date_format(now(),'%Y, %m') and o.company_id = :cid and o.delete_flg = :deleteFlg  " +
+            "group by o.create_by " +
+            "order by count(o.create_by) asc", nativeQuery = true)
+    List<Map<String, Object>> getOrdersByEmployee(
+            @Param("cid")
+            Long cid,
+            @Param("deleteFlg")
+            Integer deleteFlg);
+
+
+    @Query(value = "select * from `order` as o where date_format(o.create_date,'%Y, %m') = date_format(now(),'%Y, %m') and " +
+            "o.create_by = :uid and o.company_id = :cid and o.delete_flg = :deleteFlg ", nativeQuery = true)
+    List<Order> getItemOrder(
+            @Param("cid")
+            Long cid,
+            @Param("uid")
+            String uid,
+            @Param("deleteFlg")
+            Integer deleteFlg);
+
+    @Query(value = "select * from `order` as o where date_format(o.create_date,'%Y, %m') = date_format(:dateOrder,'%Y, %m') and " +
+            "o.company_id = :cid and o.delete_flg = :deleteFlg ", nativeQuery = true)
+    List<Order> getItemOrderByDateOrder(
+            @Param("cid")
+                    Long cid,
+            @Param("dateOrder")
+                    Date dateOrder,
+            @Param("deleteFlg")
+                    Integer deleteFlg);
+
+    @Query(value = "select count(*) from `order` as o where date_format(o.create_date,'%Y, %m') = date_format(now(),'%Y, %m') and " +
+            "o.company_id = :cid and o.delete_flg = :deleteFlg ", nativeQuery = true)
+    Integer getCount(
+            @Param("cid")
+                    Long cid,
+            @Param("deleteFlg")
+                    Integer deleteFlg);
+
+    List<Order> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg);
+
 }

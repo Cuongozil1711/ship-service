@@ -9,8 +9,10 @@ import java.util.Map;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import vn.clmart.manager_service.model.Employee;
 import vn.clmart.manager_service.model.Items;
 import vn.clmart.manager_service.model.Storage;
+import vn.clmart.manager_service.repository.EmployeeRepository;
 import vn.clmart.manager_service.repository.ItemsRepository;
 import vn.clmart.manager_service.repository.StorageRepository;
 
@@ -24,10 +26,13 @@ public class CloudinaryService {
 
     private final ItemsRepository itemsRepository;
 
-    public CloudinaryService(Cloudinary cloudinaryConfig, StorageRepository storageRepository, ItemsRepository itemsRepository) {
+    private final EmployeeRepository employeeRepository;
+
+    public CloudinaryService(Cloudinary cloudinaryConfig, StorageRepository storageRepository, ItemsRepository itemsRepository, EmployeeRepository employeeRepository) {
         this.cloudinaryConfig = cloudinaryConfig;
         this.storageRepository = storageRepository;
         this.itemsRepository = itemsRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     /**
@@ -55,6 +60,13 @@ public class CloudinaryService {
                     if(items != null){
                         items.setImage(publicId);
                         itemsRepository.save(items);
+                    }
+                }
+                if(type.equals("employee")){
+                    Employee items = employeeRepository.findById(rootId).orElse(null);
+                    if(items != null){
+                        items.setImage(publicId);
+                        employeeRepository.save(items);
                     }
                 }
                 return publicId;

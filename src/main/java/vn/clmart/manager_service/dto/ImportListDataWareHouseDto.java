@@ -4,16 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class OrderDto {
-    private String name;
+public class ImportListDataWareHouseDto {
     private String code;
-    private Long idCustomer;
-    private List<DetailsItemOrderDto> detailsItemOrders;
+    private Long idReceiptImport;
+    private List<ImportWareHouseDto> data;
 }

@@ -42,7 +42,7 @@ public class WareHouseService {
         }
     }
 
-    public WareHouse getById(Long cid, String uid, Long id){
+    public WareHouse getById(Long cid,Long id){
         try {
             return WareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
         }

@@ -9,19 +9,17 @@ import org.springframework.util.StringUtils;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Converter
-public class ListHashMapConverter implements AttributeConverter<List<Map<String, Integer>>, String>{
+public class ListHashMapConverterString implements AttributeConverter<List<Map<String, String>>, String> {
     private static final Logger log = LogManager.getLogger(ListHashMapConverter.class);
 
-    public ListHashMapConverter() {
+    public ListHashMapConverterString() {
     }
 
     @Override
-    public String convertToDatabaseColumn(List<Map<String, Integer>> content) {
+    public String convertToDatabaseColumn(List<Map<String, String>> content) {
         if (content != null && !content.isEmpty()) {
             String result = null;
 
@@ -37,13 +35,13 @@ public class ListHashMapConverter implements AttributeConverter<List<Map<String,
         }
     }
 
-    public List<Map<String, Integer>> convertToEntityAttribute(String content) {
-        List<Map<String, Integer>> result = null;
+    public List<Map<String, String>> convertToEntityAttribute(String content) {
+        List<Map<String, String>> result = null;
         if (StringUtils.isEmpty(content)) {
             return new ArrayList();
         } else {
             try {
-                result = (List)(new ObjectMapper()).readValue(content, new TypeReference<List<Map<String, Integer>>>() {
+                result = (List)(new ObjectMapper()).readValue(content, new TypeReference<List<Map<String, String>>>() {
                 });
             } catch (IOException var4) {
                 log.error("JSON reading error", var4);

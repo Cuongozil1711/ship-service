@@ -14,5 +14,6 @@ public class ExportWareHouseDto {
     private Double totalPrice;
     private Long idReceiptExport;
     private Long idItems;
-    private String code;
+    private String note;
+    private String dvtCode;
 }

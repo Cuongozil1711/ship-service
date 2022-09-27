@@ -26,11 +26,13 @@ public class ExportWareHouse extends PersistableEntity<Long> {
     @GeneratedValue(generator = "id")
     private Long id;
     private String code;
+    private String note;
     private Integer numberBox;
     private Integer quantity;
     private Double totalPrice;
     private Long idReceiptExport;
     private Long idItems;
+    private String dvtCode;
 
     public static ExportWareHouse of(ExportWareHouseDto exportWareHouseDto, Long cid, String uid){
         ExportWareHouse exportWareHouse = ExportWareHouse.builder()
@@ -38,6 +40,8 @@ public class ExportWareHouse extends PersistableEntity<Long> {
                 .totalPrice(exportWareHouseDto.getTotalPrice())
                 .idReceiptExport(exportWareHouseDto.getIdReceiptExport())
                 .idItems(exportWareHouseDto.getIdItems())
+                .note(exportWareHouseDto.getNote())
+                .dvtCode(exportWareHouseDto.getDvtCode())
                 .build();
         exportWareHouse.setCreateBy(uid);
         exportWareHouse.setCompanyId(cid);
