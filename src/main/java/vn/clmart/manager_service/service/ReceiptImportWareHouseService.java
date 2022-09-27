@@ -44,7 +44,7 @@ public class ReceiptImportWareHouseService {
         try {
             ReceiptImportWareHouse receiptImportWareHouse = ReceiptImportWareHouse.of(receiptImportWareHouseDto, cid, uid);
             receiptImportWareHouse.setCode("RI" + new Date().getTime());
-            receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.INIT.name());
+            receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.PROCESSING.name());
             return receiptImportWareHouseRepository.save(receiptImportWareHouse);
         }
         catch (Exception ex){

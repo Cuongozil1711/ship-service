@@ -9,16 +9,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.config.exceptions.BusinessException;
 import vn.clmart.manager_service.dto.CustomerDto;
+import vn.clmart.manager_service.dto.DetailsItemOrderDto;
 import vn.clmart.manager_service.dto.ExportWareHouseDto;
 import vn.clmart.manager_service.dto.OrderDto;
 import vn.clmart.manager_service.dto.request.ItemsResponseDTO;
 import vn.clmart.manager_service.dto.request.OrderItemResponseDTO;
 import vn.clmart.manager_service.dto.request.OrderResponseDTO;
-import vn.clmart.manager_service.model.ExportWareHouse;
-import vn.clmart.manager_service.model.ImportWareHouse;
-import vn.clmart.manager_service.model.Items;
-import vn.clmart.manager_service.model.Order;
+import vn.clmart.manager_service.model.*;
+import vn.clmart.manager_service.repository.DetailsItemOrderRepository;
 import vn.clmart.manager_service.repository.OrderRepositorry;
+import vn.clmart.manager_service.repository.PriceItemsRepository;
 import vn.clmart.manager_service.untils.Constants;
 
 import java.util.*;
@@ -43,38 +43,55 @@ public class OrderService {
     @Autowired
     CustomerService customerService;
 
+    @Autowired
+    PriceItemsRepository priceItemsRepository;
+
+    @Autowired
+    DetailsItemOrderRepository detailsItemOrderRepository;
+
     public Order createOrder(OrderDto orderDto, Long cid, String uid){
         try {
             Order order = Order.of(orderDto, cid, uid);
             if(!orderRepositorry.findAllByCompanyIdAndDeleteFlgAndCode(cid, Constants.DELETE_FLG.NON_DELETE, orderDto.getCode()).isEmpty()){
                 throw new BusinessException("Mã đã tồn tại");
             }
+            order.setCode("OR" + orderDto.getDetailsItemOrders().size() + new Date().getTime());
+            // dat hang
+            order = orderRepositorry.save(order);
             // check so luong dat hang
-            List<Map<String, Integer>> detailsItem = new ArrayList<>();
-            for(Map<Long, Integer> items : orderDto.getDetailItems()){
-                Map<String, Integer> dItems = new HashMap<>();
-                Long idItems = Long.valueOf(items.keySet().stream().findFirst().get());
-                Integer qualityItems = checkQualityItem(idItems, cid, uid);
-                if(items.get(idItems) > qualityItems){
+            List<DetailsItemOrder> detailsItem = new ArrayList<>();
+            for(DetailsItemOrderDto items : orderDto.getDetailsItemOrders()){
+                items.setIdOrder(order.getId());
+                DetailsItemOrder dItems = DetailsItemOrder.of(items, cid, uid);
+                Long idItems = items.getIdItems();
+                Integer qualityItems = checkQualityItem(idItems, cid, uid); // check trong kho xem còn bao nhiêu
+                PriceItems priceItems = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, idItems, Constants.DELETE_FLG.NON_DELETE, items.getDvtCode()).orElse(null);
+                Integer qualitySold = 0;
+                if(priceItems == null){
+                    throw new BusinessException("Không tìm " + itemsService.getById(cid, uid, idItems).getName() + " đơn vị tính");
+                }
+                else{
+                    qualitySold = items.getQuality();
+                }
+                if(qualitySold * priceItems.getQuality() > qualityItems){
                     throw new BusinessException("Mặt hàng " + itemsService.getById(cid, uid, idItems).getName() + " không còn trong kho");
                 }
-                dItems.put(idItems.toString(), items.get(idItems));
+                dItems.setTotalPrice(qualitySold * priceItems.getPriceItems());
+                dItems.setQuality(qualitySold);
+                dItems.setType("SOLD");
                 detailsItem.add(dItems);
             }
-            order.setCode("OR" + orderDto.getDetailItems().size() + new Date().getTime());
-            // dat hang
-            order.setDetailItems(detailsItem);
-            order = orderRepositorry.save(order);
+            detailsItemOrderRepository.saveAll(detailsItem);
             // luu vao xuat kho
-            for(Map<String, Integer> items : detailsItem){
-                Map<String, Integer> dItems = new HashMap<>();
-                Long idItems = Long.valueOf(items.keySet().stream().findFirst().get());
-                Integer qualityItems = items.get(idItems.toString());
+            for(DetailsItemOrderDto items : orderDto.getDetailsItemOrders()){
+                Long idItems = items.getIdItems();
+                PriceItems priceItems = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, idItems, Constants.DELETE_FLG.NON_DELETE, items.getDvtCode()).orElse(null);
                 ExportWareHouseDto exportWareHouseDto = new ExportWareHouseDto();
-                exportWareHouseDto.setQuantity(qualityItems);
+                exportWareHouseDto.setQuantity(items.getQuality() * priceItems.getQuality());
                 exportWareHouseDto.setIdReceiptExport(null);
                 exportWareHouseDto.setIdItems(idItems);
-                exportWareHouseDto.setTotalPrice(itemsService.getById(cid, uid, idItems).getPriceItem() * qualityItems);
+                exportWareHouseDto.setDvtCode(items.getDvtCode());
+                exportWareHouseDto.setTotalPrice(priceItems.getPriceItems() * items.getQuality().doubleValue());
                 exportWareHouseService.orderToExport(exportWareHouseDto, cid, uid);
             }
             // tao hoa don
@@ -115,25 +132,25 @@ public class OrderService {
             if(order != null){
                 OrderItemResponseDTO itemsResponseDTO = new OrderItemResponseDTO();
                 BeanUtils.copyProperties(order, itemsResponseDTO);
-                List<Map<String, Integer>> orders = order.getDetailItems();
+                List<DetailsItemOrder> orders = detailsItemOrderRepository.findAllByCompanyIdAndDeleteFlgAndIdOrder(cid, Constants.DELETE_FLG.NON_DELETE, id);
                 Double totalPrice = 0d;
                 Integer size = 0;
-                List<ItemsResponseDTO> list = new ArrayList<>();
+                List<DetailsItemOrderDto> list = new ArrayList<>();
                 for(int i=0; i < orders.size(); i++){
-                    Map<String, Integer> item = orders.get(i);
-                    Long idItems = Long.valueOf(item.keySet().stream().findFirst().get());
-                    if(idItems != null){
-                        Items items = itemsService.getById(cid, "", idItems);
-                        ItemsResponseDTO itemsResponseDTO1 = new ItemsResponseDTO();
-                        BeanUtils.copyProperties(items, itemsResponseDTO1);
-                        Integer qualityItems = item.get(item.keySet().stream().findFirst().get());
-                        itemsResponseDTO1.setTotalSold(qualityItems.longValue());
-                        size +=qualityItems;
-                        list.add(itemsResponseDTO1);
-                        totalPrice += itemsService.getById(cid, "", idItems).getPriceItem() * qualityItems;
+                    DetailsItemOrderDto detailsItemOrderDto = new DetailsItemOrderDto();
+                    DetailsItemOrder item = orders.get(i);
+                    BeanUtils.copyProperties(item, detailsItemOrderDto);
+                    if(item.getIdItems() != null){
+                        ItemsResponseDTO itemsResponseDTO1 = itemsService.getById(cid, "", item.getIdItems());
+                        PriceItems priceItems = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, item.getIdItems(), Constants.DELETE_FLG.NON_DELETE, item.getDvtCode()).orElse(null);
+                        itemsResponseDTO1.setTotalSold(item.getQuality().longValue());
+                        size += item.getQuality();
+                        detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
+                        totalPrice += priceItems.getPriceItems() * item.getQuality();
                     }
+                    list.add(detailsItemOrderDto);
                 }
-                itemsResponseDTO.setItemsResponseDTOList(list);
+                itemsResponseDTO.setDetailsItemOrders(list);
                 itemsResponseDTO.setTotalPrice(totalPrice);
                 itemsResponseDTO.setQuantity(size);
                 return itemsResponseDTO;
@@ -160,13 +177,18 @@ public class OrderService {
                 }
                 Double totalPrice = 0d;
                 Integer size = 0;
-                for(int i=0; i < items.getDetailItems().size(); i++){
-                    Map<String, Integer> orders = items.getDetailItems().get(i);
-                    Long idItems = Long.valueOf(orders.keySet().stream().findFirst().get());
-                    if(idItems != null){
-                        Integer qualityItems = orders.get(orders.keySet().stream().findFirst().get());
-                        size +=qualityItems;
-                        totalPrice += itemsService.getById(cid, "", idItems).getPriceItem() * qualityItems;
+                List<DetailsItemOrder> orders = detailsItemOrderRepository.findAllByCompanyIdAndDeleteFlgAndIdOrder(cid, Constants.DELETE_FLG.NON_DELETE, items.getId());
+                for(int i=0; i < orders.size(); i++){
+                    DetailsItemOrderDto detailsItemOrderDto = new DetailsItemOrderDto();
+                    DetailsItemOrder item = orders.get(i);
+                    BeanUtils.copyProperties(item, detailsItemOrderDto);
+                    if(item.getIdItems() != null){
+                        ItemsResponseDTO itemsResponseDTO1 = itemsService.getById(cid, "", item.getIdItems());
+                        PriceItems priceItems = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, item.getIdItems(), Constants.DELETE_FLG.NON_DELETE, item.getDvtCode()).orElse(null);
+                        itemsResponseDTO1.setTotalSold(item.getQuality().longValue());
+                        size += item.getQuality();
+                        detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
+                        totalPrice += priceItems.getPriceItems() * item.getQuality();
                     }
                 }
                 itemsResponseDTO.setTotalPrice(totalPrice);

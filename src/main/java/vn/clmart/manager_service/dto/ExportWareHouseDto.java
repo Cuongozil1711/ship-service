@@ -15,4 +15,5 @@ public class ExportWareHouseDto {
     private Long idReceiptExport;
     private Long idItems;
     private String note;
+    private String dvtCode;
 }

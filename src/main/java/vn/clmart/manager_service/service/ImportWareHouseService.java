@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.config.exceptions.BusinessException;
+import vn.clmart.manager_service.dto.ImportListDataWareHouseDto;
 import vn.clmart.manager_service.dto.ImportWareHouseDto;
 import vn.clmart.manager_service.dto.request.ImportWareHouseResponseDTO;
 import vn.clmart.manager_service.model.ImportWareHouse;
@@ -62,7 +63,26 @@ public class ImportWareHouseService {
             ImportWareHouse importWareHouse = ImportWareHouse.of(importWareHouseDto, cid, uid);
             String codeExport = "I" + itemsRepository.findById(importWareHouseDto.getIdItems()).get().getName().trim() + new Date();
             importWareHouse.setCode(codeExport);
+            importWareHouse.setIdReceiptImport(importWareHouseDto.getIdReceiptImport());
             importWareHouseRepository.save(importWareHouse);
+            return true;
+        }
+        catch (Exception ex){
+            throw new BusinessException(ex.getMessage());
+        }
+    }
+
+    public boolean importListWareHouse(ImportListDataWareHouseDto importListDataWareHouseDto, Long cid, String uid){
+        try {
+            ReceiptImportWareHouse receiptImportWareHouse = receiptImportWareHouseService.getById(cid, uid, importListDataWareHouseDto.getIdReceiptImport());
+            receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
+            for(ImportWareHouseDto item : importListDataWareHouseDto.getData()){
+                ImportWareHouse importWareHouse = ImportWareHouse.of(item, cid, uid);
+                String codeExport = "I" + itemsRepository.findById(item.getIdItems()).get().getName().trim() + new Date().getTime();
+                importWareHouse.setCode(codeExport);
+                importWareHouse.setIdReceiptImport(item.getIdReceiptImport());
+                importWareHouseRepository.save(importWareHouse);
+            }
             return true;
         }
         catch (Exception ex){
@@ -123,7 +143,7 @@ public class ImportWareHouseService {
             if(importWareHouses.size() == 0) return 0l;
             Long total = 0l;
             for(ImportWareHouse importWareHouse : importWareHouses){
-                if(importWareHouse.getNumberBox() == 0 || importWareHouse.getNumberBox() == null) importWareHouse.setNumberBox(1);
+                if(importWareHouse.getNumberBox() == null) importWareHouse.setNumberBox(1);
                 total += importWareHouse.getQuantity() * importWareHouse.getNumberBox();
             }
             return total;

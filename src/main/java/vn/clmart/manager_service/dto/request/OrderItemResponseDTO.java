@@ -5,6 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import vn.clmart.manager_service.dto.CustomerDto;
+import vn.clmart.manager_service.dto.DetailsItemOrderDto;
+import vn.clmart.manager_service.model.DetailsItemOrder;
+
 import java.util.List;
 
 @Data
@@ -19,5 +22,5 @@ public class OrderItemResponseDTO {
     private Integer quantity;
     private Double totalPrice;
     private Integer deleteFlg;
-    private List<ItemsResponseDTO> itemsResponseDTOList;
+    private List<DetailsItemOrderDto> detailsItemOrders;
 }

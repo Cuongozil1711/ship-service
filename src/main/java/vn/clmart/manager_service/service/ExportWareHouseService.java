@@ -136,7 +136,7 @@ public class ExportWareHouseService {
             if(exportWareHouses.size() == 0) return 0l;
             Long total = 0l;
             for(ExportWareHouse exportWareHouse : exportWareHouses){
-                if(exportWareHouse.getNumberBox() == 0 || exportWareHouse.getNumberBox() == null) exportWareHouse.setNumberBox(1);
+                if(exportWareHouse.getNumberBox() == null) exportWareHouse.setNumberBox(1);
                 total += exportWareHouse.getQuantity() * exportWareHouse.getNumberBox();
             }
             return total;
@@ -146,7 +146,7 @@ public class ExportWareHouseService {
         }
     }
 
-    public PageImpl<ExportWareHouse> search(Long cid, Pageable pageable){
+    public PageImpl<ExportWareHouseResponseDTO> search(Long cid, Pageable pageable){
         try {
             Page<ExportWareHouse> pageSearch = exportWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
             List<ExportWareHouseResponseDTO> responseDTOS = new ArrayList<>();

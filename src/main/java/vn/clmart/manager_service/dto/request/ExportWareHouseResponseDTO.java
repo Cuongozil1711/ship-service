@@ -20,6 +20,7 @@ public class ExportWareHouseResponseDTO {
     private Long idReceiptExport;
     private Long idItems;
     private Date createDate;
+    private String dvtCode;
     private String itemsName = "";
     private String receiptExportName;
     private String creatByName = "";

@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import vn.clmart.manager_service.dto.PriceItemsDto;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
@@ -20,4 +22,5 @@ public class ItemsResponseDTO {
     private String image;
     private Long totalSold;
     private Long totalInWareHouse;
+    private List<PriceItemsDto> priceItemsDtos;
 }

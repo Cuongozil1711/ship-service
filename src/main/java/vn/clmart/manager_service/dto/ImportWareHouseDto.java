@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,4 +18,5 @@ public class ImportWareHouseDto {
     private Double totalPrice;
     private Long idReceiptImport;
     private Long idItems;
+    private Date dateExpired;
 }

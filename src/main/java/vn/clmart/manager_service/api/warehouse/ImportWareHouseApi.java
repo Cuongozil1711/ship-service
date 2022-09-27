@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.clmart.manager_service.dto.ImportListDataWareHouseDto;
 import vn.clmart.manager_service.dto.ImportWareHouseDto;
 import vn.clmart.manager_service.dto.ReceiptExportWareHouseDto;
 import vn.clmart.manager_service.service.ImportWareHouseService;
@@ -28,6 +29,20 @@ public class ImportWareHouseApi {
     ) {
         try {
             return new ResponseEntity<>(importWareHouseService.importWareHouse(importWareHouseDto, cid, uid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @PostMapping("/list")
+    protected @ResponseBody
+    ResponseEntity<Object> createList(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @RequestBody ImportListDataWareHouseDto importListDataWareHouseDto
+    ) {
+        try {
+            return new ResponseEntity<>(importWareHouseService.importListWareHouse(importListDataWareHouseDto, cid, uid), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

@@ -10,6 +10,7 @@ import vn.clmart.manager_service.model.config.PersistableEntity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -31,14 +32,15 @@ public class ImportWareHouse extends PersistableEntity<Long> {
     private Double totalPrice; // gia tien 1 item
     private Long idReceiptImport;
     private Long idItems;
+    private Date dateExpired;
 
     public static ImportWareHouse of(ImportWareHouseDto importWareHouseDto, Long cid, String uid){
         ImportWareHouse receiptImportWareHouse = ImportWareHouse.builder()
                 .quantity(importWareHouseDto.getQuantity())
                 .totalPrice(importWareHouseDto.getTotalPrice())
                 .numberBox(importWareHouseDto.getNumberBox())
-                .idReceiptImport(importWareHouseDto.getIdReceiptImport())
                 .idItems(importWareHouseDto.getIdItems())
+                .dateExpired(importWareHouseDto.getDateExpired())
                 .build();
         receiptImportWareHouse.setCreateBy(uid);
         receiptImportWareHouse.setCompanyId(cid);

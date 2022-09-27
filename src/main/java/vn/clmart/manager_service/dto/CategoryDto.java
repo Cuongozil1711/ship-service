@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
@@ -12,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class CategoryDto {
     private String code;
     private String name;
+    private List<Map<String, String>> unit;// bỏ
 }

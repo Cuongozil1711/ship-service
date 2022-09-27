@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import vn.clmart.manager_service.dto.CustomerDto;
 
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,4 +20,5 @@ public class OrderResponseDTO {
     private Integer quantity;
     private Double totalPrice;
     private Integer deleteFlg;
+    private Date createDate;
 }
