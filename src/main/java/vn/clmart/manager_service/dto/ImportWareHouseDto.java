@@ -13,6 +13,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 public class ImportWareHouseDto {
     private String code;
+    private Long id;
     private Integer numberBox;
     private Integer quantity;
     private Double totalPrice;

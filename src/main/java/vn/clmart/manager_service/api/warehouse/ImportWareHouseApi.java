@@ -48,6 +48,48 @@ public class ImportWareHouseApi {
         }
     }
 
+    @PostMapping("/edit")
+    protected @ResponseBody
+    ResponseEntity<Object> editList(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @RequestBody ImportListDataWareHouseDto importListDataWareHouseDto
+    ) {
+        try {
+            return new ResponseEntity<>(importWareHouseService.editImportListWareHouse(importListDataWareHouseDto, cid, uid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @DeleteMapping("/{idReceiptExport}")
+    protected @ResponseBody
+    ResponseEntity<Object> deleteExport(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable("idReceiptExport") Long idReceiptExport
+    ) {
+        try {
+            return new ResponseEntity<>(importWareHouseService.deleteExport(cid, uid, idReceiptExport), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @GetMapping("/checkRemoveItem/{id}")
+    protected @ResponseBody
+    ResponseEntity<Object> checkRemoveItem(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable("id") Long id
+    ) {
+        try {
+            return new ResponseEntity<>(importWareHouseService.checkRemoveListImport(cid, uid, id), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
     @PutMapping("{idReceiptImport}")
     protected @ResponseBody
     ResponseEntity<Object> create(
@@ -70,7 +112,7 @@ public class ImportWareHouseApi {
             @PathVariable("idReceiptImport") Long idReceiptImport
     ) {
         try {
-            return new ResponseEntity<>(importWareHouseService.findAll(cid, uid, idReceiptImport), HttpStatus.OK);
+            return new ResponseEntity<>(importWareHouseService.getImportByReceiptId(cid, uid, idReceiptImport), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.clmart.manager_service.dto.ExportWareHouseDto;
+import vn.clmart.manager_service.dto.ExportWareHouseListDto;
 import vn.clmart.manager_service.service.ExportWareHouseService;
 
 import java.util.List;
@@ -20,31 +21,15 @@ public class ExportWareHouseApi {
         this.exportWareHouseService = exportWareHouseService;
     }
 
-    @PostMapping()
-    protected @ResponseBody
-    ResponseEntity<Object> create(
-            @RequestHeader Long cid,
-            @RequestHeader String uid,
-            @RequestBody ExportWareHouseDto exportWareHouseDto
-    ) {
-        try {
-            return new ResponseEntity<>(exportWareHouseService.exportWareHouse(exportWareHouseDto, cid, uid), HttpStatus.OK);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
-        }
-    }
-
     @PostMapping("/list")
     protected @ResponseBody
     ResponseEntity<Object> createList(
             @RequestHeader Long cid,
             @RequestHeader String uid,
-            @RequestBody List<ExportWareHouseDto> exportWareHouseDto
+            @RequestBody ExportWareHouseListDto exportWareHouseDto
     ) {
         try {
-            for(ExportWareHouseDto item : exportWareHouseDto){
-                exportWareHouseService.exportWareHouse(item, cid, uid);
-            }
+            exportWareHouseService.exportWareHouse(exportWareHouseDto, cid, uid);
             return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
@@ -64,7 +49,7 @@ public class ExportWareHouseApi {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
-    @GetMapping({"idReceiptExport"})
+    @GetMapping("{idReceiptExport}")
     protected @ResponseBody
     ResponseEntity<Object> findAllByIdReceiptExport(
             @RequestHeader Long cid,
@@ -72,7 +57,22 @@ public class ExportWareHouseApi {
             @PathVariable("idReceiptExport") Long idReceiptExport
     ) {
         try {
-            return new ResponseEntity<>(exportWareHouseService.findAll(cid, uid, idReceiptExport), HttpStatus.OK);
+            return new ResponseEntity<>(exportWareHouseService.getByIdReceiptExport(cid, uid, idReceiptExport), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @DeleteMapping("{idReceiptExport}")
+    protected @ResponseBody
+    ResponseEntity<Object> deleteExport(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable("idReceiptExport") Long idReceiptExport
+    ) {
+        try {
+            exportWareHouseService.deleteExport(cid, uid, idReceiptExport);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

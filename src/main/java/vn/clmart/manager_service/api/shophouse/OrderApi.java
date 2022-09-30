@@ -61,4 +61,19 @@ public class OrderApi {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
+
+    @DeleteMapping("{id}")
+    protected @ResponseBody
+    ResponseEntity<Object> create(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @RequestBody Long id
+    ) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return new ResponseEntity<>(objectMapper.writeValueAsString(orderService.deleteOrder(cid, uid, id)), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
 }

@@ -15,6 +15,7 @@ public class DetailsItemOrderDto {
     private Integer quality;
     private Long totalPrice; // gia tien theo don vi tinh * quality
     private Long idItems;
+    private Long idReceiptImport;
     private Long idOrder;
     private ItemsResponseDTO itemsResponseDTO;
 }

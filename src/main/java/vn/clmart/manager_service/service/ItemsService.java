@@ -66,7 +66,7 @@ public class ItemsService {
             // xóa giá cũ
             List<PriceItems> priceItemOld = priceItemsRepository.findAllByCompanyIdAndIdItemsAndDeleteFlg(cid, item.getId(), Constants.DELETE_FLG.NON_DELETE);
             for(PriceItems priceItem : priceItemOld){
-                priceItem.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
+                priceItem.setDeleteFlg(Constants.DELETE_FLG.DELETE);
                 priceItemsRepository.save(priceItem);
             }
             // cập nhật lại giá mới

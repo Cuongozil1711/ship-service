@@ -87,10 +87,13 @@ public class OrderService {
                 Long idItems = items.getIdItems();
                 PriceItems priceItems = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, idItems, Constants.DELETE_FLG.NON_DELETE, items.getDvtCode()).orElse(null);
                 ExportWareHouseDto exportWareHouseDto = new ExportWareHouseDto();
-                exportWareHouseDto.setQuantity(items.getQuality() * priceItems.getQuality());
+                exportWareHouseDto.setNumberBox(items.getQuality());
+                exportWareHouseDto.setQuantity(priceItems.getQuality());
                 exportWareHouseDto.setIdReceiptExport(null);
                 exportWareHouseDto.setIdItems(idItems);
+                exportWareHouseDto.setIdReceiptImport(items.getIdReceiptImport());
                 exportWareHouseDto.setDvtCode(items.getDvtCode());
+                exportWareHouseDto.setIdOrder(order.getId());
                 exportWareHouseDto.setTotalPrice(priceItems.getPriceItems() * items.getQuality().doubleValue());
                 exportWareHouseService.orderToExport(exportWareHouseDto, cid, uid);
             }
@@ -100,6 +103,36 @@ public class OrderService {
         catch (Exception ex){
             throw new RuntimeException(ex);
         }
+    }
+
+    public boolean deleteOrder(Long cid, String uid, Long id){
+        Order order = orderRepositorry.findByCompanyIdAndIdAndDeleteFlg(cid, id, Constants.DELETE_FLG.NON_DELETE).orElse(null);
+        if(order != null){
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DATE, -1);
+            Date dateNow = cal.getTime();
+            if(order.getCreateDate().after(dateNow)){
+                return false;
+            }
+            else{
+                // update Order
+                order.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
+                order.setUpdateBy(uid);
+                orderRepositorry.save(order);
+
+                // update price item don hang
+                List<DetailsItemOrder> detailsItemOrders = detailsItemOrderRepository.findAllByCompanyIdAndDeleteFlgAndIdOrder(cid, Constants.DELETE_FLG.NON_DELETE, id);
+                detailsItemOrders.forEach(detailsItemOrder -> {
+                    detailsItemOrder.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
+                    detailsItemOrder.setUpdateBy(uid);
+                });
+                detailsItemOrderRepository.saveAll(detailsItemOrders);
+
+                // check xuất kho để xóa
+                exportWareHouseService.deleteExportByOrderId(cid, uid, order.getId());
+            }
+        }
+        return false;
     }
 
     public Integer checkQualityItem(Long id, Long cid, String uid){

@@ -17,6 +17,8 @@ public interface OrderRepositorry extends JpaRepository<Order, Long> {
 
     Optional<Order> findByCompanyIdAndId(Long cid, Long id);
 
+    Optional<Order> findByCompanyIdAndIdAndDeleteFlg(Long cid, Long id, Integer deleteFlg);
+
     List<Order> findAllByCompanyIdAndDeleteFlgAndCode(Long cid, Integer deleteFlg, String code);
 
     @Query(value = "select count(o.create_by) as sumOrder, o.create_by as createBy from `order` as o where date_format(o.create_date,'%Y, %m') = date_format(now(),'%Y, %m') and o.company_id = :cid and o.delete_flg = :deleteFlg  " +
