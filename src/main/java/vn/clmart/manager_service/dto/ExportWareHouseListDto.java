@@ -5,19 +5,15 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class ImportWareHouseDto {
+public class ExportWareHouseListDto {
+    private String name;
     private String code;
-    private Long id;
-    private Integer numberBox;
-    private Integer quantity;
-    private Double totalPrice;
-    private Long idReceiptImport;
-    private Long idItems;
-    private Date dateExpired;
+    private Long idReceiptExport;
+    private List<DetailsItemOrderDto> data;
 }

@@ -90,4 +90,18 @@ public class ItemsApi {
         }
     }
 
+    @GetMapping("details/{id}")
+    protected @ResponseBody
+    ResponseEntity<Object> getById(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable("id") Long id
+            ) {
+        try {
+            return new ResponseEntity<>(ItemsService.getByIdtems(cid, uid, id), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
 }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import vn.clmart.manager_service.model.ReceiptImportWareHouse;
 
 import java.util.Date;
 
@@ -14,13 +15,13 @@ import java.util.Date;
 public class ImportWareHouseResponseDTO {
     private Long id;
     private String code;
-    private Integer numberBox;
-    private Integer quantity;
+    private Integer quantityItems;
     private Double totalPrice; // gia tien 1 item
     private Long idReceiptImport;
-    private Long idItems;
+    private ReceiptImportWareHouse receiptImportWareHouse;
     private Date createDate;
-    private String itemsName = "";
+    private Date updateDate;
+    private String updateByName = "";
     private String receiptImportName = "";
     private String creatByName = "";
 }

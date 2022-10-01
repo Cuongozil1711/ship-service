@@ -184,4 +184,13 @@ public class UserService {
         }
     }
 
+    public FullName getFullName(Long cid, String uid){
+        User user = userRepository.findUserByUidAndCompanyIdAndDeleteFlg(uid, cid, Constants.DELETE_FLG.NON_DELETE).orElse(null);
+        if(user != null){
+            Employee employee = employeeRepository.findAllByIdUserAndDeleteFlgAndCompanyId(user.getId(), Constants.DELETE_FLG.NON_DELETE, cid).stream().findFirst().orElse(null);
+            FullName fullName = fullNameRepository.findById(employee.getIdFullName()).orElse(new FullName());
+            return fullName;
+        }
+        return new FullName();
+    }
 }

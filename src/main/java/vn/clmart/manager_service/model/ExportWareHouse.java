@@ -30,7 +30,9 @@ public class ExportWareHouse extends PersistableEntity<Long> {
     private Integer numberBox;
     private Integer quantity;
     private Double totalPrice;
+    private Long idOrder;
     private Long idReceiptExport;
+    private Long idReceiptImport;
     private Long idItems;
     private String dvtCode;
 
@@ -40,8 +42,10 @@ public class ExportWareHouse extends PersistableEntity<Long> {
                 .totalPrice(exportWareHouseDto.getTotalPrice())
                 .idReceiptExport(exportWareHouseDto.getIdReceiptExport())
                 .idItems(exportWareHouseDto.getIdItems())
+                .idOrder(exportWareHouseDto.getIdOrder())
                 .note(exportWareHouseDto.getNote())
                 .dvtCode(exportWareHouseDto.getDvtCode())
+                .idReceiptImport(exportWareHouseDto.getIdReceiptImport())
                 .build();
         exportWareHouse.setCreateBy(uid);
         exportWareHouse.setCompanyId(cid);
