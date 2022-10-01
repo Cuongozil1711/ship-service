@@ -13,6 +13,8 @@ public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse
 
     public List<ExportWareHouse> findAllByDeleteFlgAndIdReceiptExportAndCompanyId(Integer delete, Long idReceiptExport, Long cid);
 
+    public List<ExportWareHouse> findAllByIdReceiptExportAndCompanyId(Long idReceiptExport, Long cid);
+
     public List<ExportWareHouse> findAllByDeleteFlgAndIdItemsAndCompanyId(Integer delete, Long idItems, Long cid);
 
     @Query("select i from ExportWareHouse as i where i.companyId = :cid and i.deleteFlg = :delete and i.idReceiptExport is not null group by i.idReceiptExport order by i.createDate")

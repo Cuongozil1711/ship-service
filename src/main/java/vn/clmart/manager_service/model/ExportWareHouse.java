@@ -45,7 +45,7 @@ public class ExportWareHouse extends PersistableEntity<Long> {
                 .idOrder(exportWareHouseDto.getIdOrder())
                 .note(exportWareHouseDto.getNote())
                 .dvtCode(exportWareHouseDto.getDvtCode())
-                .idReceiptExport(exportWareHouseDto.getIdReceiptExport())
+                .idReceiptImport(exportWareHouseDto.getIdReceiptImport())
                 .build();
         exportWareHouse.setCreateBy(uid);
         exportWareHouse.setCompanyId(cid);

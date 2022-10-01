@@ -78,15 +78,30 @@ public class ExportWareHouseApi {
         }
     }
 
-    @GetMapping("/list")
+    @GetMapping("/list/{status}")
     protected @ResponseBody
     ResponseEntity<Object> findAllByImportWareHouse(
             @RequestHeader Long cid,
             @RequestHeader String uid,
+            @PathVariable(value = "status") Integer status,
             Pageable pageable
     ) {
         try {
-            return new ResponseEntity<>(exportWareHouseService.search(cid, pageable), HttpStatus.OK);
+            return new ResponseEntity<>(exportWareHouseService.search(cid, status, pageable), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @PostMapping("/restore")
+    protected @ResponseBody
+    ResponseEntity<Object> restoreExportWareHouse(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @RequestBody Long[] idReceiptExport
+    ) {
+        try {
+            return new ResponseEntity<>(exportWareHouseService.restoreExportWareHouse(cid, uid, idReceiptExport), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

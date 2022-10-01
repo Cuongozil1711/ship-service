@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class ExportWareHouseDto {
     private Integer numberBox = 1;
     private Integer quantity;
-    private Double totalPrice;
+    private Double totalPrice; // số lượng trên 1 đơn vị
     private Long idReceiptExport;
     private Long idReceiptImport;
     private Long idOrder;

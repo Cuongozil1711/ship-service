@@ -103,6 +103,31 @@ public class ImportWareHouseService {
         }
     }
 
+    public Boolean restoreImportWareHouse(Long cid, String uid, Long[] idReceiptImports){
+        try {
+            for(Long idReceiptImport : idReceiptImports){
+                List<ImportWareHouse> importWareHouses = importWareHouseRepository.findAllByDeleteFlgAndIdReceiptImportAndCompanyId(Constants.DELETE_FLG.DELETE, idReceiptImport, cid);
+                importWareHouses.forEach(importWareHouse -> {
+                    importWareHouse.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
+                    importWareHouse.setUpdateBy(uid);
+                });
+                importWareHouseRepository.saveAll(importWareHouses);
+
+                // chỉnh sửa lại trạng thái phiếu
+                ReceiptImportWareHouse receiptImportWareHouse = receiptImportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(idReceiptImport, cid, Constants.DELETE_FLG.NON_DELETE).orElse(null);
+                if(receiptImportWareHouse != null){
+                    receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
+                    receiptImportWareHouse.setUpdateBy(uid);
+                    receiptImportWareHouseRepository.save(receiptImportWareHouse);
+                }
+            }
+        }
+        catch (Exception ex){
+            throw new BusinessException(ex.getMessage());
+        }
+        return true;
+    }
+
     public boolean deleteExport(Long cid, String uid, Long idReceiptImport){
         try {
             List<ExportWareHouse> wareHouseList = exportWareHouseRepository.findAllByDeleteFlgAndCompanyIdAndIdReceiptImport(Constants.DELETE_FLG.NON_DELETE, cid, idReceiptImport);
@@ -117,7 +142,7 @@ public class ImportWareHouseService {
                 // chỉnh sửa lại trạng thái phiếu
                 ReceiptImportWareHouse receiptImportWareHouse = receiptImportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(idReceiptImport, cid, Constants.DELETE_FLG.NON_DELETE).orElse(null);
                 if(receiptImportWareHouse != null){
-                    receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.PROCESSING.name());
+                    receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.CANCELED.name());
                     receiptImportWareHouse.setUpdateBy(uid);
                     receiptImportWareHouseRepository.save(receiptImportWareHouse);
                 }
@@ -208,7 +233,7 @@ public class ImportWareHouseService {
                 importListDataWareHouseDto.setCode(receiptImportWareHouse.getCode());
                 importListDataWareHouseDto.setIdReceiptImport(idReceiptImport);
                 List<ImportWareHouseDto> data = new ArrayList<>();
-                List<ImportWareHouse> list = importWareHouseRepository.findAllByDeleteFlgAndIdReceiptImportAndCompanyId(Constants.DELETE_FLG.NON_DELETE, idReceiptImport, cid);
+                List<ImportWareHouse> list = importWareHouseRepository.findAllByIdReceiptImportAndCompanyId(idReceiptImport, cid);
                 data = list.stream().map(importWareHouse -> of(importWareHouse)).collect(Collectors.toList());
                 importListDataWareHouseDto.setData(data);
             }
@@ -290,9 +315,9 @@ public class ImportWareHouseService {
         }
     }
 
-    public PageImpl<ImportWareHouseResponseDTO> search(Long cid, Pageable pageable){
+    public PageImpl<ImportWareHouseResponseDTO> search(Long cid, Integer status, Pageable pageable){
         try {
-            Page<ImportWareHouse> pageSearch = importWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
+            Page<ImportWareHouse> pageSearch = importWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, status, pageable);
             List<ImportWareHouseResponseDTO> responseDTOS = new ArrayList<>();
             for(ImportWareHouse item : pageSearch.getContent()){
                 ImportWareHouseResponseDTO importWareHouseResponseDTO = new ImportWareHouseResponseDTO();
@@ -300,7 +325,7 @@ public class ImportWareHouseService {
                 if(importWareHouseResponseDTO.getIdReceiptImport() != null){
                     importWareHouseResponseDTO.setReceiptImportWareHouse(receiptImportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(importWareHouseResponseDTO.getIdReceiptImport(), cid, Constants.DELETE_FLG.NON_DELETE).orElse(new ReceiptImportWareHouse()));
                     AtomicReference<Double> totalPrice = new AtomicReference<>(0d);
-                    List<ImportWareHouse> wareHouseList = importWareHouseRepository.findAllByDeleteFlgAndIdReceiptImportAndCompanyId(Constants.DELETE_FLG.NON_DELETE, importWareHouseResponseDTO.getIdReceiptImport(), cid);
+                    List<ImportWareHouse> wareHouseList = importWareHouseRepository.findAllByDeleteFlgAndIdReceiptImportAndCompanyId(status, importWareHouseResponseDTO.getIdReceiptImport(), cid);
                     wareHouseList.forEach(
                              importWareHouse -> {
                                  if(importWareHouse.getTotalPrice() != null)
@@ -309,13 +334,27 @@ public class ImportWareHouseService {
                     );
                     importWareHouseResponseDTO.setQuantityItems(wareHouseList.size());
                     importWareHouseResponseDTO.setTotalPrice(totalPrice.get());
-                    FullName fullName = userService.getFullName(cid, importWareHouseResponseDTO.getReceiptImportWareHouse().getCreateBy());
+                    FullName fullName = userService.getFullName(cid, item.getCreateBy());
+                    FullName fullNameUpDate = userService.getFullName(cid,item.getUpdateBy());
+                    if(status == 0){
+                        importWareHouseResponseDTO.setUpdateByName(fullNameUpDate.getFirstName() + " "  + fullNameUpDate.getLastName());
+                        importWareHouseResponseDTO.setUpdateDate(item.getModifiedDate());
+                    }
                     importWareHouseResponseDTO.setCreatByName(fullName.getFirstName() + " " + fullName.getLastName());
                     importWareHouseResponseDTO.setCreateDate(item.getCreateDate());
                 }
                 responseDTOS.add(importWareHouseResponseDTO);
             }
             return new PageImpl(responseDTOS, pageable, pageSearch.getTotalElements());
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public List<ImportWareHouse> getByIdtems(Long cid, Long idItems){
+        try {
+            return importWareHouseRepository.findAllByDeleteFlgAndIdItemsAndCompanyIdOrderByDateExpiredAsc(Constants.DELETE_FLG.NON_DELETE, idItems, cid);
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

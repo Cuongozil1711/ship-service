@@ -118,15 +118,30 @@ public class ImportWareHouseApi {
         }
     }
 
-    @GetMapping("/list")
+    @GetMapping("/list/{status}")
     protected @ResponseBody
     ResponseEntity<Object> findAllByImportWareHouse(
             @RequestHeader Long cid,
             @RequestHeader String uid,
+            @PathVariable(value = "status") Integer status,
             Pageable pageable
     ) {
         try {
-            return new ResponseEntity<>(importWareHouseService.search(cid, pageable), HttpStatus.OK);
+            return new ResponseEntity<>(importWareHouseService.search(cid, status, pageable), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @PostMapping("/restore")
+    protected @ResponseBody
+    ResponseEntity<Object> restoreImportWareHouse(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @RequestBody Long[] idReceiptImport
+    ) {
+        try {
+            return new ResponseEntity<>(importWareHouseService.restoreImportWareHouse(cid, uid, idReceiptImport), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

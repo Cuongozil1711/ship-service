@@ -2,14 +2,17 @@ package vn.clmart.manager_service.service;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.dto.ItemsDto;
+import vn.clmart.manager_service.dto.ItemsResponseDto;
 import vn.clmart.manager_service.dto.PriceItemsDto;
 import vn.clmart.manager_service.dto.request.ItemsResponseDTO;
+import vn.clmart.manager_service.model.ImportWareHouse;
 import vn.clmart.manager_service.model.Items;
 import vn.clmart.manager_service.model.PriceItems;
 import vn.clmart.manager_service.repository.ItemsRepository;
@@ -29,6 +32,7 @@ public class ItemsService {
     ItemsRepository itemsRepository;
 
     @Autowired
+    @Lazy
     ImportWareHouseService importWareHouseService;
 
     @Autowired
@@ -36,6 +40,9 @@ public class ItemsService {
 
     @Autowired
     PriceItemsRepository priceItemsRepository;
+
+    @Autowired
+    ReceiptImportWareHouseService receiptImportWareHouseService;
 
     public Items create(ItemsDto itemsDto, Long cid, String uid){
         try {
@@ -133,6 +140,27 @@ public class ItemsService {
             items.setDeleteFlg(Constants.DELETE_FLG.DELETE);
             items.setUpdateBy(uid);
             return itemsRepository.save(items);
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public List<ItemsResponseDto> getByIdtems(Long cid, String uid, Long idItems){
+        try {
+            List<ItemsResponseDto> itemsResponseDtos = new ArrayList<>();
+            List<ImportWareHouse> importWareHouses = importWareHouseService.getByIdtems(cid, idItems);
+            itemsResponseDtos = importWareHouses.stream().map(importWareHouse -> {
+                ItemsResponseDto itemsResponseDTO = new ItemsResponseDto();
+                itemsResponseDTO.setReceiptImportWareHouse(receiptImportWareHouseService.getById(cid, uid, importWareHouse.getIdReceiptImport()));
+                itemsResponseDTO.setDateExpired(importWareHouse.getDateExpired());
+                // Số lượng đã bán
+                itemsResponseDTO.setQualityExport(exportWareHouseService.qualityExport(cid, importWareHouse.getIdReceiptImport(), idItems, 1));
+                itemsResponseDTO.setQualityCanceled(exportWareHouseService.qualityExport(cid, importWareHouse.getIdReceiptImport(), idItems, 0));
+                itemsResponseDTO.setQualityImport(importWareHouse.getNumberBox() * importWareHouse.getQuantity());
+                return itemsResponseDTO;
+            }).collect(Collectors.toList());
+            return itemsResponseDtos;
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

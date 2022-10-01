@@ -13,7 +13,12 @@ public interface ImportWareHouseRepository extends JpaRepository<ImportWareHouse
 
     public List<ImportWareHouse> findAllByDeleteFlgAndIdReceiptImportAndCompanyId(Integer delete, Long idReceiptImport, Long cid);
 
+    public List<ImportWareHouse> findAllByIdReceiptImportAndCompanyId(Long idReceiptImport, Long cid);
+
+
     public List<ImportWareHouse> findAllByDeleteFlgAndIdItemsAndCompanyId(Integer delete, Long idItems, Long cid);
+
+    public List<ImportWareHouse> findAllByDeleteFlgAndIdItemsAndCompanyIdOrderByDateExpiredAsc(Integer delete, Long idItems, Long cid);
 
     public Optional<ImportWareHouse> findByCompanyIdAndIdAndDeleteFlg(Long cid, Long id, Integer deteteFlg);
 

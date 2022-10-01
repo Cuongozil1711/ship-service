@@ -34,15 +34,16 @@ public class OrderApi {
         }
     }
 
-    @PostMapping("/search")
+    @PostMapping("/search/{status}")
     protected @ResponseBody
     ResponseEntity<Object> search(
             @RequestHeader Long cid,
             @RequestHeader String uid,
             @RequestParam(value = "", required = false) String search
+            ,@PathVariable("status") Integer status
             , Pageable pageable) {
         try {
-            return new ResponseEntity<>(orderService.search(cid, pageable, search), HttpStatus.OK);
+            return new ResponseEntity<>(orderService.search(cid, pageable, search, status), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -67,11 +68,25 @@ public class OrderApi {
     ResponseEntity<Object> create(
             @RequestHeader Long cid,
             @RequestHeader String uid,
-            @RequestBody Long id
+            @PathVariable(value = "id") Long id
     ) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             return new ResponseEntity<>(objectMapper.writeValueAsString(orderService.deleteOrder(cid, uid, id)), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @GetMapping("/restore/{id}")
+    protected @ResponseBody
+    ResponseEntity<Object> restoreExportWareHouse(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable("id") Long id
+    ) {
+        try {
+            return new ResponseEntity<>(orderService.restoreOrder(cid, uid, id), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

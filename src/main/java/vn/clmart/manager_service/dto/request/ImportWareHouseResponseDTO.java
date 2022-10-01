@@ -20,6 +20,8 @@ public class ImportWareHouseResponseDTO {
     private Long idReceiptImport;
     private ReceiptImportWareHouse receiptImportWareHouse;
     private Date createDate;
+    private Date updateDate;
+    private String updateByName = "";
     private String receiptImportName = "";
     private String creatByName = "";
 }

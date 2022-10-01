@@ -24,6 +24,8 @@ public class ExportWareHouseResponseDTO {
     private Long idItems;
     private Date createDate;
     private String dvtCode;
+    private Date updateDate;
+    private String updateByName;
     private String itemsName = "";
     private String receiptExportName;
     private String creatByName = "";

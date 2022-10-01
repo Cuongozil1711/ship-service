@@ -1,6 +1,5 @@
 package vn.clmart.manager_service.service;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -12,7 +11,6 @@ import vn.clmart.manager_service.dto.DetailsItemOrderDto;
 import vn.clmart.manager_service.dto.ExportWareHouseDto;
 import vn.clmart.manager_service.dto.ExportWareHouseListDto;
 import vn.clmart.manager_service.dto.request.ExportWareHouseResponseDTO;
-import vn.clmart.manager_service.dto.request.ImportWareHouseResponseDTO;
 import vn.clmart.manager_service.model.*;
 import vn.clmart.manager_service.repository.ExportWareHouseRepository;
 import vn.clmart.manager_service.repository.ItemsRepository;
@@ -62,11 +60,10 @@ public class ExportWareHouseService {
             }
         }
     }
-
     public ExportWareHouseListDto getByIdReceiptExport(Long cid, String uid, Long idReceiptExport){
         try {
             ExportWareHouseListDto exportWareHouseListDto = new ExportWareHouseListDto();
-            List<ExportWareHouse> exportWareHouses = exportWareHouseRepository.findAllByDeleteFlgAndIdReceiptExportAndCompanyId(Constants.DELETE_FLG.NON_DELETE, idReceiptExport, cid);
+            List<ExportWareHouse> exportWareHouses = exportWareHouseRepository.findAllByIdReceiptExportAndCompanyId(idReceiptExport, cid);
             List<DetailsItemOrderDto> detailsItemOrderDtoList = new ArrayList<>();
             String code = "";
             if(exportWareHouses != null) code = exportWareHouses.get(0).getCode();
@@ -87,7 +84,6 @@ public class ExportWareHouseService {
             throw new RuntimeException(ex);
         }
     }
-
     public void deleteExport(Long cid, String uid, Long idReceiptExport){
         try {
             List<ExportWareHouse> exportWareHouses = exportWareHouseRepository.findAllByDeleteFlgAndIdReceiptExportAndCompanyId(Constants.DELETE_FLG.NON_DELETE, idReceiptExport, cid);
@@ -99,7 +95,7 @@ public class ExportWareHouseService {
             // chỉnh sửa lại trạng thái phiếu
             ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(idReceiptExport, cid, Constants.DELETE_FLG.NON_DELETE).orElse(null);
             if(receiptExportWareHouse != null){
-                receiptExportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.PROCESSING.name());
+                receiptExportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.CANCELED.name());
                 receiptExportWareHouse.setUpdateBy(uid);
                 receiptExportWareHouseRepository.save(receiptExportWareHouse);
             }
@@ -109,6 +105,30 @@ public class ExportWareHouseService {
         }
     }
 
+    public Boolean restoreExportWareHouse(Long cid, String uid, Long[] idReceiptExports){
+        try {
+            for(Long idReceiptExport : idReceiptExports){
+                List<ExportWareHouse> exportWareHouses = exportWareHouseRepository.findAllByDeleteFlgAndIdReceiptExportAndCompanyId(Constants.DELETE_FLG.DELETE, idReceiptExport, cid);
+                exportWareHouses.forEach(exportWareHouse -> {
+                    exportWareHouse.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
+                    exportWareHouse.setUpdateBy(uid);
+                });
+                exportWareHouseRepository.saveAll(exportWareHouses);
+
+                // chỉnh sửa lại trạng thái phiếu
+                ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(idReceiptExport, cid, Constants.DELETE_FLG.NON_DELETE).orElse(null);
+                if(receiptExportWareHouse != null){
+                    receiptExportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
+                    receiptExportWareHouse.setUpdateBy(uid);
+                    receiptExportWareHouseRepository.save(receiptExportWareHouse);
+                }
+            }
+        }
+        catch (Exception ex){
+            throw new BusinessException(ex.getMessage());
+        }
+        return true;
+    }
     public void deleteExportByOrderId(Long cid, String uid, Long orgId){
         try {
             List<ExportWareHouse> exportWareHouses = exportWareHouseRepository.findAllByCompanyIdAndDeleteFlgAndIdOrder(cid, Constants.DELETE_FLG.NON_DELETE, orgId);
@@ -122,7 +142,6 @@ public class ExportWareHouseService {
             throw new RuntimeException(ex);
         }
     }
-
     public boolean exportWareHouse(ExportWareHouseListDto exportWareHouseListDto, Long cid, String uid){
         try {
             ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.getById(cid, uid, exportWareHouseListDto.getIdReceiptExport());
@@ -137,7 +156,7 @@ public class ExportWareHouseService {
                 exportWareHouseDto.setIdReceiptExport(exportWareHouseListDto.getIdReceiptExport());
                 exportWareHouseDto.setIdReceiptImport(itemExport.getIdReceiptImport());
                 exportWareHouseDto.setIdItems(idItems);
-                exportWareHouseDto.setTotalPrice(priceItems.getQuality() * itemExport.getQuality() * priceItems.getPriceItems().doubleValue());
+                exportWareHouseDto.setTotalPrice(priceItems.getQuality() * priceItems.getPriceItems().doubleValue());
                 exportWareHouseDto.setDvtCode(itemExport.getDvtCode());
                 ExportWareHouse exportWareHouse = ExportWareHouse.of(exportWareHouseDto, cid, uid);
                 exportWareHouse.setCode(exportWareHouseListDto.getCode());
@@ -163,23 +182,6 @@ public class ExportWareHouseService {
         }
     }
 
-    public List<ExportWareHouse> findAll(Long cid, String uid, Long idReceiptExport){
-        try {
-            ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.getById(cid, uid, idReceiptExport);
-            if(receiptExportWareHouse == null){
-                throw new BusinessException("Không tìm thấy phiếu nhập kho");
-            }
-            else{
-                if(receiptExportWareHouse.getState().equals(Constants.RECEIPT_WARE_HOUSE.PROCESSING.name())){
-                    throw new BusinessException("Phiếu nhập kho chưa hoàn thành");
-                }
-            }
-            return exportWareHouseRepository.findAllByDeleteFlgAndIdReceiptExportAndCompanyId(Constants.DELETE_FLG.NON_DELETE, idReceiptExport, cid);
-        }
-        catch (Exception ex){
-            throw new BusinessException(ex.getMessage());
-        }
-    }
 
     public boolean completeWareHouse(Long cid, String uid, Long idReceiptExport){
         try {
@@ -200,7 +202,6 @@ public class ExportWareHouseService {
             throw new BusinessException(ex.getMessage());
         }
     }
-
     public List<ExportWareHouse> findAllByItems(Long cid, String uid, Long idItems){
         try {
             return exportWareHouseRepository.findAllByDeleteFlgAndIdItemsAndCompanyId(Constants.DELETE_FLG.NON_DELETE, idItems, cid);
@@ -209,7 +210,6 @@ public class ExportWareHouseService {
             throw new BusinessException(ex.getMessage());
         }
     }
-
     public Long totalItemsInExport(Long idItem, Long cid){
         try {
             List<ExportWareHouse> exportWareHouses = exportWareHouseRepository.findAllByDeleteFlgAndIdItemsAndCompanyId(Constants.DELETE_FLG.NON_DELETE, idItem, cid);
@@ -225,33 +225,50 @@ public class ExportWareHouseService {
             throw new BusinessException(ex.getMessage());
         }
     }
-
-    public PageImpl<ExportWareHouseResponseDTO> search(Long cid, Pageable pageable){
+    public PageImpl<ExportWareHouseResponseDTO> search(Long cid, Integer status, Pageable pageable){
         try {
-            Page<ExportWareHouse> pageSearch = exportWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
+            Page<ExportWareHouse> pageSearch = exportWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, status, pageable);
             List<ExportWareHouseResponseDTO> responseDTOS = new ArrayList<>();
             for(ExportWareHouse item : pageSearch.getContent()){
                 ExportWareHouseResponseDTO exportWareHouseResponseDTO = new ExportWareHouseResponseDTO();
                 exportWareHouseResponseDTO.setIdReceiptExport(item.getIdReceiptExport());
                 if(item.getIdReceiptExport() != null){
                     exportWareHouseResponseDTO.setReceiptExportWareHouse(receiptExportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(item.getIdReceiptExport(), cid, Constants.DELETE_FLG.NON_DELETE).orElse(new ReceiptExportWareHouse()));
-                    List<ExportWareHouse> wareHouseList = exportWareHouseRepository.findAllByDeleteFlgAndIdReceiptExportAndCompanyId(Constants.DELETE_FLG.NON_DELETE, item.getIdReceiptExport(), cid);
+                    List<ExportWareHouse> wareHouseList = exportWareHouseRepository.findAllByDeleteFlgAndIdReceiptExportAndCompanyId(status, item.getIdReceiptExport(), cid);
                     AtomicReference<Double> totalPrice = new AtomicReference<>(0d);
                     wareHouseList.forEach(
                             importWareHouse -> {
                                 if(importWareHouse.getTotalPrice() != null)
-                                    totalPrice.updateAndGet(v -> v + importWareHouse.getTotalPrice());
+                                    totalPrice.updateAndGet(v -> v + importWareHouse.getTotalPrice() * importWareHouse.getNumberBox());
                             }
                     );
                     exportWareHouseResponseDTO.setQuantityItems(wareHouseList.size());
                     exportWareHouseResponseDTO.setTotalPrice(totalPrice.get());
-                    FullName fullName = userService.getFullName(cid, exportWareHouseResponseDTO.getReceiptExportWareHouse().getCreateBy());
+                    FullName fullName = userService.getFullName(cid, item.getCreateBy());
+                    FullName fullNameUpDate = userService.getFullName(cid,item.getUpdateBy());
+                    if(status == 0){
+                        exportWareHouseResponseDTO.setUpdateByName(fullNameUpDate.getFirstName() + " "  + fullNameUpDate.getLastName());
+                        exportWareHouseResponseDTO.setUpdateDate(item.getModifiedDate());
+                    }
                     exportWareHouseResponseDTO.setCreatByName(fullName.getFirstName() + " " + fullName.getLastName());
                     exportWareHouseResponseDTO.setCreateDate(item.getCreateDate());
                 }
                 responseDTOS.add(exportWareHouseResponseDTO);
             }
             return new PageImpl(responseDTOS, pageable, pageSearch.getTotalElements());
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public Integer qualityExport(Long cid, Long idReceiptImport, Long idItems, Integer status){
+        try {
+            AtomicReference<Integer> qualityExport = new AtomicReference<>(0);
+            exportWareHouseRepository.findAllByDeleteFlgAndIdItemsAndCompanyIdAndIdReceiptImport(status, idItems, cid, idReceiptImport).forEach(exportWareHouse -> {
+                qualityExport.updateAndGet(v -> v + exportWareHouse.getQuantity() * exportWareHouse.getNumberBox());
+            });
+            return qualityExport.get();
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

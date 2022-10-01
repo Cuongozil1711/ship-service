@@ -2,6 +2,7 @@ package vn.clmart.manager_service.service;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ public class OrderService {
     ExportWareHouseService exportWareHouseService;
 
     @Autowired
+    @Lazy
     ImportWareHouseService importWareHouseService;
 
     @Autowired
@@ -76,7 +78,7 @@ public class OrderService {
                 if(qualitySold * priceItems.getQuality() > qualityItems){
                     throw new BusinessException("Mặt hàng " + itemsService.getById(cid, uid, idItems).getName() + " không còn trong kho");
                 }
-                dItems.setTotalPrice(qualitySold * priceItems.getPriceItems());
+                dItems.setTotalPrice(qualitySold * priceItems.getPriceItems()); // tổng tiền theo số lượng, giá sản phảm
                 dItems.setQuality(qualitySold);
                 dItems.setType("SOLD");
                 detailsItem.add(dItems);
@@ -105,25 +107,60 @@ public class OrderService {
         }
     }
 
+    public Boolean restoreOrder(Long cid, String uid, Long id){
+        try {
+            Order order = orderRepositorry.findByCompanyIdAndIdAndDeleteFlg(cid, id, Constants.DELETE_FLG.DELETE).orElse(null);
+            if(order != null){
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.DATE, -1);
+                Date dateNow = cal.getTime();
+                if(dateNow.after(order.getCreateDate())){
+                    return false;
+                }
+                else{
+                    // update Order
+                    order.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
+                    order.setUpdateBy(uid);
+                    orderRepositorry.save(order);
+
+                    // update price item don hang
+                    List<DetailsItemOrder> detailsItemOrders = detailsItemOrderRepository.findAllByCompanyIdAndDeleteFlgAndIdOrder(cid, Constants.DELETE_FLG.DELETE, id);
+                    detailsItemOrders.forEach(detailsItemOrder -> {
+                        detailsItemOrder.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
+                        detailsItemOrder.setUpdateBy(uid);
+                    });
+                    detailsItemOrderRepository.saveAll(detailsItemOrders);
+
+                    // check xuất kho để xóa
+                    exportWareHouseService.deleteExportByOrderId(cid, uid, order.getId());
+                }
+            }
+        }
+        catch (Exception ex){
+            throw new BusinessException(ex.getMessage());
+        }
+        return true;
+    }
+
     public boolean deleteOrder(Long cid, String uid, Long id){
         Order order = orderRepositorry.findByCompanyIdAndIdAndDeleteFlg(cid, id, Constants.DELETE_FLG.NON_DELETE).orElse(null);
         if(order != null){
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.DATE, -1);
             Date dateNow = cal.getTime();
-            if(order.getCreateDate().after(dateNow)){
+            if(dateNow.after(order.getCreateDate())){
                 return false;
             }
             else{
                 // update Order
-                order.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
+                order.setDeleteFlg(Constants.DELETE_FLG.DELETE);
                 order.setUpdateBy(uid);
                 orderRepositorry.save(order);
 
                 // update price item don hang
                 List<DetailsItemOrder> detailsItemOrders = detailsItemOrderRepository.findAllByCompanyIdAndDeleteFlgAndIdOrder(cid, Constants.DELETE_FLG.NON_DELETE, id);
                 detailsItemOrders.forEach(detailsItemOrder -> {
-                    detailsItemOrder.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
+                    detailsItemOrder.setDeleteFlg(Constants.DELETE_FLG.DELETE);
                     detailsItemOrder.setUpdateBy(uid);
                 });
                 detailsItemOrderRepository.saveAll(detailsItemOrders);
@@ -165,7 +202,7 @@ public class OrderService {
             if(order != null){
                 OrderItemResponseDTO itemsResponseDTO = new OrderItemResponseDTO();
                 BeanUtils.copyProperties(order, itemsResponseDTO);
-                List<DetailsItemOrder> orders = detailsItemOrderRepository.findAllByCompanyIdAndDeleteFlgAndIdOrder(cid, Constants.DELETE_FLG.NON_DELETE, id);
+                List<DetailsItemOrder> orders = detailsItemOrderRepository.findAllByCompanyIdAndIdOrder(cid, id);
                 Double totalPrice = 0d;
                 Integer size = 0;
                 List<DetailsItemOrderDto> list = new ArrayList<>();
@@ -195,9 +232,9 @@ public class OrderService {
         }
     }
 
-    public PageImpl<Order> search(Long cid, Pageable pageable, String search){
+    public PageImpl<Order> search(Long cid, Pageable pageable, String search, Integer status){
         try {
-            Page<Order> pageSearch = orderRepositorry.findAllByCompanyId(cid, search, pageable);
+            Page<Order> pageSearch = orderRepositorry.findAllByCompanyId(cid, search, status, pageable);
             List<Order> list = pageSearch.getContent();
             List<OrderResponseDTO> responseDTOList = new ArrayList<>();
             for(Order items : list){
@@ -210,18 +247,17 @@ public class OrderService {
                 }
                 Double totalPrice = 0d;
                 Integer size = 0;
-                List<DetailsItemOrder> orders = detailsItemOrderRepository.findAllByCompanyIdAndDeleteFlgAndIdOrder(cid, Constants.DELETE_FLG.NON_DELETE, items.getId());
+                List<DetailsItemOrder> orders = detailsItemOrderRepository.findAllByCompanyIdAndDeleteFlgAndIdOrder(cid, status, items.getId());
                 for(int i=0; i < orders.size(); i++){
                     DetailsItemOrderDto detailsItemOrderDto = new DetailsItemOrderDto();
                     DetailsItemOrder item = orders.get(i);
                     BeanUtils.copyProperties(item, detailsItemOrderDto);
                     if(item.getIdItems() != null){
                         ItemsResponseDTO itemsResponseDTO1 = itemsService.getById(cid, "", item.getIdItems());
-                        PriceItems priceItems = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, item.getIdItems(), Constants.DELETE_FLG.NON_DELETE, item.getDvtCode()).orElse(null);
                         itemsResponseDTO1.setTotalSold(item.getQuality().longValue());
                         size += item.getQuality();
                         detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
-                        totalPrice += priceItems.getPriceItems() * item.getQuality();
+                        totalPrice += item.getTotalPrice();
                     }
                 }
                 itemsResponseDTO.setTotalPrice(totalPrice);
