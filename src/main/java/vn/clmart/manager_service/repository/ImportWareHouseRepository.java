@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import vn.clmart.manager_service.model.ImportWareHouse;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +24,6 @@ public interface ImportWareHouseRepository extends JpaRepository<ImportWareHouse
     public Optional<ImportWareHouse> findByCompanyIdAndIdAndDeleteFlg(Long cid, Long id, Integer deteteFlg);
 
 
-    @Query("select i from ImportWareHouse as i where i.companyId = :cid and i.deleteFlg = :delete group by i.idReceiptImport order by i.createDate")
-    public Page<ImportWareHouse> findAllByCompanyIdAndDeleteFlg(Long cid, Integer delete, Pageable pageable);
+    @Query("select i from ImportWareHouse as i inner join ReceiptImportWareHouse r on r.id = i.idReceiptImport where i.companyId = :cid and i.deleteFlg = :delete and  (i.createDate between coalesce(:startDate, current_date) and coalesce(:endDate, current_date) or current_date = current_date ) and ((lower(concat(coalesce(i.code, ''), coalesce(r.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) group by i.idReceiptImport order by i.createDate")
+    public Page<ImportWareHouse> findAllByCompanyIdAndDeleteFlg(Long cid, Integer delete, String search, Date startDate, Date endDate, Pageable pageable);
 }

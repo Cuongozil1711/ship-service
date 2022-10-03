@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.clmart.manager_service.dto.ExportWareHouseDto;
 import vn.clmart.manager_service.dto.ExportWareHouseListDto;
+import vn.clmart.manager_service.dto.ItemsSearchDto;
 import vn.clmart.manager_service.service.ExportWareHouseService;
 
 import java.util.List;
@@ -84,10 +85,11 @@ public class ExportWareHouseApi {
             @RequestHeader Long cid,
             @RequestHeader String uid,
             @PathVariable(value = "status") Integer status,
+            @RequestParam(value = "", required = false) String search,
             Pageable pageable
     ) {
         try {
-            return new ResponseEntity<>(exportWareHouseService.search(cid, status, pageable), HttpStatus.OK);
+            return new ResponseEntity<>(exportWareHouseService.search(cid, status, search, pageable), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -102,6 +104,23 @@ public class ExportWareHouseApi {
     ) {
         try {
             return new ResponseEntity<>(exportWareHouseService.restoreExportWareHouse(cid, uid, idReceiptExport), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @PostMapping("/statistical/export/{status}")
+    protected @ResponseBody
+    ResponseEntity<Object> findAllByImportWareHouseAndOrder(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable(value = "status") Integer status,
+            @RequestParam(value = "", required = false) String search,
+            @RequestBody ItemsSearchDto itemsSearchDto,
+            Pageable pageable
+    ) {
+        try {
+            return new ResponseEntity<>(exportWareHouseService.statistical(cid, status, search, itemsSearchDto, pageable), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

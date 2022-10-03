@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.config.exceptions.BusinessException;
 import vn.clmart.manager_service.dto.ImportListDataWareHouseDto;
 import vn.clmart.manager_service.dto.ImportWareHouseDto;
+import vn.clmart.manager_service.dto.ItemsSearchDto;
 import vn.clmart.manager_service.dto.request.ImportWareHouseResponseDTO;
 import vn.clmart.manager_service.model.*;
 import vn.clmart.manager_service.repository.ExportWareHouseRepository;
@@ -315,9 +316,9 @@ public class ImportWareHouseService {
         }
     }
 
-    public PageImpl<ImportWareHouseResponseDTO> search(Long cid, Integer status, Pageable pageable){
+    public PageImpl<ImportWareHouseResponseDTO> search(Long cid, Integer status, String search, ItemsSearchDto itemsSearchDto, Pageable pageable){
         try {
-            Page<ImportWareHouse> pageSearch = importWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, status, pageable);
+            Page<ImportWareHouse> pageSearch = importWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, status, search, itemsSearchDto.getStartDate(), itemsSearchDto.getEndDate(),  pageable);
             List<ImportWareHouseResponseDTO> responseDTOS = new ArrayList<>();
             for(ImportWareHouse item : pageSearch.getContent()){
                 ImportWareHouseResponseDTO importWareHouseResponseDTO = new ImportWareHouseResponseDTO();

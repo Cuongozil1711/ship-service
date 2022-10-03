@@ -33,6 +33,18 @@ public class ItemsApi {
         }
     }
 
+    @GetMapping("/list")
+    protected @ResponseBody
+    ResponseEntity<Object> list(
+            @RequestHeader Long cid,
+            @RequestHeader String uid) {
+        try {
+            return new ResponseEntity<>(ItemsService.list(cid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
     @GetMapping("{id}")
     protected @ResponseBody
     ResponseEntity<Object> getById(

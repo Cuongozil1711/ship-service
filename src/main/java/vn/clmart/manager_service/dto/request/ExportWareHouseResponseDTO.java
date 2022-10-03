@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import vn.clmart.manager_service.model.Order;
 import vn.clmart.manager_service.model.ReceiptExportWareHouse;
 
 import java.util.Date;
@@ -21,6 +22,7 @@ public class ExportWareHouseResponseDTO {
     private Long idReceiptExport;
     private Integer quantityItems;
     private ReceiptExportWareHouse receiptExportWareHouse;
+    private Order order;
     private Long idItems;
     private Date createDate;
     private String dvtCode;
