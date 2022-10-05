@@ -1,17 +1,17 @@
 package vn.clmart.manager_service.service;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.config.exceptions.BusinessException;
-import vn.clmart.manager_service.dto.DetailsItemOrderDto;
-import vn.clmart.manager_service.dto.ExportWareHouseDto;
-import vn.clmart.manager_service.dto.ExportWareHouseListDto;
-import vn.clmart.manager_service.dto.ItemsSearchDto;
+import vn.clmart.manager_service.dto.*;
 import vn.clmart.manager_service.dto.request.ExportWareHouseResponseDTO;
+import vn.clmart.manager_service.dto.request.ItemsResponseDTO;
 import vn.clmart.manager_service.model.*;
 import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.untils.Constants;
@@ -48,6 +48,11 @@ public class ExportWareHouseService {
 
     @Autowired
     PromotionService promotionService;
+
+    @Lazy
+    @Autowired
+    ItemsService itemsService;
+
 
     public void validateDto(ExportWareHouseDto exportWareHouseDto, Long cid, String uid){
         if(exportWareHouseDto.getIdItems() == null){
@@ -160,7 +165,7 @@ public class ExportWareHouseService {
                 exportWareHouseDto.setIdReceiptExport(exportWareHouseListDto.getIdReceiptExport());
                 exportWareHouseDto.setIdReceiptImport(itemExport.getIdReceiptImport());
                 exportWareHouseDto.setIdItems(idItems);
-                exportWareHouseDto.setTotalPrice(priceItems.getQuality() * priceItems.getPriceItems().doubleValue());
+                exportWareHouseDto.setTotalPrice(itemExport.getQuality() * priceItems.getPriceItems().doubleValue());
                 exportWareHouseDto.setDvtCode(itemExport.getDvtCode());
                 ExportWareHouse exportWareHouse = ExportWareHouse.of(exportWareHouseDto, cid, uid);
                 exportWareHouse.setNumberBox(exportWareHouseDto.getNumberBox());
@@ -178,7 +183,7 @@ public class ExportWareHouseService {
         try {
             ExportWareHouse exportWareHouse = ExportWareHouse.of(exportWareHouseDto, cid, uid);
             exportWareHouse.setNumberBox(exportWareHouseDto.getNumberBox());
-            String codeExport = "E" + itemsRepository.findById(exportWareHouseDto.getIdItems()).get().getName().trim() + new Date();
+            String codeExport = "EX"  + new Date().getTime();
             exportWareHouse.setCode(codeExport);
             exportWareHouseRepository.save(exportWareHouse);
             return true;
@@ -347,6 +352,89 @@ public class ExportWareHouseService {
                 responseDTOS.add(exportWareHouseResponseDTO);
             }
             return new PageImpl(responseDTOS, pageable, pageSearch.getTotalElements());
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public PageImpl<ExportWareHouseResponseDTO> listExport(Long cid, Integer status, String search, ItemsSearchDto itemsSearchDto, Pageable pageable){
+        try {
+            Page<ExportWareHouse> pageSearch = exportWareHouseRepository.listExport(cid, status, search, itemsSearchDto.getStartDate(), itemsSearchDto.getEndDate(), pageable);
+            List<ExportWareHouseResponseDTO> responseDTOS = new ArrayList<>();
+            for(ExportWareHouse item : pageSearch.getContent()){
+                ExportWareHouseResponseDTO exportWareHouseResponseDTO = new ExportWareHouseResponseDTO();
+                BeanUtils.copyProperties(item, exportWareHouseResponseDTO);
+                exportWareHouseResponseDTO.setIdReceiptExport(item.getIdReceiptExport());
+                if(item.getIdItems() != null){
+                    ItemsResponseDTO items = itemsService.getById(cid, "", item.getIdItems());
+                    exportWareHouseResponseDTO.setItemsName(items.getName());
+                }
+                if(item.getIdReceiptExport() != null){
+                    exportWareHouseResponseDTO.setReceiptExportWareHouse(receiptExportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(item.getIdReceiptExport(), cid, Constants.DELETE_FLG.NON_DELETE).orElse(new ReceiptExportWareHouse()));
+                    exportWareHouseResponseDTO.setQuantityItems(item.getQuantity() * item.getNumberBox());
+                    exportWareHouseResponseDTO.setTotalPrice(item.getTotalPrice() * item.getNumberBox());
+                    FullName fullName = userService.getFullName(cid, item.getCreateBy());
+                    FullName fullNameUpDate = userService.getFullName(cid,item.getUpdateBy());
+                    if(status == 0){
+                        exportWareHouseResponseDTO.setUpdateByName(fullNameUpDate.getFirstName() + " "  + fullNameUpDate.getLastName());
+                        exportWareHouseResponseDTO.setUpdateDate(item.getModifiedDate());
+                    }
+                    exportWareHouseResponseDTO.setCreatByName(fullName.getFirstName() + " " + fullName.getLastName());
+                    exportWareHouseResponseDTO.setCreateDate(item.getCreateDate());
+                }
+                else if(item.getIdOrder() != null){
+                    exportWareHouseResponseDTO.setOrder(orderRepositorry.findByCompanyIdAndIdAndDeleteFlg(cid, item.getIdOrder(), Constants.DELETE_FLG.NON_DELETE).orElse(new Order()));
+                    exportWareHouseResponseDTO.setQuantityItems(item.getQuantity() * item.getNumberBox());
+                    exportWareHouseResponseDTO.setTotalPrice(item.getTotalPrice() * item.getNumberBox());
+                    FullName fullName = userService.getFullName(cid, item.getCreateBy());
+                    FullName fullNameUpDate = userService.getFullName(cid,item.getUpdateBy());
+                    if(status == 0){
+                        exportWareHouseResponseDTO.setUpdateByName(fullNameUpDate.getFirstName() + " "  + fullNameUpDate.getLastName());
+                        exportWareHouseResponseDTO.setUpdateDate(item.getModifiedDate());
+                    }
+                    exportWareHouseResponseDTO.setCreatByName(fullName.getFirstName() + " " + fullName.getLastName());
+                    exportWareHouseResponseDTO.setCreateDate(item.getCreateDate());
+                }
+                else{
+                    List<PromotionResponseDto> promotion = promotionService.getByItemsId(cid, item.getIdItems());
+                    exportWareHouseResponseDTO.setQuantityItems(item.getQuantity() * item.getNumberBox());
+                    exportWareHouseResponseDTO.setPromotionResponseDtoList(promotion);
+                    FullName fullName = userService.getFullName(cid, item.getCreateBy());
+                    FullName fullNameUpDate = userService.getFullName(cid,item.getUpdateBy());
+                    if(status == 0){
+                        exportWareHouseResponseDTO.setUpdateByName(fullNameUpDate.getFirstName() + " "  + fullNameUpDate.getLastName());
+                        exportWareHouseResponseDTO.setUpdateDate(item.getModifiedDate());
+                    }
+                    exportWareHouseResponseDTO.setCreatByName(fullName.getFirstName() + " " + fullName.getLastName());
+                    exportWareHouseResponseDTO.setCreateDate(item.getCreateDate());
+                }
+                responseDTOS.add(exportWareHouseResponseDTO);
+            }
+            return new PageImpl(responseDTOS, pageable, pageSearch.getTotalElements());
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public List<ExportWareHouseResponseDTO> getListOrder(Long cid){
+        try {
+            List<ExportWareHouse> pageSearch = exportWareHouseRepository.getListOrder(cid, Constants.DELETE_FLG.NON_DELETE);
+            List<ExportWareHouseResponseDTO> responseDTOS = new ArrayList<>();
+            for(ExportWareHouse item : pageSearch){
+                ExportWareHouseResponseDTO exportWareHouseResponseDTO = new ExportWareHouseResponseDTO();
+                BeanUtils.copyProperties(item, exportWareHouseResponseDTO);
+                exportWareHouseResponseDTO.setIdReceiptExport(item.getIdReceiptExport());
+                if(item.getIdItems() != null){
+                    ItemsResponseDTO items = itemsService.getById(cid, "", item.getIdItems());
+                    exportWareHouseResponseDTO.setItemsName(items.getName());
+                    exportWareHouseResponseDTO.setImage(items.getImage());
+                    exportWareHouseResponseDTO.setQuantityItems(item.getQuantity() * item.getNumberBox());
+                }
+                responseDTOS.add(exportWareHouseResponseDTO);
+            }
+            return responseDTOS;
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

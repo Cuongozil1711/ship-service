@@ -61,4 +61,17 @@ public interface OrderRepositorry extends JpaRepository<Order, Long> {
 
     List<Order> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg);
 
+    @Query(value = "select count(case when month(e.create_date) = :month then 0 end) as t1  " +
+            " from  `order` as e " +
+            "where e.company_id = :cid and e.delete_flg = :deleteFlg", nativeQuery = true)
+    Integer getOrderForMonth(@Param("cid") Long cid, Integer deleteFlg, Integer month);
+
+
+    @Query(value = "select count(case when month(e.create_date) = month(current_date) then 0 end) as t1  " +
+            " from  `order` as e " +
+            "where e.company_id = :cid and e.delete_flg = :deleteFlg and e.create_by = :uid", nativeQuery = true)
+    Integer getOrderByEmployee(@Param("cid") Long cid, Integer deleteFlg, String uid);
+
+
+
 }

@@ -54,7 +54,7 @@ public class ItemsService {
             items = itemsRepository.save(items);
             for(PriceItemsDto priceItems : itemsDto.getPriceItemsDtos()){
                 PriceItems priceItem = new PriceItems();
-                priceItem.setPriceItems(itemsDto.getPriceItem().longValue());
+                priceItem.setPriceItems(priceItems.getPriceItems());
                 priceItem.setDvtCode(priceItems.getDvtCode());
                 priceItem.setIdItems(items.getId());
                 priceItem.setCompanyId(cid);

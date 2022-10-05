@@ -126,4 +126,34 @@ public class ExportWareHouseApi {
         }
     }
 
+    @PostMapping("/list-export/{status}")
+    protected @ResponseBody
+    ResponseEntity<Object> listExport(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable(value = "status") Integer status,
+            @RequestParam(value = "", required = false) String search,
+            @RequestBody ItemsSearchDto itemsSearchDto,
+            Pageable pageable
+    ) {
+        try {
+            return new ResponseEntity<>(exportWareHouseService.listExport(cid, status, search, itemsSearchDto, pageable), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @GetMapping("/getListOrder")
+    protected @ResponseBody
+    ResponseEntity<Object> getListOrder(
+            @RequestHeader Long cid,
+            @RequestHeader String uid
+    ) {
+        try {
+            return new ResponseEntity<>(exportWareHouseService.getListOrder(cid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
 }

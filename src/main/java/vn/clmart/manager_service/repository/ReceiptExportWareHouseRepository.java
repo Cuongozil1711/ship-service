@@ -3,6 +3,8 @@ package vn.clmart.manager_service.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import vn.clmart.manager_service.model.ReceiptExportWareHouse;
 
 import java.util.Optional;
@@ -11,4 +13,9 @@ public interface ReceiptExportWareHouseRepository extends JpaRepository<ReceiptE
     Optional<ReceiptExportWareHouse> findByIdAndCompanyIdAndDeleteFlg(Long id, Long cid, Integer deleteFlg);
 
     Page<ReceiptExportWareHouse> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable);
+
+    @Query(value = "select count(case when month(e.create_date) = :month then 0 end) as t1  " +
+            " from  `receipt_export_ware_house` as e " +
+            "where e.company_id = :cid and e.delete_flg = :deleteFlg and e.state = 'COMPLETE'", nativeQuery = true)
+    Integer getImportForMonth(@Param("cid") Long cid, Integer deleteFlg, Integer month);
 }

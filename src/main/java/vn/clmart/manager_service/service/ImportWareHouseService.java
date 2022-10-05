@@ -1,6 +1,8 @@
 package vn.clmart.manager_service.service;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -12,6 +14,7 @@ import vn.clmart.manager_service.dto.ImportListDataWareHouseDto;
 import vn.clmart.manager_service.dto.ImportWareHouseDto;
 import vn.clmart.manager_service.dto.ItemsSearchDto;
 import vn.clmart.manager_service.dto.request.ImportWareHouseResponseDTO;
+import vn.clmart.manager_service.dto.request.ItemsResponseDTO;
 import vn.clmart.manager_service.model.*;
 import vn.clmart.manager_service.repository.ExportWareHouseRepository;
 import vn.clmart.manager_service.repository.ImportWareHouseRepository;
@@ -76,7 +79,7 @@ public class ImportWareHouseService {
             ReceiptImportWareHouse receiptImportWareHouse = receiptImportWareHouseService.getById(cid, uid, importWareHouseDto.getIdReceiptImport());
             receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
             ImportWareHouse importWareHouse = ImportWareHouse.of(importWareHouseDto, cid, uid);
-            String codeExport = "I" + itemsRepository.findById(importWareHouseDto.getIdItems()).get().getName().trim() + new Date();
+            String codeExport = "IM" + new Date().getTime();
             importWareHouse.setCode(codeExport);
             importWareHouse.setIdReceiptImport(importWareHouseDto.getIdReceiptImport());
             importWareHouseRepository.save(importWareHouse);
@@ -356,6 +359,40 @@ public class ImportWareHouseService {
     public List<ImportWareHouse> getByIdtems(Long cid, Long idItems){
         try {
             return importWareHouseRepository.findAllByDeleteFlgAndIdItemsAndCompanyIdOrderByDateExpiredAsc(Constants.DELETE_FLG.NON_DELETE, idItems, cid);
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public PageImpl<ImportWareHouseResponseDTO> listImport(Long cid, Integer status, String search, ItemsSearchDto itemsSearchDto, Pageable pageable){
+        try {
+            Page<ImportWareHouse> pageSearch = importWareHouseRepository.listImportWareHouse(cid, status, search, itemsSearchDto.getStartDate(), itemsSearchDto.getEndDate(),  pageable);
+            List<ImportWareHouseResponseDTO> responseDTOS = new ArrayList<>();
+            for(ImportWareHouse item : pageSearch.getContent()){
+                ImportWareHouseResponseDTO importWareHouseResponseDTO = new ImportWareHouseResponseDTO();
+                BeanUtils.copyProperties(item, importWareHouseResponseDTO);
+                importWareHouseResponseDTO.setIdReceiptImport(item.getIdReceiptImport());
+                if(item.getIdItems() != null){
+                    ItemsResponseDTO items = itemsService.getById(cid, "", item.getIdItems());
+                    importWareHouseResponseDTO.setItemName(items.getName());
+                }
+                if(importWareHouseResponseDTO.getIdReceiptImport() != null){
+                    importWareHouseResponseDTO.setReceiptImportWareHouse(receiptImportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(importWareHouseResponseDTO.getIdReceiptImport(), cid, Constants.DELETE_FLG.NON_DELETE).orElse(new ReceiptImportWareHouse()));
+                    importWareHouseResponseDTO.setQuantityItems(item.getQuantity() * item.getNumberBox());
+                    importWareHouseResponseDTO.setTotalPrice(item.getTotalPrice());
+                    FullName fullName = userService.getFullName(cid, item.getCreateBy());
+                    FullName fullNameUpDate = userService.getFullName(cid,item.getUpdateBy());
+                    if(status == 0){
+                        importWareHouseResponseDTO.setUpdateByName(fullNameUpDate.getFirstName() + " "  + fullNameUpDate.getLastName());
+                        importWareHouseResponseDTO.setUpdateDate(item.getModifiedDate());
+                    }
+                    importWareHouseResponseDTO.setCreatByName(fullName.getFirstName() + " " + fullName.getLastName());
+                    importWareHouseResponseDTO.setCreateDate(item.getCreateDate());
+                }
+                responseDTOS.add(importWareHouseResponseDTO);
+            }
+            return new PageImpl(responseDTOS, pageable, pageSearch.getTotalElements());
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

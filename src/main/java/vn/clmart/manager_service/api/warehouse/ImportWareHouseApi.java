@@ -149,4 +149,21 @@ public class ImportWareHouseApi {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
+
+    @PostMapping("/list-import/{status}")
+    protected @ResponseBody
+    ResponseEntity<Object> listExport(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable(value = "status") Integer status,
+            @RequestParam(value = "", required = false) String search,
+            @RequestBody ItemsSearchDto itemsSearchDto,
+            Pageable pageable
+    ) {
+        try {
+            return new ResponseEntity<>(importWareHouseService.listImport(cid, status, search, itemsSearchDto, pageable), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
 }

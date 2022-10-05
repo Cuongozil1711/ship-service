@@ -5,10 +5,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import vn.clmart.manager_service.model.ExportWareHouse;
-import vn.clmart.manager_service.model.ImportWareHouse;
+import vn.clmart.manager_service.model.Order;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse, Long> {
 
@@ -35,4 +34,18 @@ public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse
     public List<ExportWareHouse> findAllByDeleteFlgAndCompanyIdAndIdReceiptImport(Integer deleteFlg,Long cid, Long idReceiptImport);
 
     public List<ExportWareHouse> findAllByCompanyIdAndDeleteFlgAndIdOrder(Long cid, Integer deleteFlg, Long idOrder);
+
+    @Query("select i from ExportWareHouse as i where i.companyId = :cid " +
+            " and i.deleteFlg = :delete " +
+            " and  ((coalesce(i.createDate,current_date) between coalesce(:startDate, current_date) and coalesce(:endDate, current_date)) " +
+            " or coalesce(:startDate, current_date) = coalesce(:endDate, current_date)) " +
+            " and ((lower(concat(coalesce(i.code, ''),'')) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) " +
+            " order by i.createDate")
+    public Page<ExportWareHouse> listExport(Long cid, Integer delete, String search, Date startDate, Date endDate, Pageable pageable);
+
+
+
+    @Query("select o from ExportWareHouse as o where o.deleteFlg = :delete and o.companyId = :cid group by o.idItems order by o.createDate desc")
+    List<ExportWareHouse> getListOrder(Long cid, Integer delete);
+
 }

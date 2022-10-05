@@ -90,7 +90,6 @@ public class OrderService {
                             exportWareHouseDto.setIdItems(itemsDonate.getIdItems());
                             exportWareHouseDto.setIdReceiptImport(itemsResponseDto.getReceiptImportWareHouse().getId());
                             exportWareHouseDto.setDvtCode("000");
-                            exportWareHouseDto.setIdOrder(order.getId());
                             exportWareHouseDto.setTotalPrice(priceItemsDonate.getPriceItems() *itemsDonate.getQuanlity().doubleValue());
                             exportWareHouseService.saleExport(exportWareHouseDto, cid, uid);
                         }

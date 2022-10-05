@@ -34,6 +34,7 @@ public class PromotionService {
     public Promotion create(PromotionDto promotionDto, Long cid, String uid){
         try {
             Promotion promotion = Promotion.of(promotionDto, cid, uid);
+            promotion.setCode("KM" + new Date().getTime());
             promotion = PromotionRepository.save(promotion);
             // nếu loại điều kiện là theo sản phẩm thì thêm loại điệu kiện
             if(promotionDto.getTypePromotion().equals("product")){

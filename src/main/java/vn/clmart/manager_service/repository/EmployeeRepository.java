@@ -15,4 +15,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Page<Employee> findAllByCompanyId(Long cid, Pageable pageable);
 
     Optional<Employee> findByCompanyIdAndId(Long cid, Long id);
+
+    List<Employee> findAllByDeleteFlgAndCompanyId(Integer deleteFlg, Long companyId);
 }

@@ -24,6 +24,9 @@ public interface ImportWareHouseRepository extends JpaRepository<ImportWareHouse
     public Optional<ImportWareHouse> findByCompanyIdAndIdAndDeleteFlg(Long cid, Long id, Integer deteteFlg);
 
 
-    @Query("select i from ImportWareHouse as i inner join ReceiptImportWareHouse r on r.id = i.idReceiptImport where i.companyId = :cid and i.deleteFlg = :delete and  (i.createDate between coalesce(:startDate, current_date) and coalesce(:endDate, current_date) or current_date = current_date ) and ((lower(concat(coalesce(i.code, ''), coalesce(r.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) group by i.idReceiptImport order by i.createDate")
+    @Query("select i from ImportWareHouse as i inner join ReceiptImportWareHouse r on r.id = i.idReceiptImport where i.companyId = :cid and i.deleteFlg = :delete and  (i.createDate between coalesce(:startDate, current_date) and coalesce(:endDate, current_date) or coalesce(:startDate, current_date) = coalesce(:endDate, current_date) ) and ((lower(concat(coalesce(i.code, ''), coalesce(r.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) group by i.idReceiptImport order by i.createDate")
     public Page<ImportWareHouse> findAllByCompanyIdAndDeleteFlg(Long cid, Integer delete, String search, Date startDate, Date endDate, Pageable pageable);
+
+    @Query("select i from ImportWareHouse as i inner join ReceiptImportWareHouse r on r.id = i.idReceiptImport where i.companyId = :cid and i.deleteFlg = :delete and  (i.createDate between coalesce(:startDate, current_date) and coalesce(:endDate, current_date) or coalesce(:startDate, current_date) = coalesce(:endDate, current_date) ) and ((lower(concat(coalesce(i.code, ''), coalesce(r.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) order by i.createDate")
+    public Page<ImportWareHouse> listImportWareHouse(Long cid, Integer delete, String search, Date startDate, Date endDate, Pageable pageable);
 }
