@@ -24,4 +24,5 @@ public class ImportWareHouseResponseDTO {
     private String updateByName = "";
     private String receiptImportName = "";
     private String creatByName = "";
+    private String itemName = "";
 }

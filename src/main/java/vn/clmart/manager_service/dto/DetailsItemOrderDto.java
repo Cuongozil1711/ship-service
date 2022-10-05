@@ -17,5 +17,6 @@ public class DetailsItemOrderDto {
     private Long idItems;
     private Long idReceiptImport;
     private Long idOrder;
+    private Long idPromotion;
     private ItemsResponseDTO itemsResponseDTO;
 }

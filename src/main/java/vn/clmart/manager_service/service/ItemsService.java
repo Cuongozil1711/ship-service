@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,13 +45,16 @@ public class ItemsService {
     @Autowired
     ReceiptImportWareHouseService receiptImportWareHouseService;
 
+    @Autowired
+    PromotionService promotionService;
+
     public Items create(ItemsDto itemsDto, Long cid, String uid){
         try {
             Items items = Items.of(itemsDto, cid, uid);
             items = itemsRepository.save(items);
             for(PriceItemsDto priceItems : itemsDto.getPriceItemsDtos()){
                 PriceItems priceItem = new PriceItems();
-                priceItem.setPriceItems(itemsDto.getPriceItem().longValue());
+                priceItem.setPriceItems(priceItems.getPriceItems());
                 priceItem.setDvtCode(priceItems.getDvtCode());
                 priceItem.setIdItems(items.getId());
                 priceItem.setCompanyId(cid);
@@ -134,6 +138,28 @@ public class ItemsService {
         }
     }
 
+    public List<ItemsResponseDTO> list(Long cid){
+        try {
+            Page<Items> pageSearch = itemsRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, PageRequest.of(0, Integer.MAX_VALUE), "");
+            List<Items> list = pageSearch.getContent();
+            List<ItemsResponseDTO> responseDTOList = new ArrayList<>();
+            for(Items items : list){
+                ItemsResponseDTO itemsResponseDTO = new ItemsResponseDTO();
+                BeanUtils.copyProperties(items, itemsResponseDTO);
+                itemsResponseDTO.setTotalInWareHouse(importWareHouseService.totalItemsInImport(itemsResponseDTO.getId(), cid) - exportWareHouseService.totalItemsInExport(itemsResponseDTO.getId(), cid));
+                itemsResponseDTO.setTotalSold(exportWareHouseService.totalItemsInExport(itemsResponseDTO.getId(), cid));
+                List<PriceItems> priceItems = priceItemsRepository.findAllByCompanyIdAndIdItemsAndDeleteFlg(cid, items.getId(), Constants.DELETE_FLG.NON_DELETE);
+                itemsResponseDTO.setPriceItemsDtos(priceItems.stream().map(e -> of(e)).collect(Collectors.toList()));
+                itemsResponseDTO.setPromotionResponseDto(promotionService.getByItemsId(cid, items.getId()));
+                responseDTOList.add(itemsResponseDTO);
+            }
+            return responseDTOList;
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
     public Items delete(Long cid, String uid, Long id){
         try {
             Items items = itemsRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
@@ -161,6 +187,33 @@ public class ItemsService {
                 return itemsResponseDTO;
             }).collect(Collectors.toList());
             return itemsResponseDtos;
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    // tìm kiếm sản phẩm theo lô còn hàng
+    public ItemsResponseDto getByIdtemsAndQuality(Long cid, String uid, Long idItems){
+        try {
+            List<ItemsResponseDto> itemsResponseDtos = new ArrayList<>();
+            List<ImportWareHouse> importWareHouses = importWareHouseService.getByIdtems(cid, idItems);
+            for(ImportWareHouse importWareHouse : importWareHouses){
+                ItemsResponseDto itemsResponseDTO = new ItemsResponseDto();
+                itemsResponseDTO.setReceiptImportWareHouse(receiptImportWareHouseService.getById(cid, uid, importWareHouse.getIdReceiptImport()));
+                itemsResponseDTO.setDateExpired(importWareHouse.getDateExpired());
+                // Số lượng đã bán
+                Integer qualityExport = exportWareHouseService.qualityExport(cid, importWareHouse.getIdReceiptImport(), idItems, 1);
+                Integer qualityCanceled = exportWareHouseService.qualityExport(cid, importWareHouse.getIdReceiptImport(), idItems, 0);
+                Integer qualityImport = importWareHouse.getNumberBox() * importWareHouse.getQuantity();
+                itemsResponseDTO.setQualityExport(qualityExport);
+                itemsResponseDTO.setQualityCanceled(qualityCanceled);
+                itemsResponseDTO.setQualityImport(qualityImport);
+                if(qualityImport > qualityExport){
+                    return itemsResponseDTO;
+                }
+            }
+            return new ItemsResponseDto();
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

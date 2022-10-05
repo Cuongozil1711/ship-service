@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface PositionRepository extends JpaRepository<Position, Long> {
     Optional<Position> findByIdAndCompanyIdAndDeleteFlg(Long id, Long cid, Integer deleteFlg);
 
+    Optional<Position> findByIdAndDeleteFlg(Long id, Integer deleteFlg);
 
     Page<Position> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable);
 

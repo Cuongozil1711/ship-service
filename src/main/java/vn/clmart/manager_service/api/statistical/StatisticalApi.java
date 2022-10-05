@@ -31,8 +31,7 @@ public class StatisticalApi {
     ) {
         try {
             return new ResponseEntity<>(orderService.getEmpoyeeOrder(cid), HttpStatus.OK);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
@@ -45,8 +44,7 @@ public class StatisticalApi {
     ) {
         try {
             return new ResponseEntity<>(orderService.getItemOrder(cid, uid), HttpStatus.OK);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
@@ -60,10 +58,36 @@ public class StatisticalApi {
     ) {
         try {
             return new ResponseEntity<>(statisticalService.statistical(cid, uid), HttpStatus.OK);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
 
+    @GetMapping("/chartInfo")
+    protected @ResponseBody
+    ResponseEntity<Object> chartInfo(
+            @RequestHeader Long cid,
+            @RequestHeader String uid
+    ) {
+        try {
+            return new ResponseEntity<>(statisticalService.getCountOrderAndImport(cid, uid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+
+    @GetMapping("/getOrderByEmployee")
+    protected @ResponseBody
+    ResponseEntity<Object> getOrderByEmployee(
+            @RequestHeader Long cid,
+            @RequestHeader String uid
+    ) {
+        try {
+            return new ResponseEntity<>(statisticalService.getOrderByEmployee(cid, uid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+
+    }
 }

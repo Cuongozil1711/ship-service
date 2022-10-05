@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.clmart.manager_service.dto.ImportListDataWareHouseDto;
 import vn.clmart.manager_service.dto.ImportWareHouseDto;
+import vn.clmart.manager_service.dto.ItemsSearchDto;
 import vn.clmart.manager_service.dto.ReceiptExportWareHouseDto;
 import vn.clmart.manager_service.service.ImportWareHouseService;
 
@@ -118,16 +119,18 @@ public class ImportWareHouseApi {
         }
     }
 
-    @GetMapping("/list/{status}")
+    @PostMapping("/list/{status}")
     protected @ResponseBody
     ResponseEntity<Object> findAllByImportWareHouse(
             @RequestHeader Long cid,
             @RequestHeader String uid,
             @PathVariable(value = "status") Integer status,
+            @RequestParam(value = "", required = false) String search,
+            @RequestBody ItemsSearchDto itemsSearchDto,
             Pageable pageable
     ) {
         try {
-            return new ResponseEntity<>(importWareHouseService.search(cid, status, pageable), HttpStatus.OK);
+            return new ResponseEntity<>(importWareHouseService.search(cid, status, search, itemsSearchDto, pageable), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -142,6 +145,23 @@ public class ImportWareHouseApi {
     ) {
         try {
             return new ResponseEntity<>(importWareHouseService.restoreImportWareHouse(cid, uid, idReceiptImport), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @PostMapping("/list-import/{status}")
+    protected @ResponseBody
+    ResponseEntity<Object> listExport(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable(value = "status") Integer status,
+            @RequestParam(value = "", required = false) String search,
+            @RequestBody ItemsSearchDto itemsSearchDto,
+            Pageable pageable
+    ) {
+        try {
+            return new ResponseEntity<>(importWareHouseService.listImport(cid, status, search, itemsSearchDto, pageable), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

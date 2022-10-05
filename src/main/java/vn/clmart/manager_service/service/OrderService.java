@@ -9,17 +9,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.config.exceptions.BusinessException;
-import vn.clmart.manager_service.dto.CustomerDto;
-import vn.clmart.manager_service.dto.DetailsItemOrderDto;
-import vn.clmart.manager_service.dto.ExportWareHouseDto;
-import vn.clmart.manager_service.dto.OrderDto;
+import vn.clmart.manager_service.dto.*;
 import vn.clmart.manager_service.dto.request.ItemsResponseDTO;
 import vn.clmart.manager_service.dto.request.OrderItemResponseDTO;
 import vn.clmart.manager_service.dto.request.OrderResponseDTO;
 import vn.clmart.manager_service.model.*;
-import vn.clmart.manager_service.repository.DetailsItemOrderRepository;
-import vn.clmart.manager_service.repository.OrderRepositorry;
-import vn.clmart.manager_service.repository.PriceItemsRepository;
+import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.untils.Constants;
 
 import java.util.*;
@@ -51,6 +46,15 @@ public class OrderService {
     @Autowired
     DetailsItemOrderRepository detailsItemOrderRepository;
 
+    @Autowired
+    PromotionService promotionService;
+
+    @Autowired
+    ItemsDonateRepository itemsDonateRepository;
+
+    @Autowired
+    ConditionRepository conditionRepository;
+
     public Order createOrder(OrderDto orderDto, Long cid, String uid){
         try {
             Order order = Order.of(orderDto, cid, uid);
@@ -68,6 +72,38 @@ public class OrderService {
                 Long idItems = items.getIdItems();
                 Integer qualityItems = checkQualityItem(idItems, cid, uid); // check trong kho xem còn bao nhiêu
                 PriceItems priceItems = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, idItems, Constants.DELETE_FLG.NON_DELETE, items.getDvtCode()).orElse(null);
+                Double priceSale = priceItems.getPriceItems() *items.getQuality().doubleValue();
+                Double totalPrice = priceItems.getPriceItems() *items.getQuality().doubleValue();
+                // kiem tra khuyen mai
+                if(items.getIdPromotion() != null){
+                    Promotion promotion = promotionService.getById(cid, uid, items.getIdPromotion());
+                    if(promotion.getTypePromotion().equals("donate")){
+                        // tặng kèm sản phẩm
+                        ItemsDonate itemsDonate = itemsDonateRepository.findByIdAndCompanyId(promotion.getIdItemsDonate(), cid).orElse(null);
+                        if(itemsDonate != null){
+                            PriceItems priceItemsDonate = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, itemsDonate.getIdItems(), Constants.DELETE_FLG.NON_DELETE, items.getDvtCode()).orElse(null);
+                            ItemsResponseDto itemsResponseDto = itemsService.getByIdtemsAndQuality(cid ,uid, itemsDonate.getIdItems());
+                            ExportWareHouseDto exportWareHouseDto = new ExportWareHouseDto();
+                            exportWareHouseDto.setNumberBox(1);
+                            exportWareHouseDto.setQuantity(itemsDonate.getQuanlity());
+                            exportWareHouseDto.setIdReceiptExport(null);
+                            exportWareHouseDto.setIdItems(itemsDonate.getIdItems());
+                            exportWareHouseDto.setIdReceiptImport(itemsResponseDto.getReceiptImportWareHouse().getId());
+                            exportWareHouseDto.setDvtCode("000");
+                            exportWareHouseDto.setTotalPrice(priceItemsDonate.getPriceItems() *itemsDonate.getQuanlity().doubleValue());
+                            exportWareHouseService.saleExport(exportWareHouseDto, cid, uid);
+                        }
+                    }
+                    else if(promotion.getTypePromotion().equals("product")){
+                        if(promotion.getType().equals("percent")){
+                            priceSale = totalPrice - totalPrice * promotion.getPercent() / 100;
+                        }
+                        else if(promotion.getType().equals("vnd")){
+                            priceSale = totalPrice - promotion.getPrice();
+                        }
+                    }
+                }
+
                 Integer qualitySold = 0;
                 if(priceItems == null){
                     throw new BusinessException("Không tìm " + itemsService.getById(cid, uid, idItems).getName() + " đơn vị tính");
@@ -78,16 +114,12 @@ public class OrderService {
                 if(qualitySold * priceItems.getQuality() > qualityItems){
                     throw new BusinessException("Mặt hàng " + itemsService.getById(cid, uid, idItems).getName() + " không còn trong kho");
                 }
-                dItems.setTotalPrice(qualitySold * priceItems.getPriceItems()); // tổng tiền theo số lượng, giá sản phảm
+                dItems.setTotalPrice(priceSale.longValue()); // tổng tiền theo số lượng, giá sản phảm
                 dItems.setQuality(qualitySold);
                 dItems.setType("SOLD");
                 detailsItem.add(dItems);
-            }
-            detailsItemOrderRepository.saveAll(detailsItem);
-            // luu vao xuat kho
-            for(DetailsItemOrderDto items : orderDto.getDetailsItemOrders()){
-                Long idItems = items.getIdItems();
-                PriceItems priceItems = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, idItems, Constants.DELETE_FLG.NON_DELETE, items.getDvtCode()).orElse(null);
+
+                // Lưu vào xuất kho
                 ExportWareHouseDto exportWareHouseDto = new ExportWareHouseDto();
                 exportWareHouseDto.setNumberBox(items.getQuality());
                 exportWareHouseDto.setQuantity(priceItems.getQuality());
@@ -96,9 +128,10 @@ public class OrderService {
                 exportWareHouseDto.setIdReceiptImport(items.getIdReceiptImport());
                 exportWareHouseDto.setDvtCode(items.getDvtCode());
                 exportWareHouseDto.setIdOrder(order.getId());
-                exportWareHouseDto.setTotalPrice(priceItems.getPriceItems() * items.getQuality().doubleValue());
+                exportWareHouseDto.setTotalPrice(priceSale);
                 exportWareHouseService.orderToExport(exportWareHouseDto, cid, uid);
             }
+            detailsItemOrderRepository.saveAll(detailsItem);
             // tao hoa don
             return order;
         }

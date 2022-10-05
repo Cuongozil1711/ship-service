@@ -35,7 +35,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (user != null) {
             Employee employees = employeeRepository.findAllByIdUserAndDeleteFlgAndCompanyId(user.getUid(), Constants.DELETE_FLG.NON_DELETE, cid).stream().findFirst().orElse(null);
             if(employees.getIdPosition() != null){
-                Position position = positionRepository.findByIdAndCompanyIdAndDeleteFlg(employees.getIdPosition(), cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+                Position position = positionRepository.findByIdAndDeleteFlg(employees.getIdPosition(),Constants.DELETE_FLG.NON_DELETE).orElseThrow();
                 boolean enabled = true;
                 boolean accountNonExpired = true;
                 boolean credentialsNonExpired = true;
