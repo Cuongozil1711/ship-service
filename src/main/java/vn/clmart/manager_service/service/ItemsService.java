@@ -178,6 +178,7 @@ public class ItemsService {
             List<ImportWareHouse> importWareHouses = importWareHouseService.getByIdtems(cid, idItems);
             itemsResponseDtos = importWareHouses.stream().map(importWareHouse -> {
                 ItemsResponseDto itemsResponseDTO = new ItemsResponseDto();
+                itemsResponseDTO.setId(importWareHouse.getId());
                 itemsResponseDTO.setReceiptImportWareHouse(receiptImportWareHouseService.getById(cid, uid, importWareHouse.getIdReceiptImport()));
                 itemsResponseDTO.setDateExpired(importWareHouse.getDateExpired());
                 // Số lượng đã bán

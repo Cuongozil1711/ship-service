@@ -356,6 +356,10 @@ public class ImportWareHouseService {
         }
     }
 
+    public ImportWareHouse getById(Long cid, Long id){
+        return importWareHouseRepository.findByCompanyIdAndIdAndDeleteFlg(cid, id, Constants.DELETE_FLG.NON_DELETE).orElse(new ImportWareHouse());
+    }
+
     public List<ImportWareHouse> getByIdtems(Long cid, Long idItems){
         try {
             return importWareHouseRepository.findAllByDeleteFlgAndIdItemsAndCompanyIdOrderByDateExpiredAsc(Constants.DELETE_FLG.NON_DELETE, idItems, cid);
@@ -397,5 +401,9 @@ public class ImportWareHouseService {
         catch (Exception ex){
             throw new RuntimeException(ex);
         }
+    }
+
+    public ImportWareHouse findByCompanyIdAndIdReceiptImportAndIdItems(Long cid, Long idReceiptImport, Long idItems){
+        return importWareHouseRepository.findByCompanyIdAndIdReceiptImportAndIdItemsAndDeleteFlg(cid, idReceiptImport, idItems, Constants.DELETE_FLG.NON_DELETE).orElse(new ImportWareHouse());
     }
 }

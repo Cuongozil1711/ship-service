@@ -13,6 +13,7 @@ import java.util.Date;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class ItemsResponseDto {
+    Long id;
     ReceiptImportWareHouse receiptImportWareHouse;
     Integer qualityImport;
     Integer qualityExport;

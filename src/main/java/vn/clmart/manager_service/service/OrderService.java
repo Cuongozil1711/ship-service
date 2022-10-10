@@ -125,7 +125,8 @@ public class OrderService {
                 exportWareHouseDto.setQuantity(priceItems.getQuality());
                 exportWareHouseDto.setIdReceiptExport(null);
                 exportWareHouseDto.setIdItems(idItems);
-                exportWareHouseDto.setIdReceiptImport(items.getIdReceiptImport());
+                ImportWareHouse importWareHouse = importWareHouseService.getById(cid, items.getIdImportWareHouse());
+                exportWareHouseDto.setIdReceiptImport(importWareHouse.getIdReceiptImport());
                 exportWareHouseDto.setDvtCode(items.getDvtCode());
                 exportWareHouseDto.setIdOrder(order.getId());
                 exportWareHouseDto.setTotalPrice(priceSale);

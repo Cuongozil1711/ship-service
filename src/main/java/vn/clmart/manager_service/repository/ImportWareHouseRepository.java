@@ -22,6 +22,7 @@ public interface ImportWareHouseRepository extends JpaRepository<ImportWareHouse
     public List<ImportWareHouse> findAllByDeleteFlgAndIdItemsAndCompanyIdOrderByDateExpiredAsc(Integer delete, Long idItems, Long cid);
 
     public Optional<ImportWareHouse> findByCompanyIdAndIdAndDeleteFlg(Long cid, Long id, Integer deteteFlg);
+    public Optional<ImportWareHouse> findByCompanyIdAndIdReceiptImportAndIdItemsAndDeleteFlg(Long cid, Long idReceiptImport, Long idItems, Integer deteteFlg);
 
 
     @Query("select i from ImportWareHouse as i inner join ReceiptImportWareHouse r on r.id = i.idReceiptImport where i.companyId = :cid and i.deleteFlg = :delete and  (i.createDate between coalesce(:startDate, current_date) and coalesce(:endDate, current_date) or coalesce(:startDate, current_date) = coalesce(:endDate, current_date) ) and ((lower(concat(coalesce(i.code, ''), coalesce(r.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) group by i.idReceiptImport order by i.createDate")

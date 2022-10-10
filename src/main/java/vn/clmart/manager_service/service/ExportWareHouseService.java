@@ -53,6 +53,10 @@ public class ExportWareHouseService {
     @Autowired
     ItemsService itemsService;
 
+    @Lazy
+    @Autowired
+    ImportWareHouseService importWareHouseService;
+
 
     public void validateDto(ExportWareHouseDto exportWareHouseDto, Long cid, String uid){
         if(exportWareHouseDto.getIdItems() == null){
@@ -81,7 +85,9 @@ public class ExportWareHouseService {
                 detailsItemOrderDto.setIdItems(exportWareHouse.getIdItems());
                 detailsItemOrderDto.setQuality(exportWareHouse.getNumberBox());
                 detailsItemOrderDto.setDvtCode(exportWareHouse.getDvtCode());
+                ImportWareHouse importWareHouse = importWareHouseService.findByCompanyIdAndIdReceiptImportAndIdItems(cid, exportWareHouse.getIdReceiptImport(), exportWareHouse.getIdItems());
                 detailsItemOrderDto.setIdReceiptImport(exportWareHouse.getIdReceiptImport());
+                detailsItemOrderDto.setIdImportWareHouse(importWareHouse.getIdItems());
                 detailsItemOrderDtoList.add(detailsItemOrderDto);
             });
             exportWareHouseListDto.setCode(code);
@@ -163,7 +169,8 @@ public class ExportWareHouseService {
                 PriceItems priceItems = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, idItems, Constants.DELETE_FLG.NON_DELETE, itemExport.getDvtCode()).orElse(null);
                 exportWareHouseDto.setQuantity(priceItems.getQuality());
                 exportWareHouseDto.setIdReceiptExport(exportWareHouseListDto.getIdReceiptExport());
-                exportWareHouseDto.setIdReceiptImport(itemExport.getIdReceiptImport());
+                ImportWareHouse importWareHouse = importWareHouseService.getById(cid, itemExport.getIdImportWareHouse());
+                exportWareHouseDto.setIdReceiptImport(importWareHouse.getIdReceiptImport());
                 exportWareHouseDto.setIdItems(idItems);
                 exportWareHouseDto.setTotalPrice(itemExport.getQuality() * priceItems.getPriceItems().doubleValue());
                 exportWareHouseDto.setDvtCode(itemExport.getDvtCode());
