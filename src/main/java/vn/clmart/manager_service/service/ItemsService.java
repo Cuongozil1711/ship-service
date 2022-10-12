@@ -22,6 +22,8 @@ import vn.clmart.manager_service.untils.Constants;
 import vn.clmart.manager_service.untils.MapUntils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -215,6 +217,44 @@ public class ItemsService {
                 }
             }
             return new ItemsResponseDto();
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public List<ItemsResponseDto> getByItemImport(Long cid, String uid){
+        try {
+            List<ItemsResponseDto> itemsResponseDtos = new ArrayList<>();
+            List<Items> itemsList = itemsRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE);
+            for(Items items : itemsList){
+                List<ImportWareHouse> itemWareHouse = importWareHouseService.getByIdtems(cid, items.getId());
+                for(ImportWareHouse importWareHouse : itemWareHouse){
+                    Calendar cal1 = Calendar.getInstance();
+                    Calendar cal2 = Calendar.getInstance();
+                    cal1.setTime(importWareHouse.getDateExpired());
+                    cal1.add(Calendar.DATE, -cal1.get(Calendar.DATE)/3);
+                    cal1.getTime();
+                    cal2.setTime(new Date());
+                    if(cal1.before(cal2) && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&  cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)){
+                        Integer qualityExport = exportWareHouseService.qualityExport(cid, importWareHouse.getIdReceiptImport(), items.getId(), 1);
+                        Integer qualityCanceled = exportWareHouseService.qualityExport(cid, importWareHouse.getIdReceiptImport(), items.getId(), 0);
+                        Integer qualityImport = importWareHouse.getNumberBox() * importWareHouse.getQuantity();
+                        if(qualityImport - qualityExport > 0){
+                            ItemsResponseDto itemsResponseDTO = new ItemsResponseDto();
+                            itemsResponseDTO.setId(importWareHouse.getId());
+                            itemsResponseDTO.setReceiptImportWareHouse(receiptImportWareHouseService.getById(cid, uid, importWareHouse.getIdReceiptImport()));
+                            itemsResponseDTO.setDateExpired(importWareHouse.getDateExpired());
+                            // Số lượng đã bán
+                            itemsResponseDTO.setQualityExport(qualityExport);
+                            itemsResponseDTO.setQualityCanceled(qualityCanceled);
+                            itemsResponseDTO.setQualityImport(qualityImport);
+                            itemsResponseDtos.add(itemsResponseDTO);
+                        }
+                    }
+                }
+            }
+            return itemsResponseDtos;
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

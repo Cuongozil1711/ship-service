@@ -116,4 +116,17 @@ public class ItemsApi {
         }
     }
 
+    @GetMapping("/findItems-dateExpired")
+    protected @ResponseBody
+    ResponseEntity<Object> getByItemImport(
+            @RequestHeader Long cid,
+            @RequestHeader String uid
+    ) {
+        try {
+            return new ResponseEntity<>(ItemsService.getByItemImport(cid, uid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
 }
