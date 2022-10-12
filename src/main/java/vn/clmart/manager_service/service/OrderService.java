@@ -55,6 +55,15 @@ public class OrderService {
     @Autowired
     ConditionRepository conditionRepository;
 
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    ReasonService reasonService;
+
+    @Autowired
+    BillRepositorry billRepositorry;
+
     public Order createOrder(OrderDto orderDto, Long cid, String uid){
         try {
             Order order = Order.of(orderDto, cid, uid);
@@ -66,6 +75,7 @@ public class OrderService {
             order = orderRepositorry.save(order);
             // check so luong dat hang
             List<DetailsItemOrder> detailsItem = new ArrayList<>();
+            Long priceTotal = 0l;
             for(DetailsItemOrderDto items : orderDto.getDetailsItemOrders()){
                 items.setIdOrder(order.getId());
                 DetailsItemOrder dItems = DetailsItemOrder.of(items, cid, uid);
@@ -92,6 +102,17 @@ public class OrderService {
                             exportWareHouseDto.setDvtCode("000");
                             exportWareHouseDto.setTotalPrice(priceItemsDonate.getPriceItems() *itemsDonate.getQuanlity().doubleValue());
                             exportWareHouseService.saleExport(exportWareHouseDto, cid, uid);
+
+                            DetailsItemOrder dItemNew = new DetailsItemOrder();
+                            dItemNew.setDvtCode("000");
+                            dItemNew.setQuality(itemsDonate.getQuanlity());
+                            dItemNew.setTotalPrice(priceItemsDonate.getPriceItems() *itemsDonate.getQuanlity());
+                            dItemNew.setIdOrder(items.getIdOrder());
+                            dItemNew.setIdItems(itemsDonate.getIdItems());
+                            dItemNew.setType("SALE");
+                            dItemNew.setCreateBy(uid);
+                            dItemNew.setCompanyId(cid);
+                            detailsItem.add(dItemNew);
                         }
                     }
                     else if(promotion.getTypePromotion().equals("product")){
@@ -129,11 +150,25 @@ public class OrderService {
                 exportWareHouseDto.setIdReceiptImport(importWareHouse.getIdReceiptImport());
                 exportWareHouseDto.setDvtCode(items.getDvtCode());
                 exportWareHouseDto.setIdOrder(order.getId());
-                exportWareHouseDto.setTotalPrice(priceSale);
+                exportWareHouseDto.setTotalPrice(totalPrice);
+                priceTotal+=totalPrice.longValue();
                 exportWareHouseService.orderToExport(exportWareHouseDto, cid, uid);
             }
             detailsItemOrderRepository.saveAll(detailsItem);
             // tao hoa don
+            Bill bill = new Bill();
+            bill.setIdCustomer(orderDto.getIdCustomer());
+            bill.setTotalPrice(priceTotal);
+            bill.setTotalPriceCustomer(orderDto.getTotalPriceCustomer());
+            bill.setIdOrder(order.getId());
+            bill.setNamePayment(orderDto.getNamePayment());
+            if(priceTotal > orderDto.getTotalPriceCustomer() || orderDto.getTotalPriceCustomer() == 0){
+                bill.setState(Constants.BILL_EMPLOYEE.PENDING.name());
+            }
+            else bill.setState(Constants.BILL_EMPLOYEE.COMPLETE.name());
+            bill.setCompanyId(cid);
+            bill.setCreateBy(uid);
+            billRepositorry.save(bill);
             return order;
         }
         catch (Exception ex){
@@ -165,8 +200,14 @@ public class OrderService {
                     });
                     detailsItemOrderRepository.saveAll(detailsItemOrders);
 
-                    // check xuất kho để xóa
-                    exportWareHouseService.deleteExportByOrderId(cid, uid, order.getId());
+                    Bill bill = billRepositorry.findByCompanyIdAndDeleteFlgAndIdOrder(cid, Constants.DELETE_FLG.DELETE, order.getId()).orElse(null);
+                    if(bill != null){
+                        bill.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
+                        billRepositorry.save(bill);
+                    }
+
+                    // check xuất kho để khôi phục
+                    exportWareHouseService.restoreExportByOrderId(cid, uid, order.getId());
                 }
             }
         }
@@ -176,7 +217,7 @@ public class OrderService {
         return true;
     }
 
-    public boolean deleteOrder(Long cid, String uid, Long id){
+    public boolean deleteOrder(Long cid, String uid, Long id, Long reasonId){
         Order order = orderRepositorry.findByCompanyIdAndIdAndDeleteFlg(cid, id, Constants.DELETE_FLG.NON_DELETE).orElse(null);
         if(order != null){
             Calendar cal = Calendar.getInstance();
@@ -188,6 +229,7 @@ public class OrderService {
             else{
                 // update Order
                 order.setDeleteFlg(Constants.DELETE_FLG.DELETE);
+                order.setReasonId(reasonId);
                 order.setUpdateBy(uid);
                 orderRepositorry.save(order);
 
@@ -199,11 +241,17 @@ public class OrderService {
                 });
                 detailsItemOrderRepository.saveAll(detailsItemOrders);
 
+                Bill bill = billRepositorry.findByCompanyIdAndDeleteFlgAndIdOrder(cid, Constants.DELETE_FLG.NON_DELETE, order.getId()).orElse(null);
+                if(bill != null){
+                    bill.setDeleteFlg(Constants.DELETE_FLG.DELETE);
+                    billRepositorry.save(bill);
+                }
+
                 // check xuất kho để xóa
                 exportWareHouseService.deleteExportByOrderId(cid, uid, order.getId());
             }
         }
-        return false;
+        return true;
     }
 
     public Integer checkQualityItem(Long id, Long cid, String uid){
@@ -236,27 +284,56 @@ public class OrderService {
             if(order != null){
                 OrderItemResponseDTO itemsResponseDTO = new OrderItemResponseDTO();
                 BeanUtils.copyProperties(order, itemsResponseDTO);
+                if(order.getIdCustomer() != null){
+                    CustomerDto customerDto = new CustomerDto();
+                    BeanUtils.copyProperties(customerService.getById(cid , "", order.getIdCustomer()), customerDto);
+                    itemsResponseDTO.setCustomerDto(customerDto);
+                }
+                if(order.getCreateBy() != null){
+                    FullName fullName = userService.getFullName(cid, order.getCreateBy());
+                    itemsResponseDTO.setCreateBy(fullName.getFirstName() + " " + fullName.getLastName());
+                }
                 List<DetailsItemOrder> orders = detailsItemOrderRepository.findAllByCompanyIdAndIdOrder(cid, id);
                 Double totalPrice = 0d;
+                Double totalSale = 0d;
                 Integer size = 0;
                 List<DetailsItemOrderDto> list = new ArrayList<>();
+                List<DetailsItemOrderDto> listSale = new ArrayList<>();
                 for(int i=0; i < orders.size(); i++){
                     DetailsItemOrderDto detailsItemOrderDto = new DetailsItemOrderDto();
                     DetailsItemOrder item = orders.get(i);
                     BeanUtils.copyProperties(item, detailsItemOrderDto);
+                    detailsItemOrderDto.setTotalSale(item.getTotalPrice());
                     if(item.getIdItems() != null){
                         ItemsResponseDTO itemsResponseDTO1 = itemsService.getById(cid, "", item.getIdItems());
-                        PriceItems priceItems = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, item.getIdItems(), Constants.DELETE_FLG.NON_DELETE, item.getDvtCode()).orElse(null);
-                        itemsResponseDTO1.setTotalSold(item.getQuality().longValue());
-                        size += item.getQuality();
-                        detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
-                        totalPrice += priceItems.getPriceItems() * item.getQuality();
+                        List<ExportWareHouse> exportWareHouses = exportWareHouseService.findAllByCompanyIdAndIdOrderAndIdItemsAndDvtCode(cid, item.getIdItems(), item.getIdOrder(), item.getDvtCode());
+                        if(exportWareHouses.size() != 0){
+                            detailsItemOrderDto.setTotalPrice(exportWareHouses.get(0).getTotalPrice().longValue());
+                            itemsResponseDTO1.setTotalSold(item.getQuality().longValue());
+                            size += item.getQuality();
+                            detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
+                            if(item.getType().equals("SOLD")){
+                                totalSale += item.getTotalPrice();
+                                totalPrice += exportWareHouses.get(0).getTotalPrice();
+                            }
+                        }
                     }
-                    list.add(detailsItemOrderDto);
+                    if(item.getType().equals("SALE")) listSale.add(detailsItemOrderDto);
+                    else if(item.getType().equals("SOLD")) list.add(detailsItemOrderDto);
                 }
+                Bill bill = billRepositorry.findByCompanyIdAndIdOrder(cid, order.getId()).orElse(new Bill());
+                BillDto billDto = new BillDto();
+                BeanUtils.copyProperties(bill, billDto);
+                itemsResponseDTO.setBillDto(billDto);
+                itemsResponseDTO.setDetailsItemOrdersSale(listSale);
                 itemsResponseDTO.setDetailsItemOrders(list);
+                itemsResponseDTO.setTotalSale(totalSale);
                 itemsResponseDTO.setTotalPrice(totalPrice);
                 itemsResponseDTO.setQuantity(size);
+                if(order.getDeleteFlg() == 0 && order.getReasonId() != null){
+                    Reason reason = reasonService.getById(cid, "", order.getReasonId());
+                    itemsResponseDTO.setReasonName(reason.getName());
+                }
                 return itemsResponseDTO;
             }
             return null;
@@ -279,9 +356,51 @@ public class OrderService {
                     BeanUtils.copyProperties(customerService.getById(cid , "", items.getIdCustomer()), customerDto);
                     itemsResponseDTO.setCustomerDto(customerDto);
                 }
+                if(status == 0 && items.getReasonId() != null){
+                    itemsResponseDTO.setReasonName(reasonService.getById(cid, "", items.getReasonId()).getName());
+                }
                 Double totalPrice = 0d;
                 Integer size = 0;
                 List<DetailsItemOrder> orders = detailsItemOrderRepository.findAllByCompanyIdAndDeleteFlgAndIdOrder(cid, status, items.getId());
+                for(int i=0; i < orders.size(); i++){
+                    DetailsItemOrderDto detailsItemOrderDto = new DetailsItemOrderDto();
+                    DetailsItemOrder item = orders.get(i);
+                    BeanUtils.copyProperties(item, detailsItemOrderDto);
+                    if(item.getIdItems() != null && item.getType().equals("SOLD")){
+                        ItemsResponseDTO itemsResponseDTO1 = itemsService.getById(cid, "", item.getIdItems());
+                        itemsResponseDTO1.setTotalSold(item.getQuality().longValue());
+                        size += item.getQuality();
+                        detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
+                        totalPrice += item.getTotalPrice();
+                    }
+                }
+                itemsResponseDTO.setTotalPrice(totalPrice);
+                itemsResponseDTO.setQuantity(size);
+
+                responseDTOList.add(itemsResponseDTO);
+            }
+            return new PageImpl(responseDTOList, pageable, pageSearch.getTotalElements());
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public List<OrderResponseDTO>  getListByEmpId(Long cid, Long empId){
+        try {
+            List<Order> list = orderRepositorry.findAllByCompanyIdAndIdCustomer(cid, empId);
+            List<OrderResponseDTO> responseDTOList = new ArrayList<>();
+            for(Order items : list){
+                OrderResponseDTO itemsResponseDTO = new OrderResponseDTO();
+                BeanUtils.copyProperties(items, itemsResponseDTO);
+                if(items.getIdCustomer() != null){
+                    CustomerDto customerDto = new CustomerDto();
+                    BeanUtils.copyProperties(customerService.getById(cid , "", items.getIdCustomer()), customerDto);
+                    itemsResponseDTO.setCustomerDto(customerDto);
+                }
+                Double totalPrice = 0d;
+                Integer size = 0;
+                List<DetailsItemOrder> orders = detailsItemOrderRepository.findAllByCompanyIdAndIdOrder(cid, items.getId());
                 for(int i=0; i < orders.size(); i++){
                     DetailsItemOrderDto detailsItemOrderDto = new DetailsItemOrderDto();
                     DetailsItemOrder item = orders.get(i);
@@ -293,6 +412,71 @@ public class OrderService {
                         detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
                         totalPrice += item.getTotalPrice();
                     }
+                }
+                if(items.getReasonId() != null){
+                    itemsResponseDTO.setReasonName(reasonService.getById(cid, "", items.getReasonId()).getName());
+                }
+                itemsResponseDTO.setTotalPrice(totalPrice);
+                itemsResponseDTO.setQuantity(size);
+
+                responseDTOList.add(itemsResponseDTO);
+            }
+            return responseDTOList;
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public PageImpl<Order> searchByDate(Long cid, Pageable pageable, String search, String state){
+        try {
+            Date date = null;
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            calendar.set(Calendar.MINUTE,0);
+            if(state.equals("now")){
+                date = calendar.getTime();
+            }
+            else if(state.equals("week")){
+                calendar.add(Calendar.DATE, -7);
+                date = calendar.getTime();
+            }
+            else if(state.equals("month")){
+                calendar.add(Calendar.MONTH, -1);
+                date = calendar.getTime();
+            }
+            else{
+                date = null;
+            }
+            Page<Order> pageSearch = orderRepositorry.getAllByCompanyId(cid, search, date, pageable);
+            List<Order> list = pageSearch.getContent();
+            List<OrderResponseDTO> responseDTOList = new ArrayList<>();
+            for(Order items : list){
+                OrderResponseDTO itemsResponseDTO = new OrderResponseDTO();
+                BeanUtils.copyProperties(items, itemsResponseDTO);
+                if(items.getIdCustomer() != null){
+                    CustomerDto customerDto = new CustomerDto();
+                    BeanUtils.copyProperties(customerService.getById(cid , "", items.getIdCustomer()), customerDto);
+                    itemsResponseDTO.setCustomerDto(customerDto);
+                }
+                Double totalPrice = 0d;
+                Integer size = 0;
+                List<DetailsItemOrder> orders = detailsItemOrderRepository.findAllByCompanyIdAndIdOrder(cid, items.getId());
+                for(int i=0; i < orders.size(); i++){
+                    DetailsItemOrderDto detailsItemOrderDto = new DetailsItemOrderDto();
+                    DetailsItemOrder item = orders.get(i);
+                    BeanUtils.copyProperties(item, detailsItemOrderDto);
+                    if(item.getIdItems() != null){
+                        ItemsResponseDTO itemsResponseDTO1 = itemsService.getById(cid, "", item.getIdItems());
+                        itemsResponseDTO1.setTotalSold(item.getQuality().longValue());
+                        size += item.getQuality();
+                        detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
+                        totalPrice += item.getTotalPrice();
+                    }
+                }
+                if(items.getReasonId() != null){
+                    itemsResponseDTO.setReasonName(reasonService.getById(cid, "", items.getReasonId()).getName());
                 }
                 itemsResponseDTO.setTotalPrice(totalPrice);
                 itemsResponseDTO.setQuantity(size);
@@ -356,6 +540,24 @@ public class OrderService {
             sumPrice += orderItemResponseDTO.getTotalPrice().longValue();
         }
         return sumPrice;
+    }
+
+    public Integer[] getCountByDate(Long cid, String uid){
+        try {
+            Integer[] result = new Integer[7];
+            for(int i = 0; i < 7; i++){
+                Calendar calendar = new GregorianCalendar();
+                calendar.set(Calendar.HOUR, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
+                calendar.set(Calendar.MINUTE,0);
+                calendar.add(Calendar.DATE, -i);
+                result[7-i-1] = orderRepositorry.getCountByDate(cid, Constants.DELETE_FLG.NON_DELETE, calendar.getTime());
+            }
+            return result;
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
     }
 
 }

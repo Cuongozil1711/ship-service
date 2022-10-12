@@ -12,8 +12,18 @@ import java.util.*;
 
 public interface OrderRepositorry extends JpaRepository<Order, Long> {
 
-    @Query("select i from Order as i where i.companyId = :cid and i.deleteFlg = :status  and ((lower(concat(coalesce(i.code, ''), coalesce(i.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) ")
+    @Query("select i from Order as i where i.companyId = :cid and i.deleteFlg = :status  and ((lower(concat(coalesce(i.code, ''), coalesce(i.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) order by i.createDate desc")
     Page<Order> findAllByCompanyId(Long cid, String search, Integer status, Pageable pageable);
+
+    @Query("select i from Order as i where i.companyId = :cid " +
+            "and (i.createDate between coalesce(:date, now()) " +
+            "and now()   or coalesce(:date, current_date) = current_date)  " +
+            "and ((lower(concat(coalesce(i.code, ''), coalesce(i.name, ''))) " +
+            "like lower(concat('%',coalesce(:search, ''), '%')))  " +
+            "or (coalesce(:search, '') = '') ) order by i.createDate desc")
+    Page<Order> getAllByCompanyId(Long cid, String search, Date date, Pageable pageable);
+
+    List<Order> findAllByCompanyIdAndIdCustomer(Long cid, Long customerId);
 
     Optional<Order> findByCompanyIdAndId(Long cid, Long id);
 
@@ -58,6 +68,17 @@ public interface OrderRepositorry extends JpaRepository<Order, Long> {
                     Long cid,
             @Param("deleteFlg")
                     Integer deleteFlg);
+
+    @Query(value = "select count(*) from `order` as o where date_format(o.create_date,'%Y-%m-%d') = date_format(:date,'%Y-%m-%d') and " +
+            "o.company_id = :cid and o.delete_flg = :deleteFlg ", nativeQuery = true)
+    Integer getCountByDate(
+            @Param("cid")
+                    Long cid,
+            @Param("deleteFlg")
+                    Integer deleteFlg,
+            @Param("date")
+                    Date date
+            );
 
     List<Order> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg);
 

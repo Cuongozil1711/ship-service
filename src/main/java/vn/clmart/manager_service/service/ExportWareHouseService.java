@@ -17,6 +17,7 @@ import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.untils.Constants;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -157,6 +158,19 @@ public class ExportWareHouseService {
             throw new RuntimeException(ex);
         }
     }
+
+    public void restoreExportByOrderId(Long cid, String uid, Long orgId){
+        try {
+            List<ExportWareHouse> exportWareHouses = exportWareHouseRepository.findAllByCompanyIdAndDeleteFlgAndIdOrder(cid, Constants.DELETE_FLG.DELETE, orgId);
+            exportWareHouses.forEach(exportWareHouse -> {
+                exportWareHouse.setUpdateBy(uid);
+            });
+            exportWareHouseRepository.saveAll(exportWareHouses);
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
     public boolean exportWareHouse(ExportWareHouseListDto exportWareHouseListDto, Long cid, String uid){
         try {
             ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.getById(cid, uid, exportWareHouseListDto.getIdReceiptExport());
@@ -242,7 +256,16 @@ public class ExportWareHouseService {
             throw new BusinessException(ex.getMessage());
         }
     }
-    public Long totalItemsInExport(Long idItem, Long cid){
+
+    public List<ExportWareHouse> findAllByCompanyIdAndIdOrderAndIdItemsAndDvtCode(Long cid, Long idItems, Long idOrder, String dvtCode) {
+        try {
+            return exportWareHouseRepository.findAllByCompanyIdAndIdOrderAndIdItemsAndDvtCode(cid, idOrder, idItems, dvtCode);
+        } catch (Exception ex) {
+            throw new BusinessException(ex.getMessage());
+        }
+    }
+
+        public Long totalItemsInExport(Long idItem, Long cid){
         try {
             List<ExportWareHouse> exportWareHouses = exportWareHouseRepository.findAllByDeleteFlgAndIdItemsAndCompanyId(Constants.DELETE_FLG.NON_DELETE, idItem, cid);
             if(exportWareHouses.size() == 0) return 0l;
@@ -437,10 +460,13 @@ public class ExportWareHouseService {
                     ItemsResponseDTO items = itemsService.getById(cid, "", item.getIdItems());
                     exportWareHouseResponseDTO.setItemsName(items.getName());
                     exportWareHouseResponseDTO.setImage(items.getImage());
-                    exportWareHouseResponseDTO.setQuantityItems(item.getQuantity() * item.getNumberBox());
+                    exportWareHouseResponseDTO.setQuantityItems(this.totalItemsInExport(items.getId(), cid).intValue());
                 }
                 responseDTOS.add(exportWareHouseResponseDTO);
             }
+            Collections.sort(responseDTOS, (o1, o2) -> {
+                return  o2.getQuantityItems() - o1.getQuantityItems();
+            });
             return responseDTOS;
         }
         catch (Exception ex){

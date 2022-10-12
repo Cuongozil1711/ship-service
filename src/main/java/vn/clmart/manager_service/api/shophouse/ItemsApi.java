@@ -33,6 +33,22 @@ public class ItemsApi {
         }
     }
 
+    @GetMapping("/getByImport/{idImportWareHouse}")
+    protected @ResponseBody
+    ResponseEntity<Object> search(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable("idImportWareHouse") Long idImportWareHouse
+            ) {
+        try {
+            return new ResponseEntity<>(ItemsService.getItemsResponseDto(cid, uid, idImportWareHouse), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+
+
     @GetMapping("/list")
     protected @ResponseBody
     ResponseEntity<Object> list(
@@ -51,7 +67,7 @@ public class ItemsApi {
             @RequestHeader Long cid,
             @RequestHeader String uid,
             @PathVariable("id") Long id
-            , Pageable pageable) {
+           ) {
         try {
             return new ResponseEntity<>(ItemsService.getById(cid, uid, id), HttpStatus.OK);
         } catch (Exception ex) {
@@ -104,7 +120,7 @@ public class ItemsApi {
 
     @GetMapping("details/{id}")
     protected @ResponseBody
-    ResponseEntity<Object> getById(
+    ResponseEntity<Object> getByIdDetails(
             @RequestHeader Long cid,
             @RequestHeader String uid,
             @PathVariable("id") Long id
@@ -115,5 +131,20 @@ public class ItemsApi {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
+
+    @GetMapping("/findItems-dateExpired")
+    protected @ResponseBody
+    ResponseEntity<Object> getByItemImport(
+            @RequestHeader Long cid,
+            @RequestHeader String uid
+    ) {
+        try {
+            return new ResponseEntity<>(ItemsService.getByItemImport(cid, uid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+
 
 }

@@ -25,4 +25,5 @@ public class ImportWareHouseResponseDTO {
     private String receiptImportName = "";
     private String creatByName = "";
     private String itemName = "";
+    private Integer deleteFlg;
 }

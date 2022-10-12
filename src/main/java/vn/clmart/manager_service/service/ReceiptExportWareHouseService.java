@@ -102,10 +102,13 @@ public class ReceiptExportWareHouseService {
     public ReceiptExportWareHouse delete(Long cid, String uid, Long id){
         try {
             ReceiptExportWareHouse ReceiptExportWareHouse = ReceiptExportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
-            ReceiptExportWareHouse.setDeleteFlg(Constants.DELETE_FLG.DELETE);
-            ReceiptExportWareHouse.setCompanyId(cid);
-            ReceiptExportWareHouse.setUpdateBy(uid);
-            return ReceiptExportWareHouseRepository.save(ReceiptExportWareHouse);
+            if(ReceiptExportWareHouse.getState().equals(Constants.RECEIPT_WARE_HOUSE.PROCESSING.name())){
+                ReceiptExportWareHouse.setDeleteFlg(Constants.DELETE_FLG.DELETE);
+                ReceiptExportWareHouse.setCompanyId(cid);
+                ReceiptExportWareHouse.setUpdateBy(uid);
+                return ReceiptExportWareHouseRepository.save(ReceiptExportWareHouse);
+            }
+            else return null;
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

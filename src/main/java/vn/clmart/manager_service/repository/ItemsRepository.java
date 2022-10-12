@@ -8,7 +8,7 @@ import vn.clmart.manager_service.model.ImportWareHouse;
 import vn.clmart.manager_service.model.Items;
 import vn.clmart.manager_service.model.Position;
 
-import java.util.Optional;
+import java.util.*;
 
 public interface ItemsRepository extends JpaRepository<Items, Long> {
 
@@ -19,4 +19,5 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
     Page<Items> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable, String search);
 
 
+    List<Items> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg);
 }

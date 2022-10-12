@@ -19,5 +19,7 @@ public class ImportWareHouseDto {
     private Double totalPrice;
     private Long idReceiptImport;
     private Long idItems;
+    private String nameItems;
     private Date dateExpired;
+    private Date createDate;
 }

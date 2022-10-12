@@ -15,4 +15,9 @@ public class Constants {
         INIT, PENDING, PROCESSING, APPROVED, REJECTED, CANCELED, COMPLETE,
         EXTEND
     }
+
+    public enum BILL_EMPLOYEE{
+        INIT, PENDING, PROCESSING, APPROVED, REJECTED, CANCELED, COMPLETE,
+        EXTEND
+    }
 }

@@ -35,6 +35,8 @@ public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse
 
     public List<ExportWareHouse> findAllByCompanyIdAndDeleteFlgAndIdOrder(Long cid, Integer deleteFlg, Long idOrder);
 
+    public List<ExportWareHouse> findAllByCompanyIdAndIdOrderAndIdItemsAndDvtCode(Long cid, Long idOrder, Long idItems, String dvtCode);
+
     @Query("select i from ExportWareHouse as i where i.companyId = :cid " +
             " and i.deleteFlg = :delete " +
             " and  ((coalesce(i.createDate,current_date) between coalesce(:startDate, current_date) and coalesce(:endDate, current_date)) " +
@@ -45,7 +47,9 @@ public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse
 
 
 
-    @Query("select o from ExportWareHouse as o where o.deleteFlg = :delete and o.companyId = :cid group by o.idItems order by o.createDate desc")
+    @Query(value = "select * from export_ware_house as o where o.delete_flg = :delete " +
+            "and o.company_id = :cid and date_format(o.create_date,'%Y, %m') = date_format(now(),'%Y, %m')" +
+            " and o.id_receipt_export is null  group by o.id_items limit 3", nativeQuery = true)
     List<ExportWareHouse> getListOrder(Long cid, Integer delete);
 
 }

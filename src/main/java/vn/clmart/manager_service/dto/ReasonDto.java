@@ -5,17 +5,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class OrderDto {
-    private String name;
+public class ReasonDto {
     private String code;
-    private Long idCustomer;
-    private String namePayment;
-    private Long totalPriceCustomer;
-    private List<DetailsItemOrderDto> detailsItemOrders;
+    private String name;
 }

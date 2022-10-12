@@ -52,7 +52,7 @@ public class StatisticalService {
             // thống kê doanh thu Revenue
             StatisticalResponseDTO statisticalRevenue = new StatisticalResponseDTO();
             statisticalRevenue.setSumPriceNow(orderService.getRevenueNow(cid, uid));
-            statisticalRevenue.setSumPriceAfter(orderService.getRevenueAfter(cid, uid));
+             statisticalRevenue.setSumPriceAfter(orderService.getRevenueAfter(cid, uid));
             statisticaList.put("statisticalRevenue", statisticalRevenue);
             return statisticaList;
         }
@@ -90,7 +90,7 @@ public class StatisticalService {
                     if(countOrder > 0){
                         employeesOrderResponse.setCountOrder(countOrder);
                         employeesOrderResponse.setImage(employee.getImage());
-                        FullName fullName = userService.getFullName(cid, uid);
+                        FullName fullName = userService.getFullName(cid, employee.getIdUser());
                         if(fullName != null)
                         employeesOrderResponse.setName(fullName.getFirstName() + " " + fullName.getLastName());
                         employeesOrderResponses.add(employeesOrderResponse);

@@ -21,4 +21,5 @@ public class OrderResponseDTO {
     private Double totalPrice;
     private Integer deleteFlg;
     private Date createDate;
+    private String reasonName;
 }

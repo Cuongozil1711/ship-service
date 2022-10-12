@@ -23,8 +23,6 @@ import java.util.Date;
 @Description("Table nhap kho")
 public class ImportWareHouse extends PersistableEntity<Long> {
     @Id
-    @GenericGenerator(name = "id",strategy = "vn.clmart.manager_service.generator.SnowflakeId")
-    @GeneratedValue(generator = "id")
     private Long id;
     private String code;
     private Integer numberBox;

@@ -119,12 +119,26 @@ public class ImportWareHouseApi {
         }
     }
 
+    @GetMapping("/get/{id}")
+    protected @ResponseBody
+    ResponseEntity<Object> getImport(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable("id") Long id
+    ) {
+        try {
+            return new ResponseEntity<>(importWareHouseService.getByIdScanner(cid, id), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
     @PostMapping("/list/{status}")
     protected @ResponseBody
     ResponseEntity<Object> findAllByImportWareHouse(
             @RequestHeader Long cid,
             @RequestHeader String uid,
-            @PathVariable(value = "status") Integer status,
+            @PathVariable(value = "status", required = false) Integer status,
             @RequestParam(value = "", required = false) String search,
             @RequestBody ItemsSearchDto itemsSearchDto,
             Pageable pageable
@@ -162,6 +176,20 @@ public class ImportWareHouseApi {
     ) {
         try {
             return new ResponseEntity<>(importWareHouseService.listImport(cid, status, search, itemsSearchDto, pageable), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @PostMapping("/prepare")
+    protected @ResponseBody
+    ResponseEntity<Object> listExport(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @RequestBody Long[] ids
+    ) {
+        try {
+            return new ResponseEntity<>(importWareHouseService.checkListImportWareHouse(cid, uid, ids), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

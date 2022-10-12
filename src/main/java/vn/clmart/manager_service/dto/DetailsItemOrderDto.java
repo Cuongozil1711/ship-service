@@ -13,7 +13,8 @@ import vn.clmart.manager_service.dto.request.ItemsResponseDTO;
 public class DetailsItemOrderDto {
     private String dvtCode;
     private Integer quality;
-    private Long totalPrice; // gia tien theo don vi tinh * quality
+    private Long totalSale; // gia tien theo don vi tinh * quality thuc te
+    private Long totalPrice; // gia tien theo don vi tinh * quality (gia goc)
     private Long idItems;
     private Long idReceiptImport;
     private Long idImportWareHouse;

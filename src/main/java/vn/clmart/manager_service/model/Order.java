@@ -36,6 +36,7 @@ public class Order extends PersistableEntity<Long> {
     public List<Map<String, Integer>> getDetailItems() {
         return detailItems;
     }
+    private Long reasonId;
 
     public static Order of(OrderDto orderDto, Long cid, String uid){
         Order order = Order.builder()
