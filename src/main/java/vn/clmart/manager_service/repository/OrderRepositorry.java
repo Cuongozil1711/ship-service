@@ -24,6 +24,7 @@ public interface OrderRepositorry extends JpaRepository<Order, Long> {
     Page<Order> getAllByCompanyId(Long cid, String search, Date date, Pageable pageable);
 
     List<Order> findAllByCompanyIdAndIdCustomer(Long cid, Long customerId);
+    List<Order> findAllByCompanyIdAndCreateBy(Long cid, String createBy);
 
     Optional<Order> findByCompanyIdAndId(Long cid, Long id);
 

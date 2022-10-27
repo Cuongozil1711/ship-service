@@ -428,6 +428,48 @@ public class OrderService {
         }
     }
 
+    public List<OrderResponseDTO>  getListByCreateBy(Long cid, String createBy){
+        try {
+            List<Order> list = orderRepositorry.findAllByCompanyIdAndCreateBy(cid, createBy);
+            List<OrderResponseDTO> responseDTOList = new ArrayList<>();
+            for(Order items : list){
+                OrderResponseDTO itemsResponseDTO = new OrderResponseDTO();
+                BeanUtils.copyProperties(items, itemsResponseDTO);
+                if(items.getIdCustomer() != null){
+                    CustomerDto customerDto = new CustomerDto();
+                    BeanUtils.copyProperties(customerService.getById(cid , "", items.getIdCustomer()), customerDto);
+                    itemsResponseDTO.setCustomerDto(customerDto);
+                }
+                Double totalPrice = 0d;
+                Integer size = 0;
+                List<DetailsItemOrder> orders = detailsItemOrderRepository.findAllByCompanyIdAndIdOrder(cid, items.getId());
+                for(int i=0; i < orders.size(); i++){
+                    DetailsItemOrderDto detailsItemOrderDto = new DetailsItemOrderDto();
+                    DetailsItemOrder item = orders.get(i);
+                    BeanUtils.copyProperties(item, detailsItemOrderDto);
+                    if(item.getIdItems() != null){
+                        ItemsResponseDTO itemsResponseDTO1 = itemsService.getById(cid, "", item.getIdItems());
+                        itemsResponseDTO1.setTotalSold(item.getQuality().longValue());
+                        size += item.getQuality();
+                        detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
+                        totalPrice += item.getTotalPrice();
+                    }
+                }
+                if(items.getReasonId() != null){
+                    itemsResponseDTO.setReasonName(reasonService.getById(cid, "", items.getReasonId()).getName());
+                }
+                itemsResponseDTO.setTotalPrice(totalPrice);
+                itemsResponseDTO.setQuantity(size);
+
+                responseDTOList.add(itemsResponseDTO);
+            }
+            return responseDTOList;
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
     public PageImpl<Order> searchByDate(Long cid, Pageable pageable, String search, String state){
         try {
             Date date = null;

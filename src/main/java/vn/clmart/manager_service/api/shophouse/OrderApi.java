@@ -77,6 +77,19 @@ public class OrderApi {
         }
     }
 
+    @GetMapping("/employee/{createBy}")
+    protected @ResponseBody
+    ResponseEntity<Object> getListByEmployee(
+            @RequestHeader Long cid
+            ,@PathVariable("createBy") String createBy
+    ) {
+        try {
+            return new ResponseEntity<>(orderService.getListByCreateBy(cid, createBy), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
     @GetMapping("{id}")
     protected @ResponseBody
     ResponseEntity<Object> getById(

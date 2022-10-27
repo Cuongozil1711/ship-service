@@ -15,5 +15,6 @@ public class ExportWareHouseListDto {
     private String name;
     private String code;
     private Long idReceiptExport;
+    private ReceiptExportWareHouseDto receiptExportWareHouseDto;
     private List<DetailsItemOrderDto> data;
 }

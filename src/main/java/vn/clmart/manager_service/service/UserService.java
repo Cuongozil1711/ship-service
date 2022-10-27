@@ -139,6 +139,7 @@ public class UserService {
             for(Employee employee : pageSearch.getContent()){
                 EmployeeDto employeeResponseDTO = new EmployeeDto();
                 employeeResponseDTO.setId(employee.getId());
+                employeeResponseDTO.setIdUser(employee.getIdUser());
                 FullName fullName = fullNameRepository.findById(employee.getIdFullName()).orElse(new FullName());
                 employeeResponseDTO.setFullNameDto(new FullNameDto(fullName.getFirstName(), fullName.getLastName()));
                 employeeResponseDTO.setCmt(employee.getCode());

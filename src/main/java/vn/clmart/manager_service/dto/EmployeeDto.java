@@ -17,6 +17,7 @@ public class EmployeeDto {
     private UserLoginDto userLoginDto;
     private AddressDto addressDto;
     private FullNameDto fullNameDto;
+    private String idUser;
     private String tel;
     private String cmt;
     private Long idPosition;

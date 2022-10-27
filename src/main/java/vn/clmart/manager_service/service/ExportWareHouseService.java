@@ -89,8 +89,15 @@ public class ExportWareHouseService {
                 ImportWareHouse importWareHouse = importWareHouseService.findByCompanyIdAndIdReceiptImportAndIdItems(cid, exportWareHouse.getIdReceiptImport(), exportWareHouse.getIdItems());
                 detailsItemOrderDto.setIdReceiptImport(exportWareHouse.getIdReceiptImport());
                 detailsItemOrderDto.setIdImportWareHouse(importWareHouse.getIdItems());
+                ItemsResponseDTO itemsResponseDTO1 = itemsService.getById(cid, "", exportWareHouse.getIdItems());
+                detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
+                detailsItemOrderDto.setCreateDate(exportWareHouse.getCreateDate());
                 detailsItemOrderDtoList.add(detailsItemOrderDto);
             });
+            ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.getById(cid, uid, idReceiptExport);
+            ReceiptExportWareHouseDto receiptExportWareHouseDto = new ReceiptExportWareHouseDto();
+            BeanUtils.copyProperties(receiptExportWareHouse, receiptExportWareHouseDto);
+            exportWareHouseListDto.setReceiptExportWareHouseDto(receiptExportWareHouseDto);
             exportWareHouseListDto.setCode(code);
             exportWareHouseListDto.setIdReceiptExport(idReceiptExport);
             exportWareHouseListDto.setData(detailsItemOrderDtoList);

@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import vn.clmart.manager_service.dto.request.ItemsResponseDTO;
 
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,5 +22,6 @@ public class DetailsItemOrderDto {
     private Long idImportWareHouse;
     private Long idOrder;
     private Long idPromotion;
+    private Date createDate;
     private ItemsResponseDTO itemsResponseDTO;
 }

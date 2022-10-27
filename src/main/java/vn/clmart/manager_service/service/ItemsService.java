@@ -104,6 +104,8 @@ public class ItemsService {
             Items items = itemsRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             ItemsResponseDTO itemsResponseDTO = new ItemsResponseDTO();
             BeanUtils.copyProperties(items, itemsResponseDTO);
+            itemsResponseDTO.setTotalInWareHouse(importWareHouseService.totalItemsInImport(itemsResponseDTO.getId(), cid) - exportWareHouseService.totalItemsInExport(itemsResponseDTO.getId(), cid));
+            itemsResponseDTO.setTotalSold(exportWareHouseService.totalItemsInExport(itemsResponseDTO.getId(), cid));
             List<PriceItems> priceItems = priceItemsRepository.findAllByCompanyIdAndIdItemsAndDeleteFlg(cid, items.getId(), Constants.DELETE_FLG.NON_DELETE);
             itemsResponseDTO.setPriceItemsDtos(priceItems.stream().map(e -> of(e)).collect(Collectors.toList()));
             return itemsResponseDTO;
@@ -134,6 +136,21 @@ public class ItemsService {
                 responseDTOList.add(itemsResponseDTO);
             }
             return new PageImpl(responseDTOList, pageable, pageSearch.getTotalElements());
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public ItemsResponseDTO getItemsResponseDto(Long cid, String uid, Long idImportWareHouse){
+        try {
+            ImportWareHouse importWareHouse = importWareHouseService.getById(cid, idImportWareHouse);
+            if(importWareHouse != null){
+                ItemsResponseDTO itemsResponseDTO = this.getById(cid, uid, importWareHouse.getIdItems());
+                return itemsResponseDTO;
+            }
+            return null;
+
         }
         catch (Exception ex){
             throw new RuntimeException(ex);
@@ -254,7 +271,6 @@ public class ItemsService {
                             }
                         }
                     }
-
                 }
             }
             return itemsResponseDtos;
