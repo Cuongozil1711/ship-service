@@ -93,4 +93,17 @@ public class UserApi {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
+
+    @GetMapping("/getByUser")
+    protected @ResponseBody
+    ResponseEntity<Object> getByUser(
+            @RequestHeader Long cid,
+            @RequestHeader String uid)
+     {
+        try {
+            return new ResponseEntity<>(userService.getByUid(cid, uid),HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
 }

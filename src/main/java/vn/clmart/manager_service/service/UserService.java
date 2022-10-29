@@ -194,4 +194,28 @@ public class UserService {
         }
         return new FullName();
     }
+
+    public EmployeeDto getByUid(Long cid, String uid){
+        Employee employee = employeeRepository.findByCompanyIdAndIdUser(cid, uid).orElseThrow(() -> new RuntimeException());
+        EmployeeDto employeeResponseDTO = new EmployeeDto();
+        employeeResponseDTO.setId(employee.getId());
+        employeeResponseDTO.setIdUser(employee.getIdUser());
+        FullName fullName = fullNameRepository.findById(employee.getIdFullName()).orElse(new FullName());
+        employeeResponseDTO.setFullNameDto(new FullNameDto(fullName.getFirstName(), fullName.getLastName()));
+        employeeResponseDTO.setCmt(employee.getCode());
+        employeeResponseDTO.setTel(employee.getTel());
+        Position position = positionService.getById(cid, "", employee.getIdPosition());
+        employeeResponseDTO.setIdPosition(position.getId());
+        employeeResponseDTO.setNamePosition(position.getName());
+        employeeResponseDTO.setStatus(employee.getDeleteFlg());
+        employeeResponseDTO.setBirthDay(employee.getBirthDay());
+        employeeResponseDTO.setImage(employee.getImage());
+        if(employee.getIdAddress() != null){
+            AddressDto addressDto = new AddressDto();
+            Address address = addressRepository.findById(employee.getIdAddress()).orElse(new Address());
+            BeanUtils.copyProperties(address, addressDto);
+            employeeResponseDTO.setAddressDto(addressDto);
+        }
+        return employeeResponseDTO;
+    }
 }
