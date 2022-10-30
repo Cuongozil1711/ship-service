@@ -30,7 +30,7 @@ public class CustomerService {
 
     public Customer update(CustomerDto CustomerDto, Long cid, String uid, Long id){
         try {
-            Customer customer = customerRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Customer customer = customerRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             customer.setCompanyId(cid);
             customer.setUpdateBy(uid);
             customer.setAddress(CustomerDto.getAddress());
@@ -45,7 +45,7 @@ public class CustomerService {
 
     public Customer getById(Long cid, String uid, Long id){
         try {
-            return customerRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            return customerRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
         }
         catch (Exception ex){
             throw new RuntimeException(ex);
@@ -54,7 +54,7 @@ public class CustomerService {
 
     public PageImpl<Customer> search(Long cid, Pageable pageable){
         try {
-            Page<Customer> pageSearch = customerRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
+            Page<Customer> pageSearch = customerRepository.findAllByDeleteFlg(Constants.DELETE_FLG.NON_DELETE, pageable);
             return new PageImpl(pageSearch.getContent(), pageable, pageSearch.getTotalElements());
         }
         catch (Exception ex){
@@ -64,7 +64,7 @@ public class CustomerService {
 
     public Customer delete(Long cid, String uid, Long id){
         try {
-            Customer customer = customerRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Customer customer = customerRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             customer.setDeleteFlg(Constants.DELETE_FLG.DELETE);
             customer.setCompanyId(cid);
             customer.setUpdateBy(uid);

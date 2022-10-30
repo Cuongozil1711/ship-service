@@ -101,8 +101,8 @@ public class ReceiptImportWareHouseService {
                     responseDTO.setNameWareHouse(wareHouseService.getById(cid, responseDTO.getIdWareHouse()).getName());
                 }
                 if(receiptImportWareHouse.getCreateBy() != null){
-                    User user = userRepository.findUserByUidAndCompanyIdAndDeleteFlg(receiptImportWareHouse.getCreateBy(), cid, Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
-                    Employee employee = employeeRepository.findAllByIdUserAndDeleteFlgAndCompanyId(user.getId(), Constants.DELETE_FLG.NON_DELETE, cid).stream().findFirst().orElse(null);
+                    User user = userRepository.findUserByUidAndDeleteFlg(receiptImportWareHouse.getCreateBy(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
+                    Employee employee = employeeRepository.findAllByIdUserAndDeleteFlg(user.getId(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
                     if(employee != null){
                         FullName fullName = fullNameRepository.findById(employee.getIdFullName()).orElse(null);
                         responseDTO.setNameCreate(fullName.getFirstName() + " " + fullName.getLastName());

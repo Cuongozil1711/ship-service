@@ -180,14 +180,14 @@ public class ExportWareHouseService {
     }
     public boolean exportWareHouse(ExportWareHouseListDto exportWareHouseListDto, Long cid, String uid){
         try {
-            ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.getById(cid, uid, exportWareHouseListDto.getIdReceiptExport());
-            receiptExportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
+//            ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.getById(cid, uid, exportWareHouseListDto.getIdReceiptExport());
+//            receiptExportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
 
             for(DetailsItemOrderDto itemExport : exportWareHouseListDto.getData()){
                 ExportWareHouseDto exportWareHouseDto = new ExportWareHouseDto();
                 exportWareHouseDto.setNumberBox(itemExport.getQuality());
                 Long idItems = itemExport.getIdItems();
-                PriceItems priceItems = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, idItems, Constants.DELETE_FLG.NON_DELETE, itemExport.getDvtCode()).orElse(null);
+                PriceItems priceItems = priceItemsRepository.findByIdItemsAndDeleteFlgAndDvtCode(idItems, Constants.DELETE_FLG.NON_DELETE, itemExport.getDvtCode()).orElse(null);
                 exportWareHouseDto.setQuantity(priceItems.getQuality());
                 exportWareHouseDto.setIdReceiptExport(exportWareHouseListDto.getIdReceiptExport());
                 ImportWareHouse importWareHouse = importWareHouseService.getById(cid, itemExport.getIdImportWareHouse());

@@ -31,6 +31,19 @@ public class WareHouseApi {
         }
     }
 
+    @PostMapping("/searchAll")
+    protected @ResponseBody
+    ResponseEntity<Object> searchAll(
+            @RequestHeader Long cid,
+            @RequestHeader String uid
+            , Pageable pageable) {
+        try {
+            return new ResponseEntity<>(WareHouseService.searchAll(pageable), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
     @GetMapping("{id}")
     protected @ResponseBody
     ResponseEntity<Object> getById(

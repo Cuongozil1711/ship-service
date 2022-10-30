@@ -194,4 +194,18 @@ public class ImportWareHouseApi {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
+
+    @PutMapping("/quickly/{idReceiptExport}")
+    protected @ResponseBody
+    ResponseEntity<Object> quicklyImport(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable("idReceiptExport") Long idReceiptExport
+    ) {
+        try {
+            return new ResponseEntity<>(importWareHouseService.importQuickLy(cid, uid, idReceiptExport), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
 }

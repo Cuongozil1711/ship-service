@@ -41,8 +41,8 @@ public class StatisticalService {
             Map<String, StatisticalResponseDTO> statisticaList = new HashMap<>();
             // thống kê khách hàng
             StatisticalResponseDTO statisticalCustomer = new StatisticalResponseDTO();
-            statisticalCustomer.setSumQuality(customerRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE).size());
-            statisticalCustomer.setSumNow(customerRepository.getCount(cid, Constants.DELETE_FLG.NON_DELETE));
+            statisticalCustomer.setSumQuality(customerRepository.findAllByDeleteFlg(Constants.DELETE_FLG.NON_DELETE).size());
+            statisticalCustomer.setSumNow(customerRepository.getCount());
             statisticaList.put("statisticalCustomer", statisticalCustomer);
             // thống kê đơn hàng
             StatisticalResponseDTO statisticalOrder = new StatisticalResponseDTO();

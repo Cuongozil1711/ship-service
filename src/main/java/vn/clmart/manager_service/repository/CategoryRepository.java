@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    Optional<Category> findByIdAndCompanyIdAndDeleteFlg(Long id, Long cid, Integer deleteFlg);
+    Optional<Category> findByIdAndDeleteFlg(Long id, Integer deleteFlg);
 
 
-    Page<Category> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable);
+    Page<Category> findAllByDeleteFlg(Integer deleteFlg, Pageable pageable);
 
 }

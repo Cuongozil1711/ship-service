@@ -18,4 +18,6 @@ public class ReceiptExportWareHouseDto {
     private String code;
     private Double totalPrice;
     private Long idWareHouse;
+    private Long companyIdTo;
+    private Long idWareHouseTo;
 }

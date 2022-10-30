@@ -9,7 +9,7 @@ import vn.clmart.manager_service.model.Stalls;
 import java.util.Optional;
 
 public interface PublisherRepository extends JpaRepository<Publisher, Long> {
-    Optional<Publisher> findByIdAndCompanyIdAndDeleteFlg(Long id, Long cid, Integer deleteFlg);
+    Optional<Publisher> findByIdAndDeleteFlg(Long id, Integer deleteFlg);
 
-    Page<Publisher> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable);
+    Page<Publisher> findAllByDeleteFlg(Integer deleteFlg, Pageable pageable);
 }

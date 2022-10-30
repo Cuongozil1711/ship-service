@@ -12,12 +12,12 @@ import java.util.*;
 
 public interface ItemsRepository extends JpaRepository<Items, Long> {
 
-    Optional<Items> findByIdAndCompanyIdAndDeleteFlg(Long id, Long cid, Integer deleteFlg);
+    Optional<Items> findByIdAndDeleteFlg(Long id, Integer deleteFlg);
 
 
-    @Query("select i from Items as i where i.companyId = :cid and i.deleteFlg = :deleteFlg and ((lower(concat(coalesce(i.code, ''), coalesce(i.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) ")
-    Page<Items> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable, String search);
+    @Query("select i from Items as i where  i.deleteFlg = :deleteFlg and ((lower(concat(coalesce(i.code, ''), coalesce(i.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) ")
+    Page<Items> findAllByDeleteFlg(Integer deleteFlg, Pageable pageable, String search);
 
 
-    List<Items> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg);
+    List<Items> findAllByDeleteFlg(Integer deleteFlg);
 }

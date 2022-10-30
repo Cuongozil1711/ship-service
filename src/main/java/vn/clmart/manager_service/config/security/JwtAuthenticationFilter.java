@@ -40,9 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(null);
                 // Lấy id user từ chuỗi jwt
                 String uid = tokenProvider.getUserIdFromJWT(jwt);
-                Long cid = Long.valueOf(request.getHeader("cid"));
                 // Lấy thông tin người dùng từ id
-                UserDetails userDetails = customUserDetailsService.loadUserByCodeAndCid(cid, uid);
+                UserDetails userDetails = customUserDetailsService.loadUserByCodeAndCid(uid);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -56,9 +55,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-        String cid = request.getHeader("cid");
         // Kiểm tra xem header Authorization có chứa thông tin jwt không
-        if (StringUtils.hasText(bearerToken) && StringUtils.hasText(cid)) {
+        if (StringUtils.hasText(bearerToken)) {
             return bearerToken;
         }
         return null;

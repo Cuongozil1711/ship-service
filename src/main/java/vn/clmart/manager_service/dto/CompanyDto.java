@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class CustomerDto {
+public class CompanyDto {
+    private Long id;
     private String code;
     private String name;
-    private String address;
-    private String tel;
-    private Long cid;
 }

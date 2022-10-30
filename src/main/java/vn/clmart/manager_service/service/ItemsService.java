@@ -72,12 +72,13 @@ public class ItemsService {
 
     public Items update(ItemsDto itemsDto, Long cid, String uid, Long id){
         try {
-            Items item = itemsRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Items item = itemsRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             MapUntils.copyWithoutAudit(itemsDto, item);
             item.setCompanyId(cid);
             item.setUpdateBy(uid);
             // xóa giá cũ
-            List<PriceItems> priceItemOld = priceItemsRepository.findAllByCompanyIdAndIdItemsAndDeleteFlg(cid, item.getId(), Constants.DELETE_FLG.NON_DELETE);
+            List<PriceItems> priceItemOld = priceItemsRepository.findAllByIdItemsAndDeleteFlg(
+                    item.getId(), Constants.DELETE_FLG.NON_DELETE);
             for(PriceItems priceItem : priceItemOld){
                 priceItem.setDeleteFlg(Constants.DELETE_FLG.DELETE);
                 priceItemsRepository.save(priceItem);
@@ -101,12 +102,12 @@ public class ItemsService {
 
     public ItemsResponseDTO getById(Long cid, String uid, Long id){
         try {
-            Items items = itemsRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Items items = itemsRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             ItemsResponseDTO itemsResponseDTO = new ItemsResponseDTO();
             BeanUtils.copyProperties(items, itemsResponseDTO);
             itemsResponseDTO.setTotalInWareHouse(importWareHouseService.totalItemsInImport(itemsResponseDTO.getId(), cid) - exportWareHouseService.totalItemsInExport(itemsResponseDTO.getId(), cid));
             itemsResponseDTO.setTotalSold(exportWareHouseService.totalItemsInExport(itemsResponseDTO.getId(), cid));
-            List<PriceItems> priceItems = priceItemsRepository.findAllByCompanyIdAndIdItemsAndDeleteFlg(cid, items.getId(), Constants.DELETE_FLG.NON_DELETE);
+            List<PriceItems> priceItems = priceItemsRepository.findAllByIdItemsAndDeleteFlg(items.getId(), Constants.DELETE_FLG.NON_DELETE);
             itemsResponseDTO.setPriceItemsDtos(priceItems.stream().map(e -> of(e)).collect(Collectors.toList()));
             return itemsResponseDTO;
         }
@@ -123,7 +124,7 @@ public class ItemsService {
 
     public PageImpl<ItemsResponseDTO> search(Long cid, Pageable pageable, String search){
         try {
-            Page<Items> pageSearch = itemsRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable, search);
+            Page<Items> pageSearch = itemsRepository.findAllByDeleteFlg(Constants.DELETE_FLG.NON_DELETE, pageable, search);
             List<Items> list = pageSearch.getContent();
             List<ItemsResponseDTO> responseDTOList = new ArrayList<>();
             for(Items items : list){
@@ -131,7 +132,7 @@ public class ItemsService {
                 BeanUtils.copyProperties(items, itemsResponseDTO);
                 itemsResponseDTO.setTotalInWareHouse(importWareHouseService.totalItemsInImport(itemsResponseDTO.getId(), cid) - exportWareHouseService.totalItemsInExport(itemsResponseDTO.getId(), cid));
                 itemsResponseDTO.setTotalSold(exportWareHouseService.totalItemsInExport(itemsResponseDTO.getId(), cid));
-                List<PriceItems> priceItems = priceItemsRepository.findAllByCompanyIdAndIdItemsAndDeleteFlg(cid, items.getId(), Constants.DELETE_FLG.NON_DELETE);
+                List<PriceItems> priceItems = priceItemsRepository.findAllByIdItemsAndDeleteFlg(items.getId(), Constants.DELETE_FLG.NON_DELETE);
                 itemsResponseDTO.setPriceItemsDtos(priceItems.stream().map(e -> of(e)).collect(Collectors.toList()));
                 responseDTOList.add(itemsResponseDTO);
             }
@@ -159,7 +160,7 @@ public class ItemsService {
 
     public List<ItemsResponseDTO> list(Long cid){
         try {
-            Page<Items> pageSearch = itemsRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, PageRequest.of(0, Integer.MAX_VALUE), "");
+            Page<Items> pageSearch = itemsRepository.findAllByDeleteFlg(Constants.DELETE_FLG.NON_DELETE, PageRequest.of(0, Integer.MAX_VALUE), "");
             List<Items> list = pageSearch.getContent();
             List<ItemsResponseDTO> responseDTOList = new ArrayList<>();
             for(Items items : list){
@@ -167,7 +168,7 @@ public class ItemsService {
                 BeanUtils.copyProperties(items, itemsResponseDTO);
                 itemsResponseDTO.setTotalInWareHouse(importWareHouseService.totalItemsInImport(itemsResponseDTO.getId(), cid) - exportWareHouseService.totalItemsInExport(itemsResponseDTO.getId(), cid));
                 itemsResponseDTO.setTotalSold(exportWareHouseService.totalItemsInExport(itemsResponseDTO.getId(), cid));
-                List<PriceItems> priceItems = priceItemsRepository.findAllByCompanyIdAndIdItemsAndDeleteFlg(cid, items.getId(), Constants.DELETE_FLG.NON_DELETE);
+                List<PriceItems> priceItems = priceItemsRepository.findAllByIdItemsAndDeleteFlg(items.getId(), Constants.DELETE_FLG.NON_DELETE);
                 itemsResponseDTO.setPriceItemsDtos(priceItems.stream().map(e -> of(e)).collect(Collectors.toList()));
                 itemsResponseDTO.setPromotionResponseDto(promotionService.getByItemsId(cid, items.getId()));
                 responseDTOList.add(itemsResponseDTO);
@@ -181,7 +182,7 @@ public class ItemsService {
 
     public Items delete(Long cid, String uid, Long id){
         try {
-            Items items = itemsRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Items items = itemsRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             items.setDeleteFlg(Constants.DELETE_FLG.DELETE);
             items.setUpdateBy(uid);
             return itemsRepository.save(items);
@@ -243,7 +244,7 @@ public class ItemsService {
     public List<ItemsResponseDto> getByItemImport(Long cid, String uid){
         try {
             List<ItemsResponseDto> itemsResponseDtos = new ArrayList<>();
-            List<Items> itemsList = itemsRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE);
+            List<Items> itemsList = itemsRepository.findAllByDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
             for(Items items : itemsList){
                 List<ImportWareHouse> itemWareHouse = importWareHouseService.getByIdtems(cid, items.getId());
                 for(ImportWareHouse importWareHouse : itemWareHouse){

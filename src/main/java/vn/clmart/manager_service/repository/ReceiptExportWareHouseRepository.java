@@ -11,6 +11,7 @@ import java.util.Optional;
 
 public interface ReceiptExportWareHouseRepository extends JpaRepository<ReceiptExportWareHouse, Long> {
     Optional<ReceiptExportWareHouse> findByIdAndCompanyIdAndDeleteFlg(Long id, Long cid, Integer deleteFlg);
+    Optional<ReceiptExportWareHouse> findByIdAndDeleteFlg(Long id, Integer deleteFlg);
 
     Page<ReceiptExportWareHouse> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable);
 

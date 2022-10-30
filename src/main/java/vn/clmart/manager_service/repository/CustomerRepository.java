@@ -10,17 +10,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
-    Optional<Customer> findByIdAndCompanyIdAndDeleteFlg(Long id, Long cid, Integer deleteFlg);
+    Optional<Customer> findByIdAndDeleteFlg(Long cid, Integer deleteFlg);
 
-    Page<Customer> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable);
+    Page<Customer> findAllByDeleteFlg(Integer deleteFlg, Pageable pageable);
 
-    List<Customer> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg);
+    List<Customer> findAllByDeleteFlg(Integer deleteFlg);
 
     @Query(value = "select count(*) from `customer` as o where date_format(o.create_date,'%Y, %m') = date_format(now(),'%Y, %m') and " +
-            "o.company_id = :cid and o.delete_flg = :deleteFlg ", nativeQuery = true)
-    Integer getCount(
-            @Param("cid")
-                    Long cid,
-            @Param("deleteFlg")
-                    Integer deleteFlg);
+            " o.delete_flg = 1 ", nativeQuery = true)
+    Integer getCount();
 }

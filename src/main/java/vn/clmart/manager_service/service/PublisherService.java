@@ -30,7 +30,7 @@ public class PublisherService {
 
     public Publisher update(PublisherDto PublisherDto, Long cid, String uid, Long id){
         try {
-            Publisher Publisher = PublisherRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Publisher Publisher = PublisherRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             Publisher.setCompanyId(cid);
             Publisher.setUpdateBy(uid);
             Publisher.setAddress(PublisherDto.getAddress());
@@ -44,7 +44,7 @@ public class PublisherService {
 
     public Publisher getById(Long cid, String uid, Long id){
         try {
-            return PublisherRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            return PublisherRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
         }
         catch (Exception ex){
             throw new RuntimeException(ex);
@@ -53,7 +53,7 @@ public class PublisherService {
 
     public PageImpl<Publisher> search(Long cid, Pageable pageable){
         try {
-            Page<Publisher> pageSearch = PublisherRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
+            Page<Publisher> pageSearch = PublisherRepository.findAllByDeleteFlg(Constants.DELETE_FLG.NON_DELETE, pageable);
             return new PageImpl(pageSearch.getContent(), pageable, pageSearch.getTotalElements());
         }
         catch (Exception ex){
@@ -63,7 +63,7 @@ public class PublisherService {
 
     public Publisher delete(Long cid, String uid, Long id){
         try {
-            Publisher Publisher = PublisherRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Publisher Publisher = PublisherRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             Publisher.setDeleteFlg(Constants.DELETE_FLG.DELETE);
             Publisher.setCompanyId(cid);
             Publisher.setUpdateBy(uid);

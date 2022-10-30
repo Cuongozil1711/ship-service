@@ -30,10 +30,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     PositionRepository positionRepository;
 
-    public UserDetails loadUserByCodeAndCid(Long cid, String uid) throws UsernameNotFoundException {
-        vn.clmart.manager_service.model.User user = userRepository.findUserByUidAndCompanyIdAndDeleteFlg(uid, cid, Constants.DELETE_FLG.NON_DELETE).orElse(null);
+    public UserDetails loadUserByCodeAndCid(String uid) throws UsernameNotFoundException {
+        vn.clmart.manager_service.model.User user = userRepository.findUserByUidAndDeleteFlg(uid, Constants.DELETE_FLG.NON_DELETE).orElse(null);
         if (user != null) {
-            Employee employees = employeeRepository.findAllByIdUserAndDeleteFlgAndCompanyId(user.getUid(), Constants.DELETE_FLG.NON_DELETE, cid).stream().findFirst().orElse(null);
+            Employee employees = employeeRepository.findAllByIdUserAndDeleteFlg(user.getUid(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
             if(employees.getIdPosition() != null){
                 Position position = positionRepository.findByIdAndDeleteFlg(employees.getIdPosition(),Constants.DELETE_FLG.NON_DELETE).orElseThrow();
                 boolean enabled = true;

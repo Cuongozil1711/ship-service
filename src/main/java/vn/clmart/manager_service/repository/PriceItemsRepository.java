@@ -6,8 +6,8 @@ import vn.clmart.manager_service.model.PriceItems;
 import java.util.*;
 public interface PriceItemsRepository extends JpaRepository<PriceItems, Long> {
 
-    List<PriceItems> findAllByCompanyIdAndIdItemsAndDeleteFlg(Long cid, Long idItems, Integer deleteFlg);
+    List<PriceItems> findAllByIdItemsAndDeleteFlg(Long idItems, Integer deleteFlg);
 
-    Optional<PriceItems> findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(Long cid, Long idItems, Integer deleteFlg, String dvtCode);
+    Optional<PriceItems> findByIdItemsAndDeleteFlgAndDvtCode(Long idItems, Integer deleteFlg, String dvtCode);
 
 }

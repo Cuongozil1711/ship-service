@@ -7,6 +7,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.springframework.context.annotation.Description;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
+import vn.clmart.manager_service.dto.CompanyDto;
+import vn.clmart.manager_service.dto.CustomerDto;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -27,6 +29,13 @@ public class Company {
     private Long id;
     private String code;
     private String name;
+
+    public static Company of(CompanyDto companyDto, Long cid, String uid){
+        Company company = Company.builder()
+                .code(companyDto.getCode())
+                .name(companyDto.getName()).build();
+        return company;
+    }
 
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(

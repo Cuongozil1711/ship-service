@@ -81,7 +81,7 @@ public class OrderService {
                 DetailsItemOrder dItems = DetailsItemOrder.of(items, cid, uid);
                 Long idItems = items.getIdItems();
                 Integer qualityItems = checkQualityItem(idItems, cid, uid); // check trong kho xem còn bao nhiêu
-                PriceItems priceItems = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, idItems, Constants.DELETE_FLG.NON_DELETE, items.getDvtCode()).orElse(null);
+                PriceItems priceItems = priceItemsRepository.findByIdItemsAndDeleteFlgAndDvtCode(idItems, Constants.DELETE_FLG.NON_DELETE, items.getDvtCode()).orElse(null);
                 Double priceSale = priceItems.getPriceItems() *items.getQuality().doubleValue();
                 Double totalPrice = priceItems.getPriceItems() *items.getQuality().doubleValue();
                 // kiem tra khuyen mai
@@ -91,7 +91,7 @@ public class OrderService {
                         // tặng kèm sản phẩm
                         ItemsDonate itemsDonate = itemsDonateRepository.findByIdAndCompanyId(promotion.getIdItemsDonate(), cid).orElse(null);
                         if(itemsDonate != null){
-                            PriceItems priceItemsDonate = priceItemsRepository.findByCompanyIdAndIdItemsAndDeleteFlgAndDvtCode(cid, itemsDonate.getIdItems(), Constants.DELETE_FLG.NON_DELETE, items.getDvtCode()).orElse(null);
+                            PriceItems priceItemsDonate = priceItemsRepository.findByIdItemsAndDeleteFlgAndDvtCode(itemsDonate.getIdItems(), Constants.DELETE_FLG.NON_DELETE, items.getDvtCode()).orElse(null);
                             ItemsResponseDto itemsResponseDto = itemsService.getByIdtemsAndQuality(cid ,uid, itemsDonate.getIdItems());
                             ExportWareHouseDto exportWareHouseDto = new ExportWareHouseDto();
                             exportWareHouseDto.setNumberBox(1);

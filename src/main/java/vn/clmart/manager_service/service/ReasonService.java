@@ -30,7 +30,7 @@ public class ReasonService {
 
     public Reason update(ReasonDto ReasonDto, Long cid, String uid, Long id){
         try {
-            Reason Reason = ReasonRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Reason Reason = ReasonRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             Reason.setCompanyId(cid);
             Reason.setUpdateBy(uid);
             Reason.setName(ReasonDto.getName());
@@ -43,7 +43,7 @@ public class ReasonService {
 
     public Reason getById(Long cid, String uid, Long id){
         try {
-            return ReasonRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            return ReasonRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
         }
         catch (Exception ex){
             throw new RuntimeException(ex);
@@ -52,7 +52,7 @@ public class ReasonService {
 
     public PageImpl<Reason> search(Long cid, Pageable pageable){
         try {
-            Page<Reason> pageSearch = ReasonRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
+            Page<Reason> pageSearch = ReasonRepository.findAllByDeleteFlg( Constants.DELETE_FLG.NON_DELETE, pageable);
             return new PageImpl(pageSearch.getContent(), pageable, pageSearch.getTotalElements());
         }
         catch (Exception ex){
@@ -62,7 +62,7 @@ public class ReasonService {
 
     public Reason delete(Long cid, String uid, Long id){
         try {
-            Reason Reason = ReasonRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Reason Reason = ReasonRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             Reason.setDeleteFlg(Constants.DELETE_FLG.DELETE);
             Reason.setCompanyId(cid);
             Reason.setUpdateBy(uid);

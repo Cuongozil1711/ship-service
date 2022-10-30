@@ -12,4 +12,5 @@ public interface WareHouseRepository extends JpaRepository<WareHouse, Long> {
     Optional<WareHouse> findByIdAndCompanyIdAndDeleteFlg(Long id, Long cid, Integer deleteFlg);
 
     Page<WareHouse> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable);
+    Page<WareHouse> findAllByDeleteFlg(Integer deleteFlg, Pageable pageable);
 }

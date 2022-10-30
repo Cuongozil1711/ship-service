@@ -25,4 +25,5 @@ public class EmployeeDto {
     private Integer status;
     private Date birthDay;
     private String image;
+    private Long cid;
 }

@@ -31,7 +31,7 @@ public class CategoryService {
 
     public Category update(CategoryDto categoryDto, Long cid, String uid, Long id){
         try {
-            Category item = categoryRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Category item = categoryRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             MapUntils.copyWithoutAudit(categoryDto, item);
             item.setCompanyId(cid);
             item.setUpdateBy(uid);
@@ -44,7 +44,7 @@ public class CategoryService {
 
     public Category getById(Long cid, String uid, Long id){
         try {
-            return categoryRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            return categoryRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
         }
         catch (Exception ex){
             throw new RuntimeException(ex);
@@ -53,7 +53,7 @@ public class CategoryService {
 
     public PageImpl<Category> search(Long cid, Pageable pageable){
         try {
-            Page<Category> pageSearch = categoryRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
+            Page<Category> pageSearch = categoryRepository.findAllByDeleteFlg(Constants.DELETE_FLG.NON_DELETE, pageable);
             return new PageImpl(pageSearch.getContent(), pageable, pageSearch.getTotalElements());
         }
         catch (Exception ex){
@@ -63,7 +63,7 @@ public class CategoryService {
 
     public Category delete(Long cid, String uid, Long id){
         try {
-            Category Category = categoryRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Category Category = categoryRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             Category.setDeleteFlg(Constants.DELETE_FLG.DELETE);
             Category.setUpdateBy(uid);
             return categoryRepository.save(Category);

@@ -19,7 +19,7 @@ public class BaseApi {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null) {
                 String userCd = auth.getName();
-                return employeeRepository.findAllByIdUserAndDeleteFlgAndCompanyId(userCd, Constants.DELETE_FLG.NON_DELETE, cid).stream().findFirst().orElseThrow();
+                return employeeRepository.findAllByIdUserAndDeleteFlg(userCd, Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElseThrow();
             }
             return new Employee();
         } catch (Exception ex) {

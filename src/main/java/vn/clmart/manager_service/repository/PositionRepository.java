@@ -13,6 +13,6 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
 
     Optional<Position> findByIdAndDeleteFlg(Long id, Integer deleteFlg);
 
-    Page<Position> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable);
+    Page<Position> findAllByDeleteFlg(Integer deleteFlg, Pageable pageable);
 
 }

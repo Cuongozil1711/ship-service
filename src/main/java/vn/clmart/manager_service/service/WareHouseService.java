@@ -61,6 +61,16 @@ public class WareHouseService {
         }
     }
 
+    public PageImpl<WareHouse> searchAll(Pageable pageable){
+        try {
+            Page<WareHouse> pageSearch = WareHouseRepository.findAllByDeleteFlg(Constants.DELETE_FLG.NON_DELETE, pageable);
+            return new PageImpl(pageSearch.getContent(), pageable, pageSearch.getTotalElements());
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
     public WareHouse delete(Long cid, String uid, Long id){
         try {
             WareHouse WareHouse = WareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();

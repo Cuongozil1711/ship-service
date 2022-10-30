@@ -17,18 +17,16 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserApi {
-
     private final UserService userService;
 
     @PostMapping("/login")
     protected @ResponseBody
     ResponseEntity<Object> login(
-            @RequestHeader Long cid,
             @RequestBody UserLoginDto userLoginDto,
             HttpServletRequest request
     ) {
         try {
-            return new ResponseEntity<>(userService.authenticateUserHandler(userLoginDto, cid, request), HttpStatus.OK);
+            return new ResponseEntity<>(userService.authenticateUserHandler(userLoginDto, request), HttpStatus.OK);
         } catch (BadCredentialsException e) {
             return new ResponseEntity<>(e,  HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (NullPointerException ex) {

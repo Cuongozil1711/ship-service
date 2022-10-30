@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
-    List<Employee> findAllByIdUserAndDeleteFlgAndCompanyId(String idUser, Integer deleteFlg, Long companyId);
+    List<Employee> findAllByIdUserAndDeleteFlg(String idUser, Integer deleteFlg);
 
-    Page<Employee> findAllByCompanyId(Long cid, Pageable pageable);
+    Page<Employee> findAll(Pageable pageable);
 
 
     Optional<Employee> findByCompanyIdAndIdUser(Long cid, String uid);
