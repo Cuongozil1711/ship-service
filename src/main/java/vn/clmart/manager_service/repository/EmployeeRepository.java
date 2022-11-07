@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findAllByIdUserAndDeleteFlg(String idUser, Integer deleteFlg);
 
-    Page<Employee> findAll(Pageable pageable);
+    Page<Employee> findAllByCompanyId(Long cid,Pageable pageable);
 
 
     Optional<Employee> findByCompanyIdAndIdUser(Long cid, String uid);

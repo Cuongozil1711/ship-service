@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.clmart.manager_service.dto.ItemsDto;
+import vn.clmart.manager_service.dto.ItemsSearchDto;
 import vn.clmart.manager_service.dto.OrderDto;
 import vn.clmart.manager_service.service.ItemsService;
 
@@ -39,11 +40,14 @@ public class OrderApi {
     ResponseEntity<Object> search(
             @RequestHeader Long cid,
             @RequestHeader String uid,
-            @RequestParam(value = "", required = false) String search
+            @RequestParam(value = "", required = false) String search,
+            @RequestBody(required = false) ItemsSearchDto itemsSearchDto
             ,@PathVariable("status") Integer status
             , Pageable pageable) {
         try {
-            return new ResponseEntity<>(orderService.search(cid, pageable, search, status), HttpStatus.OK);
+            if(itemsSearchDto == null)
+                itemsSearchDto = new ItemsSearchDto();
+            return new ResponseEntity<>(orderService.search(cid, pageable, search, itemsSearchDto, status), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

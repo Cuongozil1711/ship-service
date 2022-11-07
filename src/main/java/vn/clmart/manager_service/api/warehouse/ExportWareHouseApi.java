@@ -86,10 +86,32 @@ public class ExportWareHouseApi {
             @RequestHeader String uid,
             @PathVariable(value = "status") Integer status,
             @RequestParam(value = "", required = false) String search,
+            @RequestBody(required = false) ItemsSearchDto itemsSearchDto,
             Pageable pageable
     ) {
         try {
-            return new ResponseEntity<>(exportWareHouseService.search(cid, status, search, pageable), HttpStatus.OK);
+            if(itemsSearchDto == null)
+            itemsSearchDto = new ItemsSearchDto();
+            return new ResponseEntity<>(exportWareHouseService.search(cid, status, search, itemsSearchDto, pageable), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @PostMapping("/list/{status}")
+    protected @ResponseBody
+    ResponseEntity<Object> findAllByExportWareHouse(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable(value = "status") Integer status,
+            @RequestParam(value = "", required = false) String search,
+            @RequestBody(required = false) ItemsSearchDto itemsSearchDto,
+            Pageable pageable
+    ) {
+        try {
+            if(itemsSearchDto == null)
+                itemsSearchDto = new ItemsSearchDto();
+            return new ResponseEntity<>(exportWareHouseService.search(cid, status, search, itemsSearchDto, pageable), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

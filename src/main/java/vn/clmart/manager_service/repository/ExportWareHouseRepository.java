@@ -17,8 +17,14 @@ public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse
 
     public List<ExportWareHouse> findAllByDeleteFlgAndIdItemsAndCompanyId(Integer delete, Long idItems, Long cid);
 
-    @Query("select i from ExportWareHouse as i inner join ReceiptExportWareHouse as r on i.idReceiptExport = r.id where i.companyId = :cid and i.deleteFlg = :delete and ((lower(concat(coalesce(i.code, ''), coalesce(r.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '')) and i.idReceiptExport is not null group by i.idReceiptExport order by i.createDate")
-    public Page<ExportWareHouse> findAllByCompanyIdAndDeleteFlg(Long cid, Integer delete, String search, Pageable pageable);
+    @Query("select i from ExportWareHouse as i inner join ReceiptExportWareHouse as r on i.idReceiptExport = r.id " +
+            "where i.companyId = :cid and i.deleteFlg = :delete " +
+            "and ((lower(concat(coalesce(i.code, ''), coalesce(r.name, ''))) " +
+            "like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '')) " +
+            "and i.idReceiptExport is not null " +
+            "and (i.createDate between coalesce(:startDate, current_date) and coalesce(:endDate, current_date)) " +
+            "group by i.idReceiptExport order by i.createDate")
+    public Page<ExportWareHouse> findAllByCompanyIdAndDeleteFlg(Long cid, Integer delete, String search, Date startDate, Date endDate ,Pageable pageable);
 
     @Query("select i from ExportWareHouse as i where i.companyId = :cid " +
             " and i.deleteFlg = :delete " +

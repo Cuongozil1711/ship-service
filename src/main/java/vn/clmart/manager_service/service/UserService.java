@@ -135,7 +135,7 @@ public class UserService {
 
     public PageImpl<EmployeeDto> search(Long cid,  Pageable pageable){
         try {
-            Page<Employee> pageSearch = employeeRepository.findAll(pageable);
+            Page<Employee> pageSearch = employeeRepository.findAllByCompanyId(cid, pageable);
             List<EmployeeDto> responseDTOList = new ArrayList<>();
             for(Employee employee : pageSearch.getContent()){
                 EmployeeDto employeeResponseDTO = new EmployeeDto();

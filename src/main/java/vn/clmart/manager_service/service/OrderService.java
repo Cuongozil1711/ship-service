@@ -16,6 +16,7 @@ import vn.clmart.manager_service.dto.request.OrderResponseDTO;
 import vn.clmart.manager_service.model.*;
 import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.untils.Constants;
+import vn.clmart.manager_service.untils.DateUntils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -75,7 +76,7 @@ public class OrderService {
             order = orderRepositorry.save(order);
             // check so luong dat hang
             List<DetailsItemOrder> detailsItem = new ArrayList<>();
-            Long priceTotal = 0l;
+            Double priceTotal = 0d;
             for(DetailsItemOrderDto items : orderDto.getDetailsItemOrders()){
                 items.setIdOrder(order.getId());
                 DetailsItemOrder dItems = DetailsItemOrder.of(items, cid, uid);
@@ -106,7 +107,7 @@ public class OrderService {
                             DetailsItemOrder dItemNew = new DetailsItemOrder();
                             dItemNew.setDvtCode("000");
                             dItemNew.setQuality(itemsDonate.getQuanlity());
-                            dItemNew.setTotalPrice(priceItemsDonate.getPriceItems() *itemsDonate.getQuanlity());
+                            dItemNew.setTotalPrice(priceItemsDonate.getPriceItems() *itemsDonate.getQuanlity().doubleValue());
                             dItemNew.setIdOrder(items.getIdOrder());
                             dItemNew.setIdItems(itemsDonate.getIdItems());
                             dItemNew.setType("SALE");
@@ -135,7 +136,7 @@ public class OrderService {
                 if(qualitySold * priceItems.getQuality() > qualityItems){
                     throw new BusinessException("Mặt hàng " + itemsService.getById(cid, uid, idItems).getName() + " không còn trong kho");
                 }
-                dItems.setTotalPrice(priceSale.longValue()); // tổng tiền theo số lượng, giá sản phảm
+                dItems.setTotalPrice(priceSale); // tổng tiền theo số lượng, giá sản phảm
                 dItems.setQuality(qualitySold);
                 dItems.setType("SOLD");
                 detailsItem.add(dItems);
@@ -151,14 +152,14 @@ public class OrderService {
                 exportWareHouseDto.setDvtCode(items.getDvtCode());
                 exportWareHouseDto.setIdOrder(order.getId());
                 exportWareHouseDto.setTotalPrice(totalPrice);
-                priceTotal+=totalPrice.longValue();
+                priceTotal+=totalPrice;
                 exportWareHouseService.orderToExport(exportWareHouseDto, cid, uid);
             }
             detailsItemOrderRepository.saveAll(detailsItem);
             // tao hoa don
             Bill bill = new Bill();
             bill.setIdCustomer(orderDto.getIdCustomer());
-            bill.setTotalPrice(priceTotal);
+            bill.setTotalPrice(priceTotal.longValue());
             bill.setTotalPriceCustomer(orderDto.getTotalPriceCustomer());
             bill.setIdOrder(order.getId());
             bill.setNamePayment(orderDto.getNamePayment());
@@ -308,7 +309,7 @@ public class OrderService {
                         ItemsResponseDTO itemsResponseDTO1 = itemsService.getById(cid, "", item.getIdItems());
                         List<ExportWareHouse> exportWareHouses = exportWareHouseService.findAllByCompanyIdAndIdOrderAndIdItemsAndDvtCode(cid, item.getIdItems(), item.getIdOrder(), item.getDvtCode());
                         if(exportWareHouses.size() != 0){
-                            detailsItemOrderDto.setTotalPrice(exportWareHouses.get(0).getTotalPrice().longValue());
+                            detailsItemOrderDto.setTotalPrice(exportWareHouses.get(0).getTotalPrice());
                             itemsResponseDTO1.setTotalSold(item.getQuality().longValue());
                             size += item.getQuality();
                             detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
@@ -343,9 +344,13 @@ public class OrderService {
         }
     }
 
-    public PageImpl<Order> search(Long cid, Pageable pageable, String search, Integer status){
+    public PageImpl<Order> search(Long cid, Pageable pageable, String search, ItemsSearchDto itemsSearchDto,Integer status){
         try {
-            Page<Order> pageSearch = orderRepositorry.findAllByCompanyId(cid, search, status, pageable);
+            if(itemsSearchDto.getStartDate() == null) itemsSearchDto.setStartDate(DateUntils.minDate());
+            else itemsSearchDto.setStartDate(DateUntils.getStartOfDate(itemsSearchDto.getStartDate()));
+            if(itemsSearchDto.getEndDate() == null) itemsSearchDto.setEndDate(DateUntils.maxDate());
+            else itemsSearchDto.setEndDate(DateUntils.getEndOfDate(itemsSearchDto.getEndDate()));
+            Page<Order> pageSearch = orderRepositorry.findAllByCompanyId(cid, search, status, itemsSearchDto.getStartDate(), itemsSearchDto.getEndDate(), pageable);
             List<Order> list = pageSearch.getContent();
             List<OrderResponseDTO> responseDTOList = new ArrayList<>();
             for(Order items : list){

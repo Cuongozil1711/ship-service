@@ -15,6 +15,15 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
     Optional<Items> findByIdAndDeleteFlg(Long id, Integer deleteFlg);
 
 
+    @Query("select i from Items as i where  i.deleteFlg = :deleteFlg and " +
+            "((lower(concat(coalesce(i.code, ''), coalesce(i.name, ''))) " +
+            "like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) " +
+            "and (coalesce(:idCategory, -1) = i.idCategory or coalesce(:idCategory, -1) = -1) " +
+            "and (coalesce(:idPubliser, -1) = i.idPubliser or coalesce(:idPubliser, -1) = -1) " +
+            "and (coalesce(:idStall, -1) = i.idStall or coalesce(:idStall, -1) = -1) ")
+    Page<Items> findAllByDeleteFlg(Integer deleteFlg, Pageable pageable, Long idCategory, Long idPubliser, Long idStall,String search);
+
+
     @Query("select i from Items as i where  i.deleteFlg = :deleteFlg and ((lower(concat(coalesce(i.code, ''), coalesce(i.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) ")
     Page<Items> findAllByDeleteFlg(Integer deleteFlg, Pageable pageable, String search);
 

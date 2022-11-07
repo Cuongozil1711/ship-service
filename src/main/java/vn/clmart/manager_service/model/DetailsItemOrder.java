@@ -28,7 +28,7 @@ public class DetailsItemOrder extends PersistableEntity<Long> {
     private String type; // giá sản phẩm theo loại bán - loại nhập
     private String dvtCode;
     private Integer quality;
-    private Long totalPrice; // gia tien theo don vi tinh * quality
+    private Double totalPrice; // gia tien theo don vi tinh * quality
     private Long idItems;
     private Long idOrder; // đơn hàng nào
 

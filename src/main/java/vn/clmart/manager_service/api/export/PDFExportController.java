@@ -21,16 +21,27 @@ public class PDFExportController {
         this.pdfGeneratorService = pdfGeneratorService;
     }
 
-    @GetMapping("/export/{idReceiptExport}")
-    public void generatePDF(HttpServletResponse response, @PathVariable("idReceiptExport") Long idReceiptExport) throws Exception {
+    @GetMapping("/export/{idReceiptExport}/{cid}")
+    public void generatePDFExport(HttpServletResponse response, @PathVariable("idReceiptExport") Long idReceiptExport, @PathVariable("cid") Long cid) throws Exception {
         response.setContentType("application/pdf");
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
         String currentDateTime = dateFormatter.format(new Date());
-
         String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=pdf_" + currentDateTime + ".pdf";
+        String headerValue = "attachment; filename=phieuxuat_" + currentDateTime + ".pdf";
         response.setHeader(headerKey, headerValue);
 
-        this.pdfGeneratorService.exportWareHouse(response, idReceiptExport);
+        this.pdfGeneratorService.exportWareHouse(response, idReceiptExport, cid);
+    }
+
+    @GetMapping("/order/{id}/{cid}")
+    public void generatePDFOrder(HttpServletResponse response, @PathVariable("id") Long id, @PathVariable("cid") Long cid) throws Exception {
+        response.setContentType("application/pdf");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=donhang_" + currentDateTime + ".pdf";
+        response.setHeader(headerKey, headerValue);
+
+        this.pdfGeneratorService.orderExport(response, id, cid);
     }
 }

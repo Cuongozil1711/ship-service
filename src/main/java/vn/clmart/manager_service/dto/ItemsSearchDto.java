@@ -1,9 +1,6 @@
 package vn.clmart.manager_service.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
@@ -11,6 +8,8 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
+@Getter
+@Setter
 public class ItemsSearchDto{
     private Long idPubliser;
     private Long idStall;

@@ -24,10 +24,12 @@ public class ItemsApi {
     ResponseEntity<Object> search(
             @RequestHeader Long cid,
             @RequestHeader String uid,
+            @RequestBody(required = false) ItemsDto itemsDto,
             @RequestParam(value = "", required = false) String search
             , Pageable pageable) {
         try {
-            return new ResponseEntity<>(ItemsService.search(cid, pageable, search), HttpStatus.OK);
+            if(itemsDto == null) itemsDto = new ItemsDto();
+            return new ResponseEntity<>(ItemsService.search(cid, pageable, itemsDto, search), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

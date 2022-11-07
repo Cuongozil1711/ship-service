@@ -20,4 +20,5 @@ public class ReceiptExportWareHouseDto {
     private Long idWareHouse;
     private Long companyIdTo;
     private Long idWareHouseTo;
+    private String fullName;
 }

@@ -12,8 +12,12 @@ import java.util.*;
 
 public interface OrderRepositorry extends JpaRepository<Order, Long> {
 
-    @Query("select i from Order as i where i.companyId = :cid and i.deleteFlg = :status  and ((lower(concat(coalesce(i.code, ''), coalesce(i.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) order by i.createDate desc")
-    Page<Order> findAllByCompanyId(Long cid, String search, Integer status, Pageable pageable);
+    @Query("select i from Order as i where i.companyId = :cid and i.deleteFlg = :status  " +
+            "and ((lower(concat(coalesce(i.code, ''), coalesce(i.name, ''))) like lower(concat('%',coalesce(:search, ''), '%')))  " +
+            "or (coalesce(:search, '') = '') ) " +
+            "and (i.createDate between coalesce(:startDate, current_date) and coalesce(:endDate, current_date))" +
+            "order by i.createDate desc")
+    Page<Order> findAllByCompanyId(Long cid, String search, Integer status, Date startDate, Date endDate, Pageable pageable);
 
     @Query("select i from Order as i where i.companyId = :cid " +
             "and (i.createDate between coalesce(:date, now()) " +

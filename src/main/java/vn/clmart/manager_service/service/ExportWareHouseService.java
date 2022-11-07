@@ -15,6 +15,7 @@ import vn.clmart.manager_service.dto.request.ItemsResponseDTO;
 import vn.clmart.manager_service.model.*;
 import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.untils.Constants;
+import vn.clmart.manager_service.untils.DateUntils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,8 +85,10 @@ public class ExportWareHouseService {
             exportWareHouses.forEach(exportWareHouse -> {
                 DetailsItemOrderDto detailsItemOrderDto = new DetailsItemOrderDto();
                 detailsItemOrderDto.setIdItems(exportWareHouse.getIdItems());
-                detailsItemOrderDto.setQuality(exportWareHouse.getNumberBox());
+                detailsItemOrderDto.setQuality(exportWareHouse.getQuantity());
+                detailsItemOrderDto.setNumberBox(exportWareHouse.getNumberBox());
                 detailsItemOrderDto.setDvtCode(exportWareHouse.getDvtCode());
+                detailsItemOrderDto.setTotalPrice(exportWareHouse.getTotalPrice());
                 ImportWareHouse importWareHouse = importWareHouseService.findByCompanyIdAndIdReceiptImportAndIdItems(cid, exportWareHouse.getIdReceiptImport(), exportWareHouse.getIdItems());
                 detailsItemOrderDto.setIdReceiptImport(exportWareHouse.getIdReceiptImport());
                 detailsItemOrderDto.setIdImportWareHouse(importWareHouse.getIdItems());
@@ -97,9 +100,13 @@ public class ExportWareHouseService {
             ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.getById(cid, uid, idReceiptExport);
             ReceiptExportWareHouseDto receiptExportWareHouseDto = new ReceiptExportWareHouseDto();
             BeanUtils.copyProperties(receiptExportWareHouse, receiptExportWareHouseDto);
+            FullName fullName = userService.getFullName(cid, receiptExportWareHouse.getCreateBy());
+            receiptExportWareHouseDto.setFullName(fullName.getFirstName() + " " + fullName.getLastName());
+            fullName = userService.getFullName(cid, exportWareHouses.get(0).getCreateBy());
             exportWareHouseListDto.setReceiptExportWareHouseDto(receiptExportWareHouseDto);
             exportWareHouseListDto.setCode(code);
             exportWareHouseListDto.setIdReceiptExport(idReceiptExport);
+            exportWareHouseListDto.setCreateByName(fullName.getFirstName() + " " + fullName.getLastName());
             exportWareHouseListDto.setData(detailsItemOrderDtoList);
             return exportWareHouseListDto;
         }
@@ -185,15 +192,15 @@ public class ExportWareHouseService {
 
             for(DetailsItemOrderDto itemExport : exportWareHouseListDto.getData()){
                 ExportWareHouseDto exportWareHouseDto = new ExportWareHouseDto();
-                exportWareHouseDto.setNumberBox(itemExport.getQuality());
+                exportWareHouseDto.setNumberBox(itemExport.getNumberBox());
                 Long idItems = itemExport.getIdItems();
-                PriceItems priceItems = priceItemsRepository.findByIdItemsAndDeleteFlgAndDvtCode(idItems, Constants.DELETE_FLG.NON_DELETE, itemExport.getDvtCode()).orElse(null);
-                exportWareHouseDto.setQuantity(priceItems.getQuality());
+//                PriceItems priceItems = priceItemsRepository.findByIdItemsAndDeleteFlgAndDvtCode(idItems, Constants.DELETE_FLG.NON_DELETE, itemExport.getDvtCode()).orElse(null);
+                exportWareHouseDto.setQuantity(itemExport.getQuality());
                 exportWareHouseDto.setIdReceiptExport(exportWareHouseListDto.getIdReceiptExport());
                 ImportWareHouse importWareHouse = importWareHouseService.getById(cid, itemExport.getIdImportWareHouse());
                 exportWareHouseDto.setIdReceiptImport(importWareHouse.getIdReceiptImport());
                 exportWareHouseDto.setIdItems(idItems);
-                exportWareHouseDto.setTotalPrice(itemExport.getQuality() * priceItems.getPriceItems().doubleValue());
+                exportWareHouseDto.setTotalPrice(itemExport.getTotalPrice());
                 exportWareHouseDto.setDvtCode(itemExport.getDvtCode());
                 ExportWareHouse exportWareHouse = ExportWareHouse.of(exportWareHouseDto, cid, uid);
                 exportWareHouse.setNumberBox(exportWareHouseDto.getNumberBox());
@@ -287,9 +294,13 @@ public class ExportWareHouseService {
             throw new BusinessException(ex.getMessage());
         }
     }
-    public PageImpl<ExportWareHouseResponseDTO> search(Long cid, Integer status, String search, Pageable pageable){
+    public PageImpl<ExportWareHouseResponseDTO> search(Long cid, Integer status, String search, ItemsSearchDto itemsSearchDto, Pageable pageable){
         try {
-            Page<ExportWareHouse> pageSearch = exportWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, status, search, pageable);
+            if(itemsSearchDto.getStartDate() == null) itemsSearchDto.setStartDate(DateUntils.minDate());
+            else itemsSearchDto.setStartDate(DateUntils.getStartOfDate(itemsSearchDto.getStartDate()));
+            if(itemsSearchDto.getEndDate() == null) itemsSearchDto.setEndDate(DateUntils.maxDate());
+            else itemsSearchDto.setEndDate(DateUntils.getEndOfDate(itemsSearchDto.getEndDate()));
+            Page<ExportWareHouse> pageSearch = exportWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, status, search, itemsSearchDto.getStartDate(), itemsSearchDto.getEndDate(), pageable);
             List<ExportWareHouseResponseDTO> responseDTOS = new ArrayList<>();
             for(ExportWareHouse item : pageSearch.getContent()){
                 ExportWareHouseResponseDTO exportWareHouseResponseDTO = new ExportWareHouseResponseDTO();
@@ -301,7 +312,7 @@ public class ExportWareHouseService {
                     wareHouseList.forEach(
                             importWareHouse -> {
                                 if(importWareHouse.getTotalPrice() != null)
-                                    totalPrice.updateAndGet(v -> v + importWareHouse.getTotalPrice() * importWareHouse.getNumberBox());
+                                    totalPrice.updateAndGet(v -> v + importWareHouse.getTotalPrice());
                             }
                     );
                     exportWareHouseResponseDTO.setQuantityItems(wareHouseList.size());
@@ -351,7 +362,7 @@ public class ExportWareHouseService {
                     wareHouseList.forEach(
                             importWareHouse -> {
                                 if(importWareHouse.getTotalPrice() != null)
-                                    totalPrice.updateAndGet(v -> v + importWareHouse.getTotalPrice() * importWareHouse.getNumberBox());
+                                    totalPrice.updateAndGet(v -> v + importWareHouse.getTotalPrice());
                             }
                     );
                     exportWareHouseResponseDTO.setQuantityItems(wareHouseList.size());
@@ -372,7 +383,7 @@ public class ExportWareHouseService {
                     wareHouseList.forEach(
                             importWareHouse -> {
                                 if(importWareHouse.getTotalPrice() != null)
-                                    totalPrice.updateAndGet(v -> v + importWareHouse.getTotalPrice() * importWareHouse.getNumberBox());
+                                    totalPrice.updateAndGet(v -> v + importWareHouse.getTotalPrice());
                             }
                     );
                     exportWareHouseResponseDTO.setQuantityItems(wareHouseList.size());

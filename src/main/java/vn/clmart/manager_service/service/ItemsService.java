@@ -122,9 +122,9 @@ public class ItemsService {
         return priceItemsDto;
     }
 
-    public PageImpl<ItemsResponseDTO> search(Long cid, Pageable pageable, String search){
+    public PageImpl<ItemsResponseDTO> search(Long cid, Pageable pageable, ItemsDto itemsDto ,String search){
         try {
-            Page<Items> pageSearch = itemsRepository.findAllByDeleteFlg(Constants.DELETE_FLG.NON_DELETE, pageable, search);
+            Page<Items> pageSearch = itemsRepository.findAllByDeleteFlg(Constants.DELETE_FLG.NON_DELETE, pageable, itemsDto.getIdCategory(), itemsDto.getIdPubliser(), itemsDto.getIdStall(),search);
             List<Items> list = pageSearch.getContent();
             List<ItemsResponseDTO> responseDTOList = new ArrayList<>();
             for(Items items : list){

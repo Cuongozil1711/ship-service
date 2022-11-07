@@ -55,7 +55,7 @@ public class SecurityConfig{
                 .csrf().disable();
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/index*", "/resources/**", "/*.js", "/*.json", "/*.ico")
                 .permitAll();
-        http.authorizeRequests().antMatchers("/user/login", "/user/create","/pdf/export/**").permitAll();
+        http.authorizeRequests().antMatchers("/user/login", "/user/create","/pdf/export/**","/pdf/order/**").permitAll();
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

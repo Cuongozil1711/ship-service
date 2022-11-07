@@ -21,6 +21,7 @@ import vn.clmart.manager_service.generator.FakeId;
 import vn.clmart.manager_service.model.*;
 import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.untils.Constants;
+import vn.clmart.manager_service.untils.DateUntils;
 import vn.clmart.manager_service.untils.MapUntils;
 
 import java.util.ArrayList;
@@ -58,6 +59,8 @@ public class ImportWareHouseService {
     @Lazy
     ItemsService itemsService;
 
+    @Autowired
+    ExportWareHouseService exportWareHouseService;
 
 
     public void validateDto(ImportWareHouseDto importWareHouseDto, Long cid, String uid){
@@ -394,12 +397,16 @@ public class ImportWareHouseService {
 
     public PageImpl<ImportWareHouseResponseDTO> search(Long cid, Integer status, String search, ItemsSearchDto itemsSearchDto, Pageable pageable){
         try {
+            if(itemsSearchDto.getStartDate() == null) itemsSearchDto.setStartDate(DateUntils.minDate());
+            else itemsSearchDto.setStartDate(DateUntils.getStartOfDate(itemsSearchDto.getStartDate()));
+            if(itemsSearchDto.getEndDate() == null) itemsSearchDto.setEndDate(DateUntils.maxDate());
+            else itemsSearchDto.setEndDate(DateUntils.getEndOfDate(itemsSearchDto.getEndDate()));
             Page<ImportWareHouse> pageSearch = null;
             if(status == 0 || status == 1){
                 pageSearch = importWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, status, search, itemsSearchDto.getStartDate(), itemsSearchDto.getEndDate(),  pageable);
             }
             else{
-                pageSearch = importWareHouseRepository.findAllByCompanyId(cid, search, itemsSearchDto.getStartDate(), itemsSearchDto.getEndDate(),  pageable);
+                pageSearch = importWareHouseRepository.findAllByCompanyId(cid, search, null, null,  pageable);
             }
             List<ImportWareHouseResponseDTO> responseDTOS = new ArrayList<>();
             for(ImportWareHouse item : pageSearch.getContent()){
@@ -443,6 +450,10 @@ public class ImportWareHouseService {
             ItemsResponseDTO itemsResponseDTO = itemsService.getById(cid, "", importWareHouse.getIdItems());
             BeanUtils.copyProperties(itemsResponseDTO, result);
             result.setIdImportWareHouse(importWareHouse.getId());
+            result.setNumberBox(importWareHouse.getNumberBox());
+            result.setTotalPrice(importWareHouse.getTotalPrice());
+            result.setQuantity(importWareHouse.getQuantity());
+            result.setQualityExport(exportWareHouseService.qualityExport(cid, importWareHouse.getIdReceiptImport(), result.getId(), 1));
             return  result;
         }
         catch (Exception ex){

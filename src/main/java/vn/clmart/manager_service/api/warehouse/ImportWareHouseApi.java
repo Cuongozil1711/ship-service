@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import vn.clmart.manager_service.dto.ImportListDataWareHouseDto;
 import vn.clmart.manager_service.dto.ImportWareHouseDto;
 import vn.clmart.manager_service.dto.ItemsSearchDto;
-import vn.clmart.manager_service.dto.ReceiptExportWareHouseDto;
 import vn.clmart.manager_service.service.ImportWareHouseService;
 
 @RestController

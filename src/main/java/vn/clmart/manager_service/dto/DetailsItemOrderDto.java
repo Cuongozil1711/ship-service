@@ -15,8 +15,9 @@ import java.util.Date;
 public class DetailsItemOrderDto {
     private String dvtCode;
     private Integer quality;
-    private Long totalSale; // gia tien theo don vi tinh * quality thuc te
-    private Long totalPrice; // gia tien theo don vi tinh * quality (gia goc)
+    private Integer numberBox;
+    private Double totalSale; // gia tien theo don vi tinh * quality thuc te
+    private Double totalPrice; // gia tien theo don vi tinh * quality (gia goc)
     private Long idItems;
     private Long idReceiptImport;
     private Long idImportWareHouse;

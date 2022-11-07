@@ -26,6 +26,10 @@ public class ItemScannerExport {
     private Long totalSold;
     private Long totalInWareHouse;
     private Long idImportWareHouse;
+    private Integer numberBox;
+    private Integer quantity;
+    private Double totalPrice; // gia tien 1 item
+    private Integer qualityExport;
     private List<PriceItemsDto> priceItemsDtos;
     private List<PromotionResponseDto> promotionResponseDto;
 }

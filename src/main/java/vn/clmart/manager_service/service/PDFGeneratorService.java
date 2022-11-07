@@ -1,31 +1,39 @@
 package vn.clmart.manager_service.service;
-import com.lowagie.text.*;
-import com.lowagie.text.Font;
-import com.lowagie.text.Image;
-import com.lowagie.text.pdf.*;
-import net.sourceforge.barbecue.Barcode;
-import net.sourceforge.barbecue.BarcodeFactory;
-import net.sourceforge.barbecue.BarcodeImageHandler;
+import com.itextpdf.text.*;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.pdf.*;
+import com.itextpdf.text.pdf.draw.DottedLineSeparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import vn.clmart.manager_service.config.font.FontFactory;
 import vn.clmart.manager_service.dto.DetailsItemOrderDto;
 import vn.clmart.manager_service.dto.ExportWareHouseListDto;
+import vn.clmart.manager_service.dto.request.OrderItemResponseDTO;
+import vn.clmart.manager_service.untils.ReadNumber;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.OutputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class PDFGeneratorService {
 
+    public static File fontFile = new File("./font/vuArial.ttf");
+    public static File imageFile = new File("./image/logo.png");
+
     @Autowired
     ExportWareHouseService exportWareHouseService;
+
+    @Autowired
+    OrderService orderService;
 
     @Autowired
     WareHouseService wareHouseService;
@@ -36,115 +44,377 @@ public class PDFGeneratorService {
     @Autowired
     ItemsService itemsService;
 
-    public void exportWareHouse(HttpServletResponse response, Long idReceiptExport) throws Exception {
-        ExportWareHouseListDto exportWareHouseListDto = exportWareHouseService.getByIdReceiptExport(69l, "", idReceiptExport);
+    public void exportWareHouse(HttpServletResponse response, Long idReceiptExport, Long cid) throws Exception {
+        ExportWareHouseListDto exportWareHouseListDto = exportWareHouseService.getByIdReceiptExport(cid, "", idReceiptExport);
         Document document = new Document(PageSize.A4);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         OutputStream outputStream = response.getOutputStream();
-        PdfWriter.getInstance(document, outputStream);
+        PdfWriter pdf  = PdfWriter.getInstance(document, outputStream);
 
         document.open();
-        Font fontTitle = FontFactory.getFont(FontFactory.TIMES_ROMAN);
-        fontTitle.setSize(18);
-
-        Font myfont = FontFactory.getFont("Tahoma", 18, Font.BOLD,Color.BLACK);
+        BaseFont courier = BaseFont.createFont(fontFile.getPath(),BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font myfont = new Font(courier, 18, Font.NORMAL);
         Paragraph paragraph = new Paragraph(new
-                String(("Phieu xuat kho").getBytes(StandardCharsets.UTF_8)), myfont);
+                String(("Phiếu xuất kho").getBytes(StandardCharsets.UTF_8)), myfont);
         paragraph.setAlignment(Paragraph.ALIGN_CENTER);
 
-        Font fontParagraph = FontFactory.getFont(FontFactory.TIMES_ROMAN);
-        fontParagraph.setSize(12);
+        Font fontTitleName = new Font(courier, 12, Font.NORMAL);
+        SimpleDateFormat DateFor = new SimpleDateFormat("dd/MM/yyyy");
+        String stringDate= DateFor.format(exportWareHouseListDto.getData().get(0).getCreateDate());
+        Paragraph paragraphDate = new Paragraph("Ngày xuất: " + stringDate, fontTitleName);
+        paragraphDate.setAlignment(Paragraph.ALIGN_CENTER);
 
-        Font fontTitleName = FontFactory.getFont(FontFactory.TIMES_ROMAN);
-        fontTitle.setSize(16);
-        Paragraph paragraphName = new Paragraph("Kho hàng " + wareHouseService.getById(69l,exportWareHouseListDto.getReceiptExportWareHouseDto().getIdWareHouse()).getName(), fontTitleName);
-        paragraphName.setAlignment(Paragraph.ALIGN_CENTER);
+        Paragraph paragraphCreateBy = new Paragraph("Người xuất: " + exportWareHouseListDto.getCreateByName(), fontTitleName);
+        paragraphCreateBy.setAlignment(Paragraph.ALIGN_LEFT);
 
-        Paragraph paragraph2 = new Paragraph("Tên chi nhánh: " + companyService.getById(69l, "", 69l).getName());
-        paragraph2.setAlignment(Paragraph.ALIGN_LEFT);
+        Paragraph paragraphName = new Paragraph("Địa chỉ: " + companyService.getById(cid, "", cid).getName() + " - " + wareHouseService.getById(cid,exportWareHouseListDto.getReceiptExportWareHouseDto().getIdWareHouse()).getName(), fontTitleName);
+        paragraphName.setAlignment(Paragraph.ALIGN_LEFT);
 
-        Paragraph paragraph3 = new Paragraph("Mã phiếu xuất: " + exportWareHouseListDto.getReceiptExportWareHouseDto().getCode());
+        Paragraph paragraph3 = new Paragraph("Mã phiếu xuất: " + exportWareHouseListDto.getReceiptExportWareHouseDto().getCode(), fontTitleName);
         paragraph3.setAlignment(Paragraph.ALIGN_LEFT);
 
-        Paragraph paragraph4 = new Paragraph("Tên phiếu xuất: " + exportWareHouseListDto.getReceiptExportWareHouseDto().getName());
+        Paragraph paragraph4 = new Paragraph("Tên phiếu xuất: " + exportWareHouseListDto.getReceiptExportWareHouseDto().getName(), fontTitleName);
         paragraph4.setAlignment(Paragraph.ALIGN_LEFT);
 
-        Paragraph paragraph5 = new Paragraph("Kho xuất tới: " +  wareHouseService.getById(137l,exportWareHouseListDto.getReceiptExportWareHouseDto().getIdWareHouseTo()).getName());
+
+        Paragraph paragraph5 = new Paragraph( "Chi nhánh xuất tới: " + companyService.getById(cid, "", exportWareHouseListDto.getReceiptExportWareHouseDto().getCompanyIdTo()).getName() + " - " +  wareHouseService.getById(137l,exportWareHouseListDto.getReceiptExportWareHouseDto().getIdWareHouseTo()).getName(), fontTitleName);
         paragraph5.setAlignment(Paragraph.ALIGN_LEFT);
 
-        Paragraph paragraph6 = new Paragraph("Chữ ký người xuất kho");
+        Paragraph paragraph6 = new Paragraph();
+        paragraph6.setSpacingBefore(10f);
+        paragraph6.setSpacingAfter(10f);
+        paragraph6.add (new Phrase("Chữ ký người xuất kho", fontTitleName));
+        paragraph6.add (new Phrase("        Chữ ký người tiếp nhận", fontTitleName));
+        paragraph6.add (new Phrase("        Chữ ký quản lý", fontTitleName));
+        paragraph6.setFont(fontTitleName);
+        paragraph6.setMultipliedLeading(2.0f);
+        paragraph6.setSpacingAfter(10);
+        paragraph6.setSpacingBefore(10);
         paragraph6.setAlignment(Paragraph.ALIGN_RIGHT);
 
+        Paragraph paragraphSign = new Paragraph();
+        paragraphSign.setSpacingBefore(10f);
+        paragraphSign.setSpacingAfter(10f);
+        paragraphSign.add (new Phrase(exportWareHouseListDto.getCreateByName(), fontTitleName));
+        paragraphSign.add (new Phrase("                                        ", fontTitleName));
+        paragraphSign.add (new Phrase("                                        ", fontTitleName));
+        paragraphSign.setFont(fontTitleName);
+        paragraphSign.setMultipliedLeading(8.0f);
+        paragraphSign.setSpacingAfter(10);
+        paragraphSign.setSpacingBefore(10);
+        paragraphSign.setAlignment(Paragraph.ALIGN_RIGHT);
+
+        PdfContentByte contB = pdf.getDirectContent();
+        Barcode128 barCode = new Barcode128();
+        barCode.setCode(idReceiptExport.toString());
+        barCode.setCodeType(Barcode128.CODE128);
+
+        Image image = barCode.createImageWithBarcode(contB, BaseColor.BLACK, BaseColor.BLACK);
+        Paragraph titulo = new Paragraph("ATCADO DOS PISOS\n",
+                new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 5));
+        titulo.setPaddingTop(0);
+        titulo.setAlignment(Element.ALIGN_CENTER);
+
+        float scaler = ((document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin()
+                - 0) / image.getWidth()) * 20;
+
+        image.scalePercent(scaler);
+        image.setPaddingTop(0);
+        image.setAlignment(Element.ALIGN_CENTER);
+        Paragraph paragraph7 = new Paragraph();
+        paragraph7.setSpacingBefore(10f);
+        paragraph7.setSpacingAfter(10f);
+        paragraph7.add (new Chunk(image, 0, 0, true));;
+        paragraph7.setAlignment(Paragraph.ALIGN_LEFT);
+        document.add(paragraph7);
         document.add(paragraph);
+        document.add(paragraphDate);
+        document.add(paragraphCreateBy);
         document.add(paragraphName);
-        document.add(paragraph2);
         document.add(paragraph3);
         document.add(paragraph4);
         document.add(paragraph5);
 
         PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100f);
-        table.setWidths(new float[] {1.5f, 3.5f, 3.0f, 3.0f, 1.5f});
+        table.setWidths(new float[] {0.5f, 3f, 1f, 1f, 1.5f});
         table.setSpacingBefore(10);
 
-        writeTableHeader(table);
-        writeTableData(table, exportWareHouseListDto.getData());
+        writeTableHeader(table, fontTitleName);
+        writeTableData(table, exportWareHouseListDto.getData(), fontTitleName);
 
+        AtomicReference<Double> totalPrice = new AtomicReference<>(0d);
+        DecimalFormat formatter = new DecimalFormat("###,###,###");
+        exportWareHouseListDto.getData().forEach(detailsItemOrderDto -> {
+            totalPrice.updateAndGet(v -> v + detailsItemOrderDto.getTotalPrice());
+        });
 
-        File outputfile = new File("C:\\Users\\cuong\\Downloads\\image");
-        ImageIO.write(generateEAN13BarcodeImage(idReceiptExport.toString()), "jpg", outputfile);
-        Image image = Image.getInstance(outputfile.getAbsolutePath());
-        Paragraph paragraph7 = new Paragraph();
-        paragraph7.setSpacingBefore(10f);
-        paragraph7.setSpacingAfter(10f);
-        paragraph7.add(new Chunk("Mã phiếu"));
-        paragraph7.add (new Chunk(image, 0, 0, true));;
-        paragraph7.setAlignment(Paragraph.ALIGN_LEFT);
-        document.add(paragraph7);
+        Paragraph paragraphTotal = new Paragraph( "Tổng tiền: " + formatter.format(totalPrice.get()) + " VND", fontTitleName);
+        paragraphTotal.setAlignment(Paragraph.ALIGN_LEFT);
+        paragraphTotal.setMultipliedLeading(2.0f);
+
+        Locale locale = new Locale("vi");
+        NumberFormat format =  NumberFormat.getCurrencyInstance(locale);
+        Paragraph paragraphTotalRead = new Paragraph( "Tổng tiền viết bằng chữ: " + ReadNumber.numberToString(totalPrice.get()), fontTitleName);
+        paragraphTotalRead.setAlignment(Paragraph.ALIGN_LEFT);
+
         document.add(table);
+        document.add(paragraphTotal);
+        document.add(paragraphTotalRead);
         document.add(paragraph6);
+        document.add(paragraphSign);
         document.close();
     }
 
-    private void writeTableData(PdfPTable table, List<DetailsItemOrderDto> dtoList) {
+    private void writeTableData(PdfPTable table, List<DetailsItemOrderDto> dtoList, Font font) {
+        font.setColor(BaseColor.BLACK);
+        DecimalFormat formatter = new DecimalFormat("###,###,###");
+        table.setHorizontalAlignment(Element.ALIGN_CENTER);
+        PdfPCell cell = new PdfPCell();
+        cell.setPadding(5);
         int i=1;
         for (DetailsItemOrderDto itemOrderDto : dtoList) {
-            table.addCell(String.valueOf(i));
+            cell.setPhrase(new Phrase(String.valueOf(i), font));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(cell);
             i++;
-            table.addCell(itemsService.getById(137l, "", itemOrderDto.getIdItems()).getName());
-            table.addCell(itemOrderDto.getDvtCode());
-            table.addCell("165000");
-            table.addCell(String.valueOf(itemOrderDto.getQuality()));
+            cell.setPhrase(new Phrase(itemsService.getById(137l, "", itemOrderDto.getIdItems()).getName(), font));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(cell);
+            Double priceItem = itemOrderDto.getTotalPrice() / (itemOrderDto.getNumberBox() * itemOrderDto.getQuality());
+            cell.setPhrase(new Phrase(formatter.format(priceItem), font));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(cell);
+            cell.setPhrase(new Phrase(String.valueOf(itemOrderDto.getQuality()) + "X" + String.valueOf(itemOrderDto.getNumberBox()), font));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(cell);
+            cell.setPhrase(new Phrase(formatter.format(itemOrderDto.getTotalPrice()), font));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(cell);
         }
     }
 
-    private void writeTableHeader(PdfPTable table) {
+    private void writeTableHeaderOrder(PdfPTable table, Font font) {
         PdfPCell cell = new PdfPCell();
-        cell.setBackgroundColor(Color.BLUE);
+        cell.setBorderWidth(0);
+        cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell.setPhrase(new Phrase("Mặt hàng", font));
+        table.addCell(cell);
+
+        cell.setPhrase(new Phrase("Đơn giá", font));
+        table.addCell(cell);
+
+        cell.setPhrase(new Phrase("Số lượng", font));
+        table.addCell(cell);
+
+        cell.setPhrase(new Phrase("Thành tiền", font));
+        table.addCell(cell);
+    }
+
+    private void writeTableFooterOrder(PdfPTable table, Font font) {
+        PdfPCell cell = new PdfPCell();
+        cell.setBorderWidth(1);
+        cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        table.addCell(cell);
+    }
+
+    private void writeTableDataOrder(PdfPTable table, List<DetailsItemOrderDto> dtoList, Font font) {
+        font.setColor(BaseColor.BLACK);
+        DecimalFormat formatter = new DecimalFormat("###,###,###");
+        table.setHorizontalAlignment(Element.ALIGN_LEFT);
+        PdfPCell cell = new PdfPCell();
+        cell.setBorderWidth(0);
+        int i=1;
+        for (DetailsItemOrderDto itemOrderDto : dtoList) {
+            cell.setPhrase(new Phrase(itemsService.getById(137l, "", itemOrderDto.getIdItems()).getName(), font));
+            cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            table.addCell(cell);
+            Double priceItem = itemOrderDto.getTotalPrice() / itemOrderDto.getQuality();
+            cell.setPhrase(new Phrase(formatter.format(priceItem), font));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(cell);
+            cell.setPhrase(new Phrase(itemOrderDto.getQuality() + "", font));
+            cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            table.addCell(cell);
+            cell.setPhrase(new Phrase(formatter.format(itemOrderDto.getTotalPrice()), font));
+            cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            table.addCell(cell);
+        }
+    }
+
+    private void writeTableHeader(PdfPTable table, Font font) {
+        PdfPCell cell = new PdfPCell();
         cell.setPadding(5);
-
-        Font font = FontFactory.getFont(FontFactory.TIMES_ROMAN);
-        font.setColor(Color.WHITE);
-
         cell.setPhrase(new Phrase("STT", font));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 
         table.addCell(cell);
 
         cell.setPhrase(new Phrase("Tên sản phẩm", font));
         table.addCell(cell);
 
-        cell.setPhrase(new Phrase("Đơn vị tính", font));
+        cell.setPhrase(new Phrase("Đơn giá (VND)", font));
         table.addCell(cell);
 
-        cell.setPhrase(new Phrase("Giá", font));
-        table.addCell(cell);
+//        cell.setPhrase(new Phrase("SL/ĐVT", font));
+//        table.addCell(cell);
 
         cell.setPhrase(new Phrase("Số lượng", font));
         table.addCell(cell);
+
+        cell.setPhrase(new Phrase("Thành tiền (VND)", font));
+        table.addCell(cell);
     }
 
-    public  BufferedImage generateEAN13BarcodeImage(String barcodeText) throws Exception {
-        Barcode barcode = BarcodeFactory.createCode128(barcodeText);
-        return BarcodeImageHandler.getImage(barcode);
+    public void orderExport(HttpServletResponse response, Long id, Long cid) throws Exception {
+        OrderItemResponseDTO orderItemResponseDTO = orderService.getOrderById(cid, id);
+        Document document = new Document(PageSize.A7);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        OutputStream outputStream = response.getOutputStream();
+        PdfWriter pdf  = PdfWriter.getInstance(document, outputStream);
+        BaseFont courier = BaseFont.createFont(fontFile.getPath(),BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font myfont = new Font(courier, 5, Font.NORMAL);
+        Font fontTitle = new Font(courier, 4, Font.NORMAL);
+
+        document.open();
+        URL url = new URL("https://i.pinimg.com/originals/7f/69/3e/7f693e0563f7334a1683db3deeeb89f3.png");
+        Image image = Image.getInstance(url);
+        float scaler = ((document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin()
+                - 0) / image.getWidth()) * 30;
+        image.scalePercent(scaler);
+        image.setAlignment(Element.ALIGN_CENTER);
+
+
+        Paragraph paragraph2 = new Paragraph();
+        paragraph2.add (new Phrase("Địa chỉ: " + "Nam Giang - Nam Trực - Nam Định", myfont));
+        paragraph2.setMultipliedLeading(-0.1f);
+        paragraph2.setAlignment(Paragraph.ALIGN_CENTER);
+
+        Paragraph paragraph3 = new Paragraph();
+        paragraph3.add (new Phrase("Chi nhánh: " + companyService.getById(cid, "", cid).getName() , myfont));;
+        paragraph3.setAlignment(Paragraph.ALIGN_CENTER);
+
+
+        Paragraph paragraph4 = new Paragraph();
+        paragraph4.add (new Phrase("Sđt: " + "0528129662" , myfont));;
+        paragraph4.setAlignment(Paragraph.ALIGN_CENTER);
+
+        Paragraph paragraphTitle = new Paragraph();
+        paragraphTitle.add (new Chunk(image, 0, 0, true));
+        paragraphTitle.setAlignment(Paragraph.ALIGN_CENTER);
+        paragraphTitle.setMultipliedLeading(0.0f);
+
+
+
+        Paragraph paragraph = new Paragraph(new
+                String(("Hóa đơn bán hàng").getBytes(StandardCharsets.UTF_8)), myfont);
+        paragraph.setSpacingBefore(10f);
+        paragraph.setSpacingAfter(10f);
+        paragraph.setAlignment(Paragraph.ALIGN_CENTER);
+
+        Paragraph paragraph6 = new Paragraph();
+        DottedLineSeparator dottedline = new DottedLineSeparator();
+        dottedline.setOffset(-2);
+        dottedline.setGap(2f);
+        paragraph6.setLeading(10f);
+        paragraph6.add(dottedline);
+
+        SimpleDateFormat DateFor = new SimpleDateFormat("dd/MM/yyyy");
+        String stringDate= DateFor.format(orderItemResponseDTO.getCreateDate());
+
+        Paragraph paragraphCode = new Paragraph("Mã đơn: " + orderItemResponseDTO.getCode(), fontTitle);
+        paragraphCode.setAlignment(Paragraph.ALIGN_LEFT);
+
+        Paragraph paragraphDate = new Paragraph("Ngày bán: " + stringDate, fontTitle);
+        paragraphDate.setAlignment(Paragraph.ALIGN_LEFT);
+
+        Paragraph paragraphCreateBy = new Paragraph("Người bán: " + orderItemResponseDTO.getCreateBy(), fontTitle);
+        paragraphCreateBy.setAlignment(Paragraph.ALIGN_LEFT);
+
+        Paragraph paragraphCus = new Paragraph("Tên khách hàng: " + orderItemResponseDTO.getCustomerDto().getName(), fontTitle);
+        paragraphCus.setAlignment(Paragraph.ALIGN_LEFT);
+
+        PdfPTable table = new PdfPTable(4);
+        table.setWidthPercentage(100f);
+        table.setWidths(new float[] {3f, 1.5f, 1.5f, 1.5f});
+        table.setSpacingBefore(25);
+        table.setSpacingAfter(10);
+
+        writeTableHeaderOrder(table, fontTitle);
+        writeTableDataOrder(table, orderItemResponseDTO.getDetailsItemOrders(), fontTitle);
+        writeTableFooterOrder(table, fontTitle);
+
+        AtomicReference<Double> totalPrice = new AtomicReference<>(0d);
+        DecimalFormat formatter = new DecimalFormat("###,###,###");
+        orderItemResponseDTO.getDetailsItemOrders().forEach(detailsItemOrderDto -> {
+            totalPrice.updateAndGet(v -> v + detailsItemOrderDto.getTotalPrice());
+        });
+
+        Paragraph paragraphTotal = new Paragraph( "Tổng tiền: " + formatter.format(totalPrice.get()) + " VND", fontTitle);
+        paragraphTotal.setSpacingBefore(10);
+        paragraphTotal.setAlignment(Paragraph.ALIGN_LEFT);
+
+        Paragraph paragraphTotalRead = new Paragraph( "Tổng tiền viết bằng chữ: " + ReadNumber.numberToString(totalPrice.get()), fontTitle);
+        paragraphTotalRead.setAlignment(Paragraph.ALIGN_LEFT);
+
+        Font fontNote = new Font(courier, 5, Font.NORMAL);
+        Paragraph paragraphNote = new Paragraph( "Lưu ý: " + " cửa hàng không hỗ trợ đổi trả trong vòng 24h", fontNote);
+        paragraphNote.setAlignment(Paragraph.ALIGN_CENTER);
+
+        Paragraph paragraphThanks = new Paragraph( "Cảm ơn quý khách !", fontTitle);
+        paragraphThanks.setSpacingBefore(5);
+        paragraphThanks.setAlignment(Paragraph.ALIGN_CENTER);
+
+        Paragraph p = new Paragraph();
+        DottedLineSeparator dottedline1 = new DottedLineSeparator();
+        p.setSpacingBefore(-8);
+        dottedline1.setOffset(-2);
+        dottedline1.setGap(2f);
+        p.add(dottedline1);
+
+        document.add(paragraphTitle);
+        document.add(paragraph2);
+        document.add(paragraph3);
+        document.add(paragraph6);
+        document.add(paragraph);
+        document.add(paragraphCode);
+        document.add(paragraphDate);
+        document.add(paragraphCreateBy);
+        document.add(paragraphCus);
+        document.add(p);
+        document.add(table);
+
+
+        DottedLineSeparator dottedline2 = new DottedLineSeparator();
+        dottedline2.setGap(2f);
+        dottedline2.setOffset(-2f);
+
+        document.add(dottedline2);
+        document.add(paragraphTotal);
+        document.add(paragraphTotalRead);
+        document.add(paragraphThanks);
+        document.add(paragraphNote);
+
+
+        PdfContentByte contB = pdf.getDirectContent();
+        Barcode128 barCode = new Barcode128();
+        barCode.setCode(id.toString());
+        barCode.setCodeType(Barcode128.CODE128);
+
+        Image image1 = barCode.createImageWithBarcode(contB, BaseColor.BLACK, BaseColor.BLACK);
+        Paragraph titulo = new Paragraph("ATCADO DOS PISOS\n",
+                new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 5));
+        titulo.setPaddingTop(0);
+        titulo.setAlignment(Element.ALIGN_CENTER);
+
+        float scaler1 = ((document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin()
+                - 0) / image.getWidth()) * 100;
+
+        image1.scalePercent(scaler1);
+        image1.setPaddingTop(0);
+        image1.setAlignment(Element.ALIGN_CENTER);
+        document.add(image1);
+        document.close();
     }
+
 }
