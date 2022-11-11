@@ -1,8 +1,10 @@
 package vn.clmart.manager_service.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -10,10 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.config.exceptions.BusinessException;
-import vn.clmart.manager_service.dto.ImportListDataWareHouseDto;
-import vn.clmart.manager_service.dto.ImportWareHouseDto;
-import vn.clmart.manager_service.dto.ItemsSearchDto;
-import vn.clmart.manager_service.dto.ReceiptImportWareHouseDto;
+import vn.clmart.manager_service.dto.*;
 import vn.clmart.manager_service.dto.request.ImportWareHouseResponseDTO;
 import vn.clmart.manager_service.dto.request.ItemScannerExport;
 import vn.clmart.manager_service.dto.request.ItemsResponseDTO;
@@ -24,9 +23,10 @@ import vn.clmart.manager_service.untils.Constants;
 import vn.clmart.manager_service.untils.DateUntils;
 import vn.clmart.manager_service.untils.MapUntils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -61,6 +61,15 @@ public class ImportWareHouseService {
 
     @Autowired
     ExportWareHouseService exportWareHouseService;
+
+    @Autowired
+    NotificationService notificationService;
+
+    @Autowired
+    TokenFireBaseRepository tokenFireBaseRepository;
+
+    @Autowired
+    EmployeeRepository employeeRepository;
 
 
     public void validateDto(ImportWareHouseDto importWareHouseDto, Long cid, String uid){
@@ -113,7 +122,7 @@ public class ImportWareHouseService {
         }
     }
 
-    public boolean importQuickLy(Long cid, String uid, Long idReceiptExport){
+    public boolean importQuickLy(Long cid, String uid, Long idReceiptExport) throws IOException {
         ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.findByIdAndDeleteFlg(idReceiptExport, Constants.DELETE_FLG.NON_DELETE).orElse(null);
         if(receiptExportWareHouse != null){
             if(!receiptExportWareHouse.getState().equals(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name()) && receiptExportWareHouse.getCompanyIdTo().equals(cid)){
@@ -144,6 +153,26 @@ public class ImportWareHouseService {
                     importWareHouses.add(importWareHouse);
                 }
                 importWareHouseRepository.saveAll(importWareHouses);
+
+                // gui thong bao cho quan ly chi nhanh
+                TokenFirseBaseDTO tokenFirseBaseDTO = new TokenFirseBaseDTO();
+                tokenFirseBaseDTO.setPriority("high");
+                String[] token = new String[10];
+                Map<String, String> notification = new HashMap<>();
+                notification.put("body", "Hoàn tất phiếu: " + receiptImportWareHouse.getName());
+                notification.put("title", "Nhập kho");
+                tokenFirseBaseDTO.setNotification(notification);
+                TokenFireBase tokenFireBase = tokenFireBaseRepository.findByDeleteFlgAndUserId(Constants.DELETE_FLG.NON_DELETE, uid).orElse(null);
+                if(tokenFireBase != null){
+                    token[0] = tokenFireBase.getToken();
+                }
+                tokenFirseBaseDTO.setRegistration_ids(token);
+
+                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                String json = ow.writeValueAsString(tokenFirseBaseDTO);
+
+                notificationService.sendNotificationToUser(json);
+
                 return true;
             }
             else return  false;
@@ -395,7 +424,7 @@ public class ImportWareHouseService {
         }
     }
 
-    public PageImpl<ImportWareHouseResponseDTO> search(Long cid, Integer status, String search, ItemsSearchDto itemsSearchDto, Pageable pageable){
+    public PageImpl<ImportWareHouseResponseDTO> search(Long cid, String uid, Integer status, String search, ItemsSearchDto itemsSearchDto, Pageable pageable){
         try {
             if(itemsSearchDto.getStartDate() == null) itemsSearchDto.setStartDate(DateUntils.minDate());
             else itemsSearchDto.setStartDate(DateUntils.getStartOfDate(itemsSearchDto.getStartDate()));
@@ -436,6 +465,32 @@ public class ImportWareHouseService {
                 }
                 responseDTOS.add(importWareHouseResponseDTO);
             }
+
+            TokenFirseBaseDTO tokenFirseBaseDTO = new TokenFirseBaseDTO();
+            tokenFirseBaseDTO.setPriority("high");
+            Map<String, String> notification = new HashMap<>();
+            notification.put("body", "Hoan tat phieu: " + "a");
+            notification.put("title", "Nhap kho");
+            tokenFirseBaseDTO.setNotification(notification);
+
+
+            List<String> userIds = employeeRepository.getListUserIdByAuthority(cid);
+            String[] token = new String[userIds.size()];
+
+            for(int i=0; i < userIds.size(); i++){
+                if(userIds.get(i) != null){
+                    TokenFireBase tokenFireBase = tokenFireBaseRepository.findByDeleteFlgAndUserId(Constants.DELETE_FLG.NON_DELETE, userIds.get(i)).orElse(null);
+                    if(tokenFireBase != null)
+                    token[i] = tokenFireBase.getToken();
+                }
+            }
+            tokenFirseBaseDTO.setRegistration_ids(token);
+
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            String json = ow.writeValueAsString(tokenFirseBaseDTO);
+
+            notificationService.sendNotificationToUser(json);
+
             return new PageImpl(responseDTOS, pageable, pageSearch.getTotalElements());
         }
         catch (Exception ex){

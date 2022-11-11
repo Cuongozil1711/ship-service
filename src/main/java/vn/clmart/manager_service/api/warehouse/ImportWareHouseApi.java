@@ -143,7 +143,7 @@ public class ImportWareHouseApi {
             Pageable pageable
     ) {
         try {
-            return new ResponseEntity<>(importWareHouseService.search(cid, status, search, itemsSearchDto, pageable), HttpStatus.OK);
+            return new ResponseEntity<>(importWareHouseService.search(cid, uid, status, search, itemsSearchDto, pageable), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

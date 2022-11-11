@@ -21,10 +21,7 @@ import vn.clmart.manager_service.config.security.JwtTokenProvider;
 import vn.clmart.manager_service.dto.*;
 import vn.clmart.manager_service.dto.request.EmployeeResponseDTO;
 import vn.clmart.manager_service.model.*;
-import vn.clmart.manager_service.repository.AddressRepository;
-import vn.clmart.manager_service.repository.EmployeeRepository;
-import vn.clmart.manager_service.repository.FullNameRepository;
-import vn.clmart.manager_service.repository.UserRepository;
+import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.untils.Constants;
 import vn.clmart.manager_service.untils.ResponseAPI;
 
@@ -59,6 +56,9 @@ public class UserService {
     @Autowired
     AddressService addressService;
 
+    @Autowired
+    TokenFireBaseRepository tokenFireBaseRepository;
+
     private static final Logger logger = LogManager.getLogger(UserService.class);
 
     public LoginDto authenticateUserHandler(UserLoginDto userLoginDto,  HttpServletRequest request) {
@@ -89,6 +89,17 @@ public class UserService {
             logger.info("Login on: " + new Date() + " username: " + userLoginDto.getUsername());
             Employee employee = employeeRepository.findAllByIdUserAndDeleteFlg(user.getId(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
             FullName fullName = fullNameRepository.findById(employee.getIdFullName()).orElse(new FullName());
+            TokenFireBase tokenFireBase = tokenFireBaseRepository.findByDeleteFlgAndUserId(Constants.DELETE_FLG.NON_DELETE, user.getUid()).orElse(null);
+            if(tokenFireBase != null && userLoginDto.getTokenFirebase() != null){
+                tokenFireBase.setToken(userLoginDto.getTokenFirebase());
+                tokenFireBaseRepository.save(tokenFireBase);
+            }
+            else if(userLoginDto.getTokenFirebase() != null){
+                TokenFireBase tokenFireBaseOnline = new TokenFireBase();
+                tokenFireBaseOnline.setUserId(user.getUid());
+                tokenFireBaseOnline.setToken(userLoginDto.getTokenFirebase());
+                tokenFireBaseRepository.save(tokenFireBaseOnline);
+            }
             result = new LoginDto(jwt, user.getCompanyId(), user.getUid(), userDetails.getAuthorities().stream().collect(Collectors.toList()).get(0).toString(), fullName.getFirstName() + " " + fullName.getLastName());
         } catch (BadCredentialsException e) {
             logger.error(e.getMessage(), e);
