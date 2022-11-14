@@ -33,9 +33,15 @@ public class AddressService {
     public List<District> findAllDistrict(){
         return districtRepository.findAll();
     }
+    public List<District> findAllDistrictByProvince(Integer proviceId){
+        return districtRepository.findAllByProvinceId(proviceId);
+    }
 
     public List<Wards> findAllWards(){
         return wardsRepository.findAll();
+    }
+    public List<Wards> findAllWardsByDistrictId(Integer districtId){
+        return wardsRepository.findAllByDistrictId(districtId);
     }
 
 }

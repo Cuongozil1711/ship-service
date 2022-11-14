@@ -51,6 +51,21 @@ public class UserApi {
         }
     }
 
+    @PostMapping("/update")
+    protected @ResponseBody
+    ResponseEntity<Object> update(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @RequestBody EmployeeDto employeeDto
+    ) {
+        try {
+            return new ResponseEntity<>(userService.updateEmployeee(employeeDto, cid, uid), HttpStatus.OK);
+        }
+        catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
     @RequestMapping(value = "/checkToken", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity<Object> checkToken(){
         try {

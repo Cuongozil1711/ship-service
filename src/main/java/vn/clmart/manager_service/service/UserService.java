@@ -144,6 +144,29 @@ public class UserService {
         }
     }
 
+    public Employee updateEmployeee(EmployeeDto employeeDto, Long cid, String uid){
+        Employee employee = employeeRepository.findById(employeeDto.getId()).orElse(null);
+        if(employee != null){
+            FullName fullName = fullNameRepository.findByCompanyIdAndId(cid, employee.getIdFullName());
+            fullName.setFirstName(employeeDto.getFullNameDto().getFirstName());
+            fullName.setLastName(employeeDto.getFullNameDto().getLastName());
+            fullNameRepository.save(fullName);
+
+            Address address = addressRepository.findByCompanyIdAndId(cid, employee.getIdAddress());
+            address.setProvinceId(employeeDto.getAddressDto().getProvinceId());
+            address.setDistrictId(employeeDto.getAddressDto().getDistrictId());
+            address.setWardId(employeeDto.getAddressDto().getWardId());
+            address.setName(employeeDto.getAddressDto().getName());
+            addressRepository.save(address);
+
+            employee.setTel(employeeDto.getTel());
+            employee.setBirthDay(employeeDto.getBirthDay());
+            employee.setCode(employeeDto.getCmt());
+            employeeRepository.save(employee);
+        }
+        return null;
+    }
+
     public PageImpl<EmployeeDto> search(Long cid,  Pageable pageable){
         try {
             Page<Employee> pageSearch = employeeRepository.findAllByCompanyId(cid, pageable);
