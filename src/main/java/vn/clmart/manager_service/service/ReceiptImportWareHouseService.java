@@ -11,10 +11,7 @@ import vn.clmart.manager_service.dto.ReceiptImportWareHouseDto;
 import vn.clmart.manager_service.dto.StallsDto;
 import vn.clmart.manager_service.dto.request.ReceiptImportWareHouseResponseDTO;
 import vn.clmart.manager_service.model.*;
-import vn.clmart.manager_service.repository.EmployeeRepository;
-import vn.clmart.manager_service.repository.FullNameRepository;
-import vn.clmart.manager_service.repository.ReceiptImportWareHouseRepository;
-import vn.clmart.manager_service.repository.UserRepository;
+import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.untils.Constants;
 
 import java.util.ArrayList;
@@ -39,6 +36,9 @@ public class ReceiptImportWareHouseService {
 
     @Autowired
     EmployeeRepository employeeRepository;
+
+    @Autowired
+    ImportWareHouseRepository importWareHouseRepository;
 
     public ReceiptImportWareHouse create(ReceiptImportWareHouseDto receiptImportWareHouseDto, Long cid, String uid){
         try {
@@ -120,7 +120,8 @@ public class ReceiptImportWareHouseService {
     public ReceiptImportWareHouse delete(Long cid, String uid, Long id){
         try {
             ReceiptImportWareHouse receiptImportWareHouse = receiptImportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
-            if(receiptImportWareHouse.getState().equals(Constants.RECEIPT_WARE_HOUSE.PROCESSING.name())){
+            List<ImportWareHouse> importWareHouses = importWareHouseRepository.findAllByDeleteFlgAndIdReceiptImportAndCompanyIdWork(Constants.DELETE_FLG.NON_DELETE, receiptImportWareHouse.getId(), cid);
+            if(receiptImportWareHouse.getState().equals(Constants.RECEIPT_WARE_HOUSE.PROCESSING.name()) && importWareHouses.isEmpty()){
                 receiptImportWareHouse.setDeleteFlg(Constants.DELETE_FLG.DELETE);
                 receiptImportWareHouse.setCompanyId(cid);
                 receiptImportWareHouse.setUpdateBy(uid);

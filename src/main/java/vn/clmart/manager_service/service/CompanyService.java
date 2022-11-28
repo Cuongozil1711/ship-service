@@ -40,7 +40,7 @@ public class CompanyService {
 
     public Company getById(Long cid, String uid, Long id){
         try {
-            return CompanyRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            return CompanyRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElse(new Company());
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

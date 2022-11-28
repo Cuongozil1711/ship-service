@@ -23,7 +23,7 @@ public class PriceItems extends PersistableEntity<Long> {
     @GenericGenerator(name = "id",strategy = "vn.clmart.manager_service.generator.SnowflakeId")
     @GeneratedValue(generator = "id")
     private Long id;
-    private Long priceItems;
+    private Double priceItems;
     private Integer quality;
     private String dvtCode;
     private Long idItems;

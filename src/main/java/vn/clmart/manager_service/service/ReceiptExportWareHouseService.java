@@ -10,8 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.dto.ReceiptExportWareHouseDto;
 import vn.clmart.manager_service.dto.request.ReceiptExportWareHouseResponseDTO;
 import vn.clmart.manager_service.dto.request.ReceiptImportWareHouseResponseDTO;
+import vn.clmart.manager_service.model.ExportWareHouse;
 import vn.clmart.manager_service.model.ReceiptExportWareHouse;
 import vn.clmart.manager_service.model.ReceiptImportWareHouse;
+import vn.clmart.manager_service.repository.ExportWareHouseRepository;
 import vn.clmart.manager_service.repository.ReceiptExportWareHouseRepository;
 import vn.clmart.manager_service.untils.Constants;
 
@@ -28,6 +30,9 @@ public class ReceiptExportWareHouseService {
 
     @Autowired
     WareHouseService wareHouseService;
+
+    @Autowired
+    ExportWareHouseRepository exportWareHouseRepository;
 
 
     public ReceiptExportWareHouse create(ReceiptExportWareHouseDto ReceiptExportWareHouseDto, Long cid, String uid){
@@ -102,7 +107,8 @@ public class ReceiptExportWareHouseService {
     public ReceiptExportWareHouse delete(Long cid, String uid, Long id){
         try {
             ReceiptExportWareHouse ReceiptExportWareHouse = ReceiptExportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
-            if(ReceiptExportWareHouse.getState().equals(Constants.RECEIPT_WARE_HOUSE.PROCESSING.name())){
+            List<ExportWareHouse> exportWareHouses = exportWareHouseRepository.findAllByDeleteFlgAndIdReceiptExportAndCompanyId(Constants.DELETE_FLG.NON_DELETE, ReceiptExportWareHouse.getId(), cid);
+            if(ReceiptExportWareHouse.getState().equals(Constants.RECEIPT_WARE_HOUSE.PROCESSING.name()) && exportWareHouses.isEmpty()){
                 ReceiptExportWareHouse.setDeleteFlg(Constants.DELETE_FLG.DELETE);
                 ReceiptExportWareHouse.setCompanyId(cid);
                 ReceiptExportWareHouse.setUpdateBy(uid);

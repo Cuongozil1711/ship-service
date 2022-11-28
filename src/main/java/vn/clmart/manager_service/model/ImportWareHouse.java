@@ -5,11 +5,10 @@ import org.hibernate.annotations.GenericGenerator;
 import org.springframework.context.annotation.Description;
 import vn.clmart.manager_service.dto.ImportWareHouseDto;
 import vn.clmart.manager_service.dto.ReceiptImportWareHouseDto;
+import vn.clmart.manager_service.model.config.ImportWareHouseKey;
 import vn.clmart.manager_service.model.config.PersistableEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -21,9 +20,12 @@ import java.util.Date;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Description("Table nhap kho")
+@IdClass(ImportWareHouseKey.class)
 public class ImportWareHouse extends PersistableEntity<Long> {
     @Id
     private Long id;
+    @Id
+    private Long companyIdWork;
     private String code;
     private Integer numberBox;
     private Integer quantity;
@@ -42,6 +44,7 @@ public class ImportWareHouse extends PersistableEntity<Long> {
                 .build();
         receiptImportWareHouse.setCreateBy(uid);
         receiptImportWareHouse.setCompanyId(cid);
+        receiptImportWareHouse.setCompanyIdWork(cid);
         return receiptImportWareHouse;
     }
 }

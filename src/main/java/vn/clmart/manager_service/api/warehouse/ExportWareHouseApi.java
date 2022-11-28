@@ -72,8 +72,7 @@ public class ExportWareHouseApi {
             @PathVariable("idReceiptExport") Long idReceiptExport
     ) {
         try {
-            exportWareHouseService.deleteExport(cid, uid, idReceiptExport);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(exportWareHouseService.deleteExport(cid, uid, idReceiptExport),HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -173,6 +172,20 @@ public class ExportWareHouseApi {
     ) {
         try {
             return new ResponseEntity<>(exportWareHouseService.getListOrder(cid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @GetMapping("/ocr/{code}")
+    protected @ResponseBody
+    ResponseEntity<Object> findAllByIdReceiptExport(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @PathVariable("code") String code
+    ) {
+        try {
+            return new ResponseEntity<>(exportWareHouseService.getByIdReceiptExportByOcr(cid, uid, code), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

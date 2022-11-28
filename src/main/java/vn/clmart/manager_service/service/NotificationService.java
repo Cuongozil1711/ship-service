@@ -47,11 +47,11 @@ public class NotificationService {
         String result = "";
         try {
             HttpPost httppost = new HttpPost("https://fcm.googleapis.com/fcm/send");
-            StringEntity entity = new StringEntity(jsonData);
+            StringEntity entity = new StringEntity(jsonData, "UTF8");
             httppost.setEntity(entity);
             httppost.setHeader("authorization",
                     "key=AAAAUW5zUM4:APA91bFXa5I8sKSbaoRflQ3zdtkIAwxPk_Fmc4U4OYswM5OHTxpggcRW1KiAWHVZFkmgJO-JocVX1P85hgkWAF3LfTBd22POfOtR1SIaSJDnUi4ot3bJc5fXmetzvICJtvp3bxHMjFUP");
-            //httppost.setHeader("Accept", "application/json");
+            httppost.setHeader("Accept", "application/json");
             httppost.setHeader("Content-type", "application/json;charset=UTF-8");
             CloseableHttpResponse response = httpclient.execute(httppost);
             try {

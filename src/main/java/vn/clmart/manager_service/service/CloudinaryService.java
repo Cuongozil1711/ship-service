@@ -9,12 +9,8 @@ import java.util.Map;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import vn.clmart.manager_service.model.Employee;
-import vn.clmart.manager_service.model.Items;
-import vn.clmart.manager_service.model.Storage;
-import vn.clmart.manager_service.repository.EmployeeRepository;
-import vn.clmart.manager_service.repository.ItemsRepository;
-import vn.clmart.manager_service.repository.StorageRepository;
+import vn.clmart.manager_service.model.*;
+import vn.clmart.manager_service.repository.*;
 
 @Service
 public class CloudinaryService {
@@ -28,11 +24,15 @@ public class CloudinaryService {
 
     private final EmployeeRepository employeeRepository;
 
-    public CloudinaryService(Cloudinary cloudinaryConfig, StorageRepository storageRepository, ItemsRepository itemsRepository, EmployeeRepository employeeRepository) {
+
+    private final ReceiptImportWareHouseRepository importWareHouseRepository;
+
+    public CloudinaryService(Cloudinary cloudinaryConfig, StorageRepository storageRepository, ItemsRepository itemsRepository, EmployeeRepository employeeRepository, ImportWareHouseService importWareHouseService, ReceiptImportWareHouseRepository importWareHouseRepository) {
         this.cloudinaryConfig = cloudinaryConfig;
         this.storageRepository = storageRepository;
         this.itemsRepository = itemsRepository;
         this.employeeRepository = employeeRepository;
+        this.importWareHouseRepository = importWareHouseRepository;
     }
 
     /**
@@ -67,6 +67,13 @@ public class CloudinaryService {
                     if(items != null){
                         items.setImage(publicId);
                         employeeRepository.save(items);
+                    }
+                }
+                else if(type.equals("import")){
+                    ReceiptImportWareHouse receiptImportWareHouse = importWareHouseRepository.findById(rootId).orElse(null);
+                    if(receiptImportWareHouse != null){
+                        receiptImportWareHouse.setImageReceipt(publicId);
+                        importWareHouseRepository.save(receiptImportWareHouse);
                     }
                 }
                 return publicId;

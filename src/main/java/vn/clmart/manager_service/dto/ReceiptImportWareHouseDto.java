@@ -18,4 +18,5 @@ public class ReceiptImportWareHouseDto {
     private Date dateImport;
     private Double totalPrice;
     private Long idWareHouse;
+    private String imageReceipt;
 }

@@ -13,6 +13,7 @@ import java.util.*;
 public class ImportListDataWareHouseDto {
     private String code;
     private Long idReceiptImport;
+    private String imageReceipt;
     private ReceiptImportWareHouseDto receiptImportWareHouseDto;
     private List<ImportWareHouseDto> data;
 }

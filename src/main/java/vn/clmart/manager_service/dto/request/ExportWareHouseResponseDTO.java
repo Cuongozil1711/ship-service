@@ -34,4 +34,5 @@ public class ExportWareHouseResponseDTO {
     private String receiptExportName;
     private String creatByName = "";
     private String image;
+    private Double totalPriceImport;
 }

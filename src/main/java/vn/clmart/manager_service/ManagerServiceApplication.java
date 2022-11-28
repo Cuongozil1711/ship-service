@@ -8,6 +8,8 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 
+import java.nio.charset.Charset;
+
 @SpringBootApplication
 public class ManagerServiceApplication extends SpringBootServletInitializer {
 
@@ -17,6 +19,8 @@ public class ManagerServiceApplication extends SpringBootServletInitializer {
     }
 
     public static void main(String[] args) {
+        System.out.println(String.format("file.encoding: %s", System.getProperty("file.encoding")));
+        System.out.println(String.format("defaultCharset: %s", Charset.defaultCharset().name()));
         SpringApplication.run(ManagerServiceApplication.class, args);
     }
 

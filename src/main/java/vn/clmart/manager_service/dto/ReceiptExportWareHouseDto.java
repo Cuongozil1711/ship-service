@@ -12,6 +12,7 @@ import java.util.Date;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class ReceiptExportWareHouseDto {
+    private Long id;
     private Date dateExport;
     private String state;
     private String name;
@@ -21,4 +22,8 @@ public class ReceiptExportWareHouseDto {
     private Long companyIdTo;
     private Long idWareHouseTo;
     private String fullName;
+    private String companyName;
+    private String companyNameTo;
+    private String wareHouseName;
+    private String wareHouseNameTo;
 }

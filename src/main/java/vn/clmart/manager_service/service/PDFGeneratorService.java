@@ -77,7 +77,7 @@ public class PDFGeneratorService {
         paragraph4.setAlignment(Paragraph.ALIGN_LEFT);
 
 
-        Paragraph paragraph5 = new Paragraph( "Chi nhánh xuất tới: " + companyService.getById(cid, "", exportWareHouseListDto.getReceiptExportWareHouseDto().getCompanyIdTo()).getName() + " - " +  wareHouseService.getById(137l,exportWareHouseListDto.getReceiptExportWareHouseDto().getIdWareHouseTo()).getName(), fontTitleName);
+        Paragraph paragraph5 = new Paragraph( "Chi nhánh xuất tới: " + companyService.getById(exportWareHouseListDto.getReceiptExportWareHouseDto().getCompanyIdTo(), "", exportWareHouseListDto.getReceiptExportWareHouseDto().getCompanyIdTo()).getName() + " - " +  wareHouseService.getById(exportWareHouseListDto.getReceiptExportWareHouseDto().getCompanyIdTo(),exportWareHouseListDto.getReceiptExportWareHouseDto().getIdWareHouseTo()).getName(), fontTitleName);
         paragraph5.setAlignment(Paragraph.ALIGN_LEFT);
 
         Paragraph paragraph6 = new Paragraph();
@@ -414,6 +414,66 @@ public class PDFGeneratorService {
         image1.setPaddingTop(0);
         image1.setAlignment(Element.ALIGN_CENTER);
         document.add(image1);
+        document.close();
+    }
+
+    public void orderExportIem(HttpServletResponse response, Long id, Long cid) throws Exception {
+        Document document = new Document(PageSize.A7);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        OutputStream outputStream = response.getOutputStream();
+        PdfWriter pdf  = PdfWriter.getInstance(document, outputStream);
+        BaseFont courier = BaseFont.createFont(fontFile.getPath(),BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font myfont = new Font(courier, 10, Font.NORMAL);
+
+        document.open();
+        URL url = new URL("https://i.pinimg.com/originals/7f/69/3e/7f693e0563f7334a1683db3deeeb89f3.png");
+        Image image = Image.getInstance(url);
+        float scaler = ((document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin()
+                - 0) / image.getWidth()) * 30;
+        image.scalePercent(scaler);
+        image.setAlignment(Element.ALIGN_LEFT);
+
+        Paragraph paragraph2 = new Paragraph();
+        paragraph2.add (new Phrase("Name: " + "Mỳ tôm hảo hảo", myfont));
+        paragraph2.setAlignment(Paragraph.ALIGN_LEFT);
+
+        Paragraph paragraph3 = new Paragraph();
+        paragraph3.add (new Phrase("Sum: " + "15X30", myfont));
+        paragraph3.setAlignment(Paragraph.ALIGN_LEFT);
+
+
+        Paragraph paragraph4 = new Paragraph();
+        paragraph4.add (new Phrase("Price: " + "3.333" , myfont));;
+        paragraph4.setAlignment(Paragraph.ALIGN_LEFT);
+
+
+        Paragraph paragraph5 = new Paragraph();
+        paragraph5.add (new Phrase("DateExpected: " + "17-11-2000" , myfont));;
+        paragraph5.setAlignment(Paragraph.ALIGN_LEFT);
+
+        document.add(paragraph2);
+        document.add(paragraph3);
+        document.add(paragraph4);
+        document.add(paragraph5);
+
+        PdfContentByte contB = pdf.getDirectContent();
+        Barcode128 barCode = new Barcode128();
+        barCode.setCode(id.toString());
+        barCode.setCodeType(Barcode128.CODE128);
+
+        Image image1 = barCode.createImageWithBarcode(contB, BaseColor.BLACK, BaseColor.BLACK);
+        Paragraph titulo = new Paragraph("ATCADO DOS PISOS\n",
+                new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 5));
+        titulo.setPaddingTop(0);
+        titulo.setAlignment(Element.ALIGN_CENTER);
+
+        float scaler1 = ((document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin()
+                - 0) / image.getWidth()) * 100;
+
+        image1.scalePercent(scaler1);
+        image1.setPaddingTop(0);
+        image1.setAlignment(Element.ALIGN_CENTER);
+
         document.close();
     }
 

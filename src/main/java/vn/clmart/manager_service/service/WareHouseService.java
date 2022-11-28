@@ -44,7 +44,7 @@ public class WareHouseService {
 
     public WareHouse getById(Long cid,Long id){
         try {
-            return WareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            return WareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElse(new WareHouse());
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

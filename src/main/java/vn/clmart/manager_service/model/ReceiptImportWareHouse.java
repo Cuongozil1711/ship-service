@@ -32,6 +32,7 @@ public class ReceiptImportWareHouse extends PersistableEntity<Long> {
     private Date dateImport;
     private Double totalPrice;
     private Long idWareHouse;
+    private String imageReceipt;
 
     public static ReceiptImportWareHouse of(ReceiptImportWareHouseDto receiptImportWareHouseDto, Long cid, String uid){
         ReceiptImportWareHouse receiptImportWareHouse = ReceiptImportWareHouse.builder()

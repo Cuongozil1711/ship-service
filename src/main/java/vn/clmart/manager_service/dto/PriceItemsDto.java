@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = false)
 public class PriceItemsDto {
     private Long id;
-    private Long priceItems;
+    private Double priceItems;
     private String dvtCode;
     private Long idItems;
     private Integer quality;
