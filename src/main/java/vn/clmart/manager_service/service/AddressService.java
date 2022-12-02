@@ -1,5 +1,6 @@
 package vn.clmart.manager_service.service;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,8 @@ import java.util.*;
 @Transactional
 public class AddressService {
 
+    private static final Logger logger = Logger.getLogger(AddressService.class);
+
     @Autowired
     ProvinceRepository provinceRepository;
 
@@ -27,21 +30,51 @@ public class AddressService {
 
 
     public List<Province> findAllProvince(){
-        return provinceRepository.findAll();
+        try {
+            return provinceRepository.findAll();
+        }
+        catch (Exception ex){
+            logger.error(ex);
+            throw new RuntimeException(ex);
+        }
     }
 
     public List<District> findAllDistrict(){
-        return districtRepository.findAll();
+        try {
+            return districtRepository.findAll();
+        }
+        catch (Exception ex){
+            logger.error(ex);
+            throw new RuntimeException(ex);
+        }
     }
     public List<District> findAllDistrictByProvince(Integer proviceId){
-        return districtRepository.findAllByProvinceId(proviceId);
+        try {
+            return districtRepository.findAllByProvinceId(proviceId);
+        }
+        catch (Exception ex){
+            logger.error(ex);
+            throw new RuntimeException(ex);
+        }
     }
 
     public List<Wards> findAllWards(){
-        return wardsRepository.findAll();
+        try {
+            return wardsRepository.findAll();
+        }
+        catch (Exception ex){
+            logger.error(ex);
+            throw new RuntimeException(ex);
+        }
     }
     public List<Wards> findAllWardsByDistrictId(Integer districtId){
-        return wardsRepository.findAllByDistrictId(districtId);
+        try {
+            return wardsRepository.findAllByDistrictId(districtId);
+        }
+        catch (Exception ex){
+            logger.error(ex);
+            throw new RuntimeException(ex);
+        }
     }
 
 }

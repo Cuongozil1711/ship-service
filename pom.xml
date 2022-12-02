@@ -8,6 +8,7 @@
         <version>2.7.3</version>
     </parent>
     <groupId>vn.clmart</groupId>
+    <packaging>war</packaging>
     <artifactId>manager_service</artifactId>
     <version>0.0.1</version>
     <name>manager_service</name>
@@ -192,6 +193,13 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20220924</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/log4j/log4j -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
         </dependency>
 
 

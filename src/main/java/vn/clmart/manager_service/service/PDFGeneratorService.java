@@ -397,11 +397,13 @@ public class PDFGeneratorService {
 
 
         PdfContentByte contB = pdf.getDirectContent();
-        Barcode128 barCode = new Barcode128();
-        barCode.setCode(id.toString());
-        barCode.setCodeType(Barcode128.CODE128);
+//        Barcode128 barCode = new Barcode128();
+//        barCode.setCode();
+//        barCode.setCodeType(Barcode128.CODE128);
 
-        Image image1 = barCode.createImageWithBarcode(contB, BaseColor.BLACK, BaseColor.BLACK);
+        BarcodeQRCode qrcode = new BarcodeQRCode(id.toString(), 80, 80, null);
+
+        Image image1 = qrcode.getImage();
         Paragraph titulo = new Paragraph("ATCADO DOS PISOS\n",
                 new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 5));
         titulo.setPaddingTop(0);
