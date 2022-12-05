@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import vn.clmart.manager_service.model.ExportWareHouse;
 import vn.clmart.manager_service.model.Order;
 
@@ -23,7 +24,7 @@ public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse
             "like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '')) " +
             "and i.idReceiptExport is not null " +
             "and (i.createDate between coalesce(:startDate, current_date) and coalesce(:endDate, current_date)) " +
-            "group by i.idReceiptExport order by i.createDate")
+            "group by i.idReceiptExport order by i.createDate desc")
     public Page<ExportWareHouse> findAllByCompanyIdAndDeleteFlg(Long cid, Integer delete, String search, Date startDate, Date endDate ,Pageable pageable);
 
     @Query("select i from ExportWareHouse as i where i.companyId = :cid " +
@@ -32,7 +33,7 @@ public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse
             " and ((lower(concat(coalesce(i.code, ''),'')) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) " +
             " and (i.idReceiptExport is not null or  i.idOrder is not null) " +
             " group by i.idReceiptExport, i.idOrder " +
-            " order by i.createDate")
+            " order by i.createDate desc ")
     public Page<ExportWareHouse> statisticalByCompanyIdAndDeleteFlgAndOrder(Long cid, Integer delete, String search, Date startDate, Date endDate, Pageable pageable);
 
     public List<ExportWareHouse> findAllByDeleteFlgAndIdItemsAndCompanyIdAndIdReceiptImport(Integer deleteFlg, Long idItems, Long cid, Long idReceiptImport);
@@ -48,7 +49,7 @@ public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse
             " and  ((coalesce(i.createDate,current_date) between coalesce(:startDate, current_date) and coalesce(:endDate, current_date)) " +
             " or coalesce(:startDate, current_date) = coalesce(:endDate, current_date)) " +
             " and ((lower(concat(coalesce(i.code, ''),'')) like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '') ) " +
-            " order by i.createDate")
+            " order by i.createDate desc ")
     public Page<ExportWareHouse> listExport(Long cid, Integer delete, String search, Date startDate, Date endDate, Pageable pageable);
 
 
@@ -57,5 +58,16 @@ public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse
             "and o.company_id = :cid and date_format(o.create_date,'%Y, %m') = date_format(now(),'%Y, %m')" +
             " and o.id_receipt_export is null  group by o.id_items limit 3", nativeQuery = true)
     List<ExportWareHouse> getListOrder(Long cid, Integer delete);
+
+    @Query(value = "select count(*) from `export_ware_house` as o where date_format(o.create_date,'%Y-%m-%d') = date_format(:date,'%Y-%m-%d') and " +
+            "o.company_id = :cid and o.delete_flg = :deleteFlg and o.id_order is null", nativeQuery = true)
+    Integer getCountByDate(
+            @Param("cid")
+                    Long cid,
+            @Param("deleteFlg")
+                    Integer deleteFlg,
+            @Param("date")
+                    Date date
+    );
 
 }

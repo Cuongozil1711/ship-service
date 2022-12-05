@@ -26,4 +26,16 @@ public class BillApi {
         }
     }
 
+    @GetMapping("/update/{id}")
+    protected @ResponseBody
+    ResponseEntity<Object> search(
+            @RequestHeader Long cid,
+            @PathVariable(value = "id") Long id) {
+        try {
+            return new ResponseEntity<>(billService.updateBill(id, cid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
 }

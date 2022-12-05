@@ -17,5 +17,6 @@ public class ItemsDto {
     private Long idCategory;
     private Long idPubliser;
     private Long idStall;
+    private String state;
     private List<PriceItemsDto> priceItemsDtos;
 }

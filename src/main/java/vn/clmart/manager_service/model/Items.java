@@ -31,6 +31,7 @@ public class Items extends PersistableEntity<Long> {
     private Long idPubliser;
     private Long idStall;
     private String image;
+    private String state;
 
     public static Items of(ItemsDto itemsDto, Long cid, String uid){
         Items items = Items.builder()

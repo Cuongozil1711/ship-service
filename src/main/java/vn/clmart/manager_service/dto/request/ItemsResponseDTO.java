@@ -24,6 +24,7 @@ public class ItemsResponseDTO {
     private String image;
     private Long totalSold;
     private Long totalInWareHouse;
+    private String state;
     private List<PriceItemsDto> priceItemsDtos;
     private List<PromotionResponseDto> promotionResponseDto;
 }

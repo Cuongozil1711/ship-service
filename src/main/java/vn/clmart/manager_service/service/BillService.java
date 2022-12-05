@@ -35,4 +35,20 @@ public class BillService {
             throw new RuntimeException(ex);
         }
     }
+
+    public boolean updateBill(Long id, Long cid){
+        try {
+            Bill bill = billRepositorry.findByCompanyIdAndId(cid, id).orElse(null);
+            if(bill != null){
+                bill.setTotalPriceCustomer(bill.getTotalPrice());
+                bill.setState(Constants.BILL_EMPLOYEE.COMPLETE.name());
+                billRepositorry.save(bill);
+            }
+            else return false;
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+        return true;
+    }
 }

@@ -10,5 +10,7 @@ public interface BillRepositorry extends JpaRepository<Bill, Long> {
     Optional<Bill> findByCompanyIdAndDeleteFlgAndIdOrder(Long cid, Integer deleteFlg, Long idOrder);
     Optional<Bill> findByCompanyIdAndIdOrder(Long cid, Long idOrder);
 
+    Optional<Bill> findByCompanyIdAndId(Long cid, Long id);
+
     List<Bill> findAllByCompanyIdAndStateAndDeleteFlg(Long cid, String state, Integer deleteFlg);
 }
