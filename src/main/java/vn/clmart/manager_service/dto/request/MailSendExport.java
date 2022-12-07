@@ -5,15 +5,17 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class StatisticalResponseDTO {
-    private Integer sumQuality;
-    private Long sumPriceNow;
-    private Long sumPriceAfter;
-    private Integer sumNow;
-    private Integer totalImport;
-    private Integer totalExport;
+public class MailSendExport {
+    private String companyName;
+    private String employeeExport;
+    private Date dateExport;
+    private String codeExport;
+    private String companyNameTo;
+    private String status;
 }

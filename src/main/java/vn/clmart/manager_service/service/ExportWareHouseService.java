@@ -12,11 +12,14 @@ import vn.clmart.manager_service.config.exceptions.BusinessException;
 import vn.clmart.manager_service.dto.*;
 import vn.clmart.manager_service.dto.request.ExportWareHouseResponseDTO;
 import vn.clmart.manager_service.dto.request.ItemsResponseDTO;
+import vn.clmart.manager_service.dto.request.MailSendExport;
 import vn.clmart.manager_service.model.*;
 import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.untils.Constants;
 import vn.clmart.manager_service.untils.DateUntils;
+import vn.clmart.manager_service.untils.MapUntils;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -61,6 +64,13 @@ public class ExportWareHouseService {
 
     @Autowired
     WareHouseService wareHouseService;
+
+    @Autowired
+    MailService mailService;
+
+    @Lazy
+    @Autowired
+    PDFGeneratorService pdfGeneratorService;
 
 
     public void validateDto(ExportWareHouseDto exportWareHouseDto, Long cid, String uid){
@@ -217,7 +227,7 @@ public class ExportWareHouseService {
     }
     public boolean exportWareHouse(ExportWareHouseListDto exportWareHouseListDto, Long cid, String uid){
         try {
-//            ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.getById(cid, uid, exportWareHouseListDto.getIdReceiptExport());
+            ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.getById(cid, uid, exportWareHouseListDto.getIdReceiptExport());
 //            receiptExportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
 
             for(DetailsItemOrderDto itemExport : exportWareHouseListDto.getData()){
@@ -237,6 +247,21 @@ public class ExportWareHouseService {
                 exportWareHouse.setCode(exportWareHouseListDto.getCode());
                 exportWareHouseRepository.save(exportWareHouse);
             }
+
+            MailSendExport mailSendExport = new MailSendExport();
+            mailSendExport.setCodeExport(receiptExportWareHouse.getCode());
+            FullName fullName = userService.getFullName(receiptExportWareHouse.getCompanyId(), receiptExportWareHouse.getCreateBy());
+            mailSendExport.setEmployeeExport(fullName.getFirstName() + " " + fullName.getLastName());
+            mailSendExport.setCompanyName(companyService.getById(cid, uid, receiptExportWareHouse.getCompanyId()).getName());
+            mailSendExport.setCompanyNameTo(companyService.getById(cid, uid, receiptExportWareHouse.getCompanyIdTo()).getName());
+            mailSendExport.setDateExport(new Date());
+            mailSendExport.setStatus("Đang thực hiện");
+            exportWareHouseListDto.setCreateByName(fullName.getFirstName() + " " + fullName.getLastName());
+            ReceiptExportWareHouseDto receiptExportWareHouseDto = new ReceiptExportWareHouseDto();
+            MapUntils.copyWithoutAudit(receiptExportWareHouse, receiptExportWareHouseDto);
+            exportWareHouseListDto.setReceiptExportWareHouseDto(receiptExportWareHouseDto);
+            File file = pdfGeneratorService.exportWareHouse(exportWareHouseListDto, receiptExportWareHouse.getId(), cid);
+            mailService.sendEmailStatusExport(mailSendExport, file);
             return true;
         }
         catch (Exception ex){

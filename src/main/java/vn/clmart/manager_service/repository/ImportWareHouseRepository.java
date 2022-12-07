@@ -55,4 +55,13 @@ public interface ImportWareHouseRepository extends JpaRepository<ImportWareHouse
             @Param("date")
                     Date date
     );
+
+    @Query(value = "select count(*) from `import_ware_house` as o where " +
+            "o.company_id = :cid and o.delete_flg = :deleteFlg", nativeQuery = true)
+    Integer getCountImport(
+            @Param("cid")
+                    Long cid,
+            @Param("deleteFlg")
+                    Integer deleteFlg
+    );
 }

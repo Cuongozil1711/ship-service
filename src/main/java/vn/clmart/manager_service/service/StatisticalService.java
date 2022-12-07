@@ -36,6 +36,12 @@ public class StatisticalService {
     @Autowired
     UserService userService;
 
+    @Autowired
+    ExportWareHouseRepository exportWareHouseRepository;
+
+    @Autowired
+    ImportWareHouseRepository importWareHouseRepository;
+
     public Map<String, StatisticalResponseDTO> statistical(Long cid, String uid){
         try {
             Map<String, StatisticalResponseDTO> statisticaList = new HashMap<>();
@@ -54,6 +60,14 @@ public class StatisticalService {
             statisticalRevenue.setSumPriceNow(orderService.getRevenueNow(cid, uid));
              statisticalRevenue.setSumPriceAfter(orderService.getRevenueAfter(cid, uid));
             statisticaList.put("statisticalRevenue", statisticalRevenue);
+            // nhập kho
+            StatisticalResponseDTO statisticalImport = new StatisticalResponseDTO();
+            statisticalImport.setTotalImport(importWareHouseRepository.getCountImport(cid, Constants.DELETE_FLG.NON_DELETE));
+            statisticaList.put("totalImport", statisticalImport);
+            // xuất kho
+            StatisticalResponseDTO statisticalExport = new StatisticalResponseDTO();
+            statisticalExport.setTotalExport(exportWareHouseRepository.getCountExport(cid, Constants.DELETE_FLG.NON_DELETE));
+            statisticaList.put("totalExport", statisticalExport);
             return statisticaList;
         }
         catch (Exception ex){
@@ -73,6 +87,19 @@ public class StatisticalService {
             response.put("exportItems", exportItems);
             response.put("importItems", importItems);
             return response;
+        }
+        catch (Exception ex){
+            throw new RuntimeException();
+        }
+    }
+
+    public Integer[] getCountOrder(Long cid, String uid){
+        try {
+            Integer[] exportItems = new Integer[12];
+            for(int i=1; i <= 12; i++){
+                exportItems[i-1] = orderRepositorry.getOrderForMonth(cid, Constants.DELETE_FLG.NON_DELETE, i);
+            }
+            return exportItems;
         }
         catch (Exception ex){
             throw new RuntimeException();

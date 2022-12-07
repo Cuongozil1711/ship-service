@@ -20,4 +20,6 @@ public class Constants {
         INIT, PENDING, PROCESSING, APPROVED, REJECTED, CANCELED, COMPLETE,
         EXTEND
     }
+
+    public static final String MAIL_ON_SUCCESS_03 = "./template/fileBz003.vm";
 }

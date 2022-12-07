@@ -76,6 +76,19 @@ public class StatisticalApi {
         }
     }
 
+    @GetMapping("/chartInfoOrder")
+    protected @ResponseBody
+    ResponseEntity<Object> chartInfoOrder(
+            @RequestHeader Long cid,
+            @RequestHeader String uid
+    ) {
+        try {
+            return new ResponseEntity<>(statisticalService.getCountOrder(cid, uid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
 
     @GetMapping("/getOrderByEmployee")
     protected @ResponseBody
