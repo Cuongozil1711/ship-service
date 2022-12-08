@@ -5,12 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import vn.clmart.manager_service.service.OrderService;
 import vn.clmart.manager_service.service.StatisticalService;
+
+import java.util.Calendar;
 
 @Controller
 @RequestMapping("/statisticalApi")
@@ -63,27 +62,31 @@ public class StatisticalApi {
         }
     }
 
-    @GetMapping("/chartInfo")
+    @GetMapping("/chartInfo/{year}")
     protected @ResponseBody
     ResponseEntity<Object> chartInfo(
             @RequestHeader Long cid,
-            @RequestHeader String uid
+            @RequestHeader String uid,
+            @PathVariable(value = "year", required = false) Integer year
     ) {
         try {
-            return new ResponseEntity<>(statisticalService.getCountOrderAndImport(cid, uid), HttpStatus.OK);
+            year = year == null ? Calendar.getInstance().get(Calendar.YEAR) : year;
+            return new ResponseEntity<>(statisticalService.getCountOrderAndImport(cid, uid, year), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
 
-    @GetMapping("/chartInfoOrder")
+    @GetMapping("/chartInfoOrder/{year}")
     protected @ResponseBody
     ResponseEntity<Object> chartInfoOrder(
             @RequestHeader Long cid,
-            @RequestHeader String uid
+            @RequestHeader String uid,
+            @PathVariable(value = "year", required = false) Integer year
     ) {
         try {
-            return new ResponseEntity<>(statisticalService.getCountOrder(cid, uid), HttpStatus.OK);
+            year = year == null ? Calendar.getInstance().get(Calendar.YEAR) : year;
+            return new ResponseEntity<>(statisticalService.getCountOrder(cid, uid, year), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

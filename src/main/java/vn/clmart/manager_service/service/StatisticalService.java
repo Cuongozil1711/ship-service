@@ -75,13 +75,13 @@ public class StatisticalService {
         }
     }
 
-    public Map<String, Object> getCountOrderAndImport(Long cid, String uid){
+    public Map<String, Object> getCountOrderAndImport(Long cid, String uid, Integer year){
         try {
             Integer[] exportItems = new Integer[12];
             Integer[] importItems = new Integer[12];
             for(int i=1; i <= 12; i++){
-                exportItems[i-1] = receiptExportWareHouseRepository.getImportForMonth(cid, Constants.DELETE_FLG.NON_DELETE, i) + orderRepositorry.getOrderForMonth(cid, Constants.DELETE_FLG.NON_DELETE, i);
-                importItems[i-1] = receiptImportWareHouseRepository.getImportForMonth(cid, Constants.DELETE_FLG.NON_DELETE, i);
+                exportItems[i-1] = receiptExportWareHouseRepository.getImportForMonth(cid, Constants.DELETE_FLG.NON_DELETE, i, year) + orderRepositorry.getOrderForMonth(cid, Constants.DELETE_FLG.NON_DELETE, i, year);
+                importItems[i-1] = receiptImportWareHouseRepository.getImportForMonth(cid, Constants.DELETE_FLG.NON_DELETE, i, year);
             }
             HashMap<String, Object> response = new HashMap<>();
             response.put("exportItems", exportItems);
@@ -93,11 +93,11 @@ public class StatisticalService {
         }
     }
 
-    public Integer[] getCountOrder(Long cid, String uid){
+    public Integer[] getCountOrder(Long cid, String uid, Integer year){
         try {
             Integer[] exportItems = new Integer[12];
             for(int i=1; i <= 12; i++){
-                exportItems[i-1] = orderRepositorry.getOrderForMonth(cid, Constants.DELETE_FLG.NON_DELETE, i);
+                exportItems[i-1] = orderRepositorry.getOrderForMonth(cid, Constants.DELETE_FLG.NON_DELETE, i, year);
             }
             return exportItems;
         }

@@ -71,7 +71,7 @@ public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse
     );
 
     @Query(value = "select count(*) from `export_ware_house` as o where " +
-            "o.company_id = :cid and o.delete_flg = :deleteFlg and o.id_order is null", nativeQuery = true)
+            "o.company_id = :cid and o.delete_flg = :deleteFlg", nativeQuery = true)
     Integer getCountExport(
             @Param("cid")
                     Long cid,

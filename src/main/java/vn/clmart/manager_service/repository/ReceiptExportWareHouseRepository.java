@@ -16,8 +16,8 @@ public interface ReceiptExportWareHouseRepository extends JpaRepository<ReceiptE
 
     Page<ReceiptExportWareHouse> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable);
 
-    @Query(value = "select count(case when month(e.create_date) = :month then 0 end) as t1  " +
+    @Query(value = "select count(case when month(e.create_date) = :month and year(e.create_date) =:year then 0 end) as t1  " +
             " from  `receipt_export_ware_house` as e " +
             "where e.company_id = :cid and e.delete_flg = :deleteFlg and e.state = 'COMPLETE'", nativeQuery = true)
-    Integer getImportForMonth(@Param("cid") Long cid, Integer deleteFlg, Integer month);
+    Integer getImportForMonth(@Param("cid") Long cid, Integer deleteFlg, Integer month, Integer year);
 }
