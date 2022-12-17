@@ -20,7 +20,7 @@ public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse
 
     @Query("select i from ExportWareHouse as i inner join ReceiptExportWareHouse as r on i.idReceiptExport = r.id " +
             "where i.companyId = :cid and i.deleteFlg = :delete " +
-            "and ((lower(concat(coalesce(i.code, ''), coalesce(r.name, ''))) " +
+            "and ((lower(concat(coalesce(r.code, ''), coalesce(r.name, ''))) " +
             "like lower(concat('%',coalesce(:search, ''), '%')))  or (coalesce(:search, '') = '')) " +
             "and i.idReceiptExport is not null " +
             "and (i.createDate between coalesce(:startDate, current_date) and coalesce(:endDate, current_date)) " +

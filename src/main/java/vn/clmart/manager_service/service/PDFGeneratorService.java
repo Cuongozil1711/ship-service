@@ -5,10 +5,13 @@ import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.DottedLineSeparator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import vn.clmart.manager_service.dto.DetailsItemOrderDto;
 import vn.clmart.manager_service.dto.ExportWareHouseListDto;
+import vn.clmart.manager_service.dto.request.ItemsResponseDTO;
 import vn.clmart.manager_service.dto.request.OrderItemResponseDTO;
+import vn.clmart.manager_service.model.ImportWareHouse;
 import vn.clmart.manager_service.untils.ReadNumber;
 
 import java.io.File;
@@ -20,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -46,11 +50,15 @@ public class PDFGeneratorService {
     @Autowired
     ItemsService itemsService;
 
+    @Autowired
+    @Lazy
+    ImportWareHouseService importWareHouseService;
+
     public void exportWareHouse(HttpServletResponse response, Long idReceiptExport, Long cid) throws Exception {
         ExportWareHouseListDto exportWareHouseListDto = exportWareHouseService.getByIdReceiptExport(cid, "", idReceiptExport);
         Document document = new Document(PageSize.A4);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        OutputStream outputStream = new FileOutputStream("/ExportWareHouse.pdf");
+        OutputStream outputStream = response.getOutputStream();
         PdfWriter pdf  = PdfWriter.getInstance(document, outputStream);
 
         document.open();
@@ -599,6 +607,77 @@ public class PDFGeneratorService {
         image1.scalePercent(scaler1);
         image1.setPaddingTop(0);
         image1.setAlignment(Element.ALIGN_CENTER);
+
+        document.close();
+    }
+
+    private Paragraph generateBarcode(Document document, PdfWriter pdf , Long code){
+        PdfContentByte contB = pdf.getDirectContent();
+        Barcode128 barCode = new Barcode128();
+        barCode.setCode(code.toString());
+        barCode.setCodeType(Barcode128.CODE128);
+
+        BarcodeEAN barcodeEAN = new BarcodeEAN();
+        barcodeEAN.setCode(code.toString());
+        barcodeEAN.setCodeType(Barcode.EAN13);
+
+        Image image = barCode.createImageWithBarcode(contB, BaseColor.BLACK, BaseColor.BLACK);
+        barCode.setCodeType(Barcode.EAN13);
+        Image image1 = barcodeEAN.createImageWithBarcode(contB, BaseColor.BLACK, BaseColor.BLACK);
+        barCode.setCodeType(Barcode.EAN8);
+        Image image2 = barcodeEAN.createImageWithBarcode(contB, BaseColor.BLACK, BaseColor.BLACK);
+
+
+        float scaler = ((document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin()
+                - 0) / image.getWidth()) * 25;
+
+        image.scalePercent(scaler);
+        image.setPaddingTop(0);
+        image.setAlignment(Element.ALIGN_CENTER);
+
+        image1.scalePercent(scaler);
+        image1.setPaddingTop(0);
+        image1.setAlignment(Element.ALIGN_CENTER);
+
+
+        image2.scalePercent(scaler);
+        image2.setPaddingTop(0);
+        image2.setAlignment(Element.ALIGN_CENTER);
+
+        Paragraph paragraph7 = new Paragraph();
+        paragraph7.setSpacingBefore(10f);
+        paragraph7.setSpacingAfter(10f);
+        paragraph7.add (new Chunk(image, 0, 10, true));;
+        paragraph7.add (new Chunk(image1, 20, 10, true));;
+        paragraph7.add (new Chunk(image2, 40, 10, true));;
+        paragraph7.setAlignment(Paragraph.ALIGN_CENTER);
+
+        return paragraph7;
+    }
+
+    public void exportBarcodeItems(HttpServletResponse response, Long idItems, Long cid) throws Exception {
+        ItemsResponseDTO items = itemsService.getById(cid, "", idItems);
+        Document document = new Document(PageSize.A4);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        OutputStream outputStream = response.getOutputStream();
+        PdfWriter pdf  = PdfWriter.getInstance(document, outputStream);
+        BaseFont courier = BaseFont.createFont(fontFile.getPath(),BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font myfont = new Font(courier, 10, Font.NORMAL);
+
+        document.open();
+
+        Paragraph paragraph = new Paragraph(new
+                String(("Danh sách mã vạch " + items.getName()).getBytes(StandardCharsets.UTF_8)), myfont);
+        paragraph.setAlignment(Paragraph.ALIGN_CENTER);
+        document.add(paragraph);
+        List<ImportWareHouse> importWareHouses = importWareHouseService.getByIdtems(cid, idItems);
+        importWareHouses.forEach(importWareHouse -> {
+            try {
+                document.add(generateBarcode(document, pdf, importWareHouse.getId()));
+            } catch (DocumentException e) {
+                e.printStackTrace();
+            }
+        });
 
         document.close();
     }

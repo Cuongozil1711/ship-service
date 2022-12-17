@@ -40,7 +40,7 @@ public class SecurityConfig{
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -55,7 +55,9 @@ public class SecurityConfig{
                 .csrf().disable();
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/index*", "/resources/**", "/*.js", "/*.json", "/*.ico")
                 .permitAll();
-        http.authorizeRequests().antMatchers("/user/login", "/user/create","/pdf/export/**","/pdf/order/**", "/pdf/orderItem/**").permitAll();
+        http.authorizeRequests().antMatchers("/user/login", "/user/create","/pdf/export/**","/pdf/order/**", "/pdf/orderItem/**",
+                "/pdf/barcode/**"
+                ).permitAll();
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

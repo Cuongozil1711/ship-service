@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.*;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -323,6 +324,37 @@ public class ImportWareHouseService {
             logger.error(ex);
             throw new RuntimeException(ex);
         }
+    }
+
+    public boolean checkRemoveQuatity(Long cid, String uid, Long idImport, Integer quatity){
+        try {
+            ImportWareHouse importWareHouse = importWareHouseRepository.findByCompanyIdWorkAndIdAndDeleteFlg(cid, idImport, Constants.DELETE_FLG.NON_DELETE).orElse(null);
+            if(importWareHouse != null){
+                List<ExportWareHouse> wareHouseList = exportWareHouseRepository.findAllByDeleteFlgAndIdItemsAndCompanyIdAndIdReceiptImport(Constants.DELETE_FLG.NON_DELETE, importWareHouse.getIdItems(), cid, importWareHouse.getIdReceiptImport());
+                AtomicReference<Integer> total = new AtomicReference<>(0);
+                wareHouseList.forEach(exportWareHouse -> {
+                    total.updateAndGet(v -> v + exportWareHouse.getNumberBox() * exportWareHouse.getNumberBox());
+                });
+                if(total.get() > quatity) return true;
+            }
+        }
+        catch (Exception ex){
+            logger.error(ex);
+            throw new RuntimeException(ex);
+        }
+        return false;
+    }
+
+    public boolean prepareEditImportListWareHouse(ImportListDataWareHouseDto importListDataWareHouseDto, Long cid, String uid){
+        AtomicBoolean check = new AtomicBoolean(false);
+        importListDataWareHouseDto.getData().forEach(importWareHouseDto -> {
+            if(importWareHouseDto.getId() != null){
+                if(checkRemoveQuatity(cid, uid, importWareHouseDto.getId(), importWareHouseDto.getNumberBox() * importWareHouseDto.getQuantity())){
+                    check.set(true);
+                }
+            }
+        });
+        return check.get();
     }
 
     @Transactional

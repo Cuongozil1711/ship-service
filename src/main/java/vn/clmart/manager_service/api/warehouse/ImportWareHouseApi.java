@@ -62,6 +62,20 @@ public class ImportWareHouseApi {
         }
     }
 
+    @PostMapping("/checkEdit/edit")
+    protected @ResponseBody
+    ResponseEntity<Object> checkEdit(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @RequestBody ImportListDataWareHouseDto importListDataWareHouseDto
+    ) {
+        try {
+            return new ResponseEntity<>(importWareHouseService.prepareEditImportListWareHouse(importListDataWareHouseDto, cid, uid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
     @DeleteMapping("/{idReceiptExport}")
     protected @ResponseBody
     ResponseEntity<Object> deleteExport(

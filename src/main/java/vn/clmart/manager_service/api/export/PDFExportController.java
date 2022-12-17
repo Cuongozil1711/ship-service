@@ -56,5 +56,16 @@ public class PDFExportController {
         this.pdfGeneratorService.orderExportIem(response, id, cid);
     }
 
+    @GetMapping("/barcode/{id}/{cid}")
+    public void generateBarcodeItem(HttpServletResponse response, @PathVariable("id") Long id, @PathVariable("cid") Long cid) throws Exception {
+        response.setContentType("application/pdf");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=barocde_" + currentDateTime + ".pdf";
+        response.setHeader(headerKey, headerValue);
+        this.pdfGeneratorService.exportBarcodeItems(response, id, cid);
+    }
+
 
 }
