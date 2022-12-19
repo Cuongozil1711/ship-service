@@ -254,4 +254,8 @@ public class UserService {
         }
         return employeeResponseDTO;
     }
+
+    public List<Employee> getUserMappingLeader(Long cid){
+        return employeeRepository.getListUserIdByAuthority(cid);
+    }
 }

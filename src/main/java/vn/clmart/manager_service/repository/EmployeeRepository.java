@@ -21,6 +21,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     List<Employee> findAllByDeleteFlgAndCompanyId(Integer deleteFlg, Long companyId);
 
-    @Query("Select e.idUser from Employee as e inner join Position as p on p.id = e.idPosition and (p.authority = 'S' or p.authority = 'A') and e.companyId = :cid")
-    List<String> getListUserIdByAuthority(Long cid);
+    @Query("Select e from Employee as e inner join Position as p on p.id = e.idPosition and (p.authority = 'S' or p.authority = 'A') and e.companyId = :cid")
+    List<Employee> getListUserIdByAuthority(Long cid);
 }
