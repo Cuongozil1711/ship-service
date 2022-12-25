@@ -192,7 +192,7 @@ public class ImportWareHouseService {
 
                     notificationService.sendNotificationToUser(json);
 
-                    ExportWareHouseListDto exportWareHouseListDto = exportWareHouseService.getByIdReceiptExport(cid, "", idReceiptExport);
+                    ExportWareHouseListDto exportWareHouseListDto = exportWareHouseService.getByIdReceiptExport(receiptExportWareHouse.getCompanyId(), "", idReceiptExport);
                     MailSendExport mailSendExport = new MailSendExport();
                     mailSendExport.setCodeExport(receiptExportWareHouse.getCode());
                     FullName fullName = userService.getFullName(receiptExportWareHouse.getCompanyId(), receiptExportWareHouse.getCreateBy());
@@ -205,7 +205,7 @@ public class ImportWareHouseService {
                     ReceiptExportWareHouseDto receiptExportWareHouseDto = new ReceiptExportWareHouseDto();
                     MapUntils.copyWithoutAudit(receiptExportWareHouse, receiptExportWareHouseDto);
                     exportWareHouseListDto.setReceiptExportWareHouseDto(receiptExportWareHouseDto);
-                    File file = pdfGeneratorService.exportWareHouse(exportWareHouseListDto, receiptExportWareHouse.getId(), cid);
+                    File file = pdfGeneratorService.exportWareHouse(exportWareHouseListDto, receiptExportWareHouse.getId(), receiptExportWareHouse.getCompanyId());
                     mailService.sendEmailStatusExport(mailSendExport, file);
                     return true;
                 }

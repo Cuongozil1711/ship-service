@@ -178,7 +178,7 @@ public class PDFGeneratorService {
 
     public File exportWareHouse(ExportWareHouseListDto exportWareHouseListDto, Long idReceiptExport, Long cid) throws Exception {
         Document document = new Document(PageSize.A4);
-        File f = new File("/ExportWareHouse.pdf");
+        File f = new File("/var/ExportWareHouse.pdf");
         FileOutputStream outputStream = new FileOutputStream(f);
         PdfWriter pdf  = PdfWriter.getInstance(document, outputStream);
 

@@ -59,6 +59,9 @@ public class UserService {
     @Autowired
     TokenFireBaseRepository tokenFireBaseRepository;
 
+    @Autowired
+    CompanyService companyService;
+
     private static final Logger logger = LogManager.getLogger(UserService.class);
 
     public LoginDto authenticateUserHandler(UserLoginDto userLoginDto,  HttpServletRequest request) {
@@ -164,7 +167,7 @@ public class UserService {
             employee.setCode(employeeDto.getCmt());
             employeeRepository.save(employee);
         }
-        return null;
+        return employee;
     }
 
     public PageImpl<EmployeeDto> search(Long cid,  Pageable pageable){
@@ -252,6 +255,7 @@ public class UserService {
             BeanUtils.copyProperties(address, addressDto);
             employeeResponseDTO.setAddressDto(addressDto);
         }
+        employeeResponseDTO.setCompanyName(companyService.getById(cid, uid, cid).getName());
         return employeeResponseDTO;
     }
 

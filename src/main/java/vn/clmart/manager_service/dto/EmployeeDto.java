@@ -26,4 +26,5 @@ public class EmployeeDto {
     private Date birthDay;
     private String image;
     private Long cid;
+    private String companyName;
 }
