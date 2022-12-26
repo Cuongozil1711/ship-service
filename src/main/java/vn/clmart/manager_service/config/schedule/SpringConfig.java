@@ -18,6 +18,7 @@ import vn.clmart.manager_service.untils.Constants;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableScheduling
@@ -61,11 +62,11 @@ public class SpringConfig {
             Integer sumImport = importWareHouseRepository.getCountByDate(company.getId(), Constants.DELETE_FLG.NON_DELETE, calendar.getTime());
             Integer sumExport = exportWareHouseRepository.getCountByDate(company.getId(), Constants.DELETE_FLG.NON_DELETE, calendar.getTime());
 
-            List<Employee> employees = userService.getUserMappingLeader(company.getId());
+            Set<Employee> employees = userService.getUserMappingLeader(company.getId()).stream().collect(Collectors.toSet());
 
             employees.forEach(e -> {
                 Map<String, String> notification = new HashMap<>();
-                notification.put("body",  calendar.get(Calendar.DATE) + "/" + calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.YEAR) + ": " + sumOrder + " đơn hàng " +
+                notification.put("body",  calendar.get(Calendar.DATE) + "/" + (calendar.get(Calendar.MONTH) + 1) + "/" + calendar.get(Calendar.YEAR) + ": " + sumOrder + " đơn hàng " +
                         sumImport + " nhập " + sumExport + " xuất");
                 notification.put("title", "Thông báo");
                 tokenFirseBaseDTO.setNotification(notification);

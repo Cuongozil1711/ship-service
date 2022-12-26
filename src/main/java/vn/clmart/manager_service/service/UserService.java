@@ -155,12 +155,16 @@ public class UserService {
             fullName.setLastName(employeeDto.getFullNameDto().getLastName());
             fullNameRepository.save(fullName);
 
-            Address address = addressRepository.findByCompanyIdAndId(cid, employee.getIdAddress());
+            Address address = addressRepository.findById(employee.getIdAddress()).orElse(new Address());
             address.setProvinceId(employeeDto.getAddressDto().getProvinceId());
             address.setDistrictId(employeeDto.getAddressDto().getDistrictId());
             address.setWardId(employeeDto.getAddressDto().getWardId());
             address.setName(employeeDto.getAddressDto().getName());
             addressRepository.save(address);
+
+//            User user = userRepository.findUserByUidAndDeleteFlg(employee.getIdUser(), Constants.DELETE_FLG.NON_DELETE).orElse(null);
+//            if(user != null)
+//            employeeDto.setUserLoginDto(new UserLoginDto(user.getUsername(), "", ""));
 
             employee.setTel(employeeDto.getTel());
             employee.setBirthDay(employeeDto.getBirthDay());
@@ -189,6 +193,11 @@ public class UserService {
                 employeeResponseDTO.setStatus(employee.getDeleteFlg());
                 employeeResponseDTO.setBirthDay(employee.getBirthDay());
                 employeeResponseDTO.setImage(employee.getImage());
+
+                User user = userRepository.findUserByUidAndDeleteFlg(employee.getIdUser(), Constants.DELETE_FLG.NON_DELETE).orElse(null);
+                if(user != null)
+                    employeeResponseDTO.setUserLoginDto(new UserLoginDto(user.getUsername(), "", ""));
+
                 if(employee.getIdAddress() != null){
                     AddressDto addressDto = new AddressDto();
                     Address address = addressRepository.findById(employee.getIdAddress()).orElse(new Address());
