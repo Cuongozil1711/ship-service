@@ -166,6 +166,13 @@ public class UserService {
 //            if(user != null)
 //            employeeDto.setUserLoginDto(new UserLoginDto(user.getUsername(), "", ""));
 
+            employee.setIdAddress(address.getId());
+            employee.setIdFullName(fullName.getId());
+            employee.setTel(employeeDto.getTel());
+            employee.setIdPosition(employeeDto.getIdPosition());
+            employee.setCompanyId(cid);
+            employee.setCreateBy(uid);
+            employee.setCode(employeeDto.getCmt());
             employee.setTel(employeeDto.getTel());
             employee.setBirthDay(employeeDto.getBirthDay());
             employee.setCode(employeeDto.getCmt());
