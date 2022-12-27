@@ -32,6 +32,7 @@ public class Items extends PersistableEntity<Long> {
     private Long idStall;
     private String image;
     private String state;
+    private Double weight;
 
     public static Items of(ItemsDto itemsDto, Long cid, String uid){
         Items items = Items.builder()
@@ -40,6 +41,7 @@ public class Items extends PersistableEntity<Long> {
                 .priceItem(itemsDto.getPriceItem())
                 .idCategory(itemsDto.getIdCategory())
                 .idPubliser(itemsDto.getIdPubliser())
+                .weight(itemsDto.getWeight())
                 .idStall(itemsDto.getIdStall()).build();
         items.setCreateBy(uid);
         items.setCompanyId(cid);

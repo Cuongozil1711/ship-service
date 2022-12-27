@@ -174,17 +174,21 @@ public class ImportWareHouseService {
                     }
                     importWareHouseRepository.saveAll(importWareHouses);
 
+                    Set<Employee> employees = userService.getUserMappingLeader(cid).stream().collect(Collectors.toSet());
+                    employees.addAll(userService.getUserMappingLeader(receiptExportWareHouse.getCompanyId()).stream().collect(Collectors.toSet()));
+                    String[] token = new String[employees.size()];
                     // gui thong bao cho quan ly chi nhanh
                     TokenFirseBaseDTO tokenFirseBaseDTO = new TokenFirseBaseDTO();
                     tokenFirseBaseDTO.setPriority("high");
-                    String[] token = new String[10];
                     Map<String, String> notification = new HashMap<>();
                     notification.put("body", "Hoàn tất phiếu: " + receiptExportWareHouse.getName());
                     notification.put("title", "Nhập kho");
                     tokenFirseBaseDTO.setNotification(notification);
-                    TokenFireBase tokenFireBase = tokenFireBaseRepository.findByDeleteFlgAndUserId(Constants.DELETE_FLG.NON_DELETE, uid).orElse(null);
-                    if(tokenFireBase != null){
-                        token[0] = tokenFireBase.getToken();
+                    for(int i = 0; i < employees.stream().collect(Collectors.toList()).size(); i++){
+                        TokenFireBase tokenFireBase = tokenFireBaseRepository.findByDeleteFlgAndUserId(Constants.DELETE_FLG.NON_DELETE, employees.stream().collect(Collectors.toList()).get(i).getIdUser()).orElse(null);
+                        if(tokenFireBase != null){
+                            token[i] = tokenFireBase.getToken();
+                        }
                     }
                     tokenFirseBaseDTO.setRegistration_ids(token);
 
