@@ -14,10 +14,19 @@ public interface ReceiptExportWareHouseRepository extends JpaRepository<ReceiptE
     Optional<ReceiptExportWareHouse> findByIdAndDeleteFlg(Long id, Integer deleteFlg);
     Optional<ReceiptExportWareHouse> findByCodeAndDeleteFlg(String code, Integer deleteFlg);
 
-    Page<ReceiptExportWareHouse> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable);
+    Page<ReceiptExportWareHouse> findAllByCompanyIdAndDeleteFlgOrderByCreateDateDesc(Long cid, Integer deleteFlg, Pageable pageable);
 
     @Query(value = "select count(case when month(e.create_date) = :month and year(e.create_date) =:year then 0 end) as t1  " +
             " from  `receipt_export_ware_house` as e " +
             "where e.company_id = :cid and e.delete_flg = :deleteFlg and e.state = 'COMPLETE'", nativeQuery = true)
     Integer getImportForMonth(@Param("cid") Long cid, Integer deleteFlg, Integer month, Integer year);
+
+    @Query(value = "select count(*) from `receipt_export_ware_house` as o where " +
+            "o.company_id = :cid and o.delete_flg = :deleteFlg", nativeQuery = true)
+    Integer getCountExport(
+            @Param("cid")
+                    Long cid,
+            @Param("deleteFlg")
+                    Integer deleteFlg
+    );
 }

@@ -92,7 +92,7 @@ public class ReceiptImportWareHouseService {
 
     public PageImpl<ReceiptImportWareHouseResponseDTO> search(Long cid, Pageable pageable){
         try {
-            Page<ReceiptImportWareHouse> pageSearch = receiptImportWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
+            Page<ReceiptImportWareHouse> pageSearch = receiptImportWareHouseRepository.findAllByCompanyIdAndDeleteFlgOrderByCreateDateDesc(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
             List<ReceiptImportWareHouseResponseDTO> list = new ArrayList<>();
             for(ReceiptImportWareHouse receiptImportWareHouse : pageSearch.getContent()){
                 ReceiptImportWareHouseResponseDTO responseDTO = new ReceiptImportWareHouseResponseDTO();

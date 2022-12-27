@@ -225,10 +225,14 @@ public class ImportWareHouseService {
             receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
             for(ImportWareHouseDto item : importListDataWareHouseDto.getData()){
                 ImportWareHouse importWareHouse = ImportWareHouse.of(item, cid, uid);
-                if(item.getId() != null) importWareHouse.setId(item.getId());
+                if(item.getId() != null) {
+                    importWareHouse.setId(item.getId());
+                }
                 else{
                     importWareHouse.setId(FakeId.getInstance().nextId());
                 }
+                importWareHouse.setCreateDate(new Date());
+                importWareHouse.setDeleteFlg(Constants.DELETE_FLG.NON_DELETE);
                 importWareHouse.setCode(importListDataWareHouseDto.getCode());
                 importWareHouse.setIdReceiptImport(importListDataWareHouseDto.getIdReceiptImport());
                 importWareHouseRepository.save(importWareHouse);

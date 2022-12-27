@@ -87,7 +87,7 @@ public class ReceiptExportWareHouseService {
 
     public PageImpl<ReceiptExportWareHouseResponseDTO> search(Long cid, Pageable pageable){
         try {
-            Page<ReceiptExportWareHouse> pageSearch = ReceiptExportWareHouseRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
+            Page<ReceiptExportWareHouse> pageSearch = ReceiptExportWareHouseRepository.findAllByCompanyIdAndDeleteFlgOrderByCreateDateDesc(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
             List<ReceiptExportWareHouseResponseDTO> list = new ArrayList<>();
             for(ReceiptExportWareHouse receiptImportWareHouse : pageSearch.getContent()){
                 ReceiptExportWareHouseResponseDTO responseDTO = new ReceiptExportWareHouseResponseDTO();

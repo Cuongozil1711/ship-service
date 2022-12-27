@@ -62,11 +62,11 @@ public class StatisticalService {
             statisticaList.put("statisticalRevenue", statisticalRevenue);
             // nhập kho
             StatisticalResponseDTO statisticalImport = new StatisticalResponseDTO();
-            statisticalImport.setTotalImport(importWareHouseRepository.getCountImport(cid, Constants.DELETE_FLG.NON_DELETE));
+            statisticalImport.setTotalImport(receiptImportWareHouseRepository.getCountImport(cid, Constants.DELETE_FLG.NON_DELETE));
             statisticaList.put("totalImport", statisticalImport);
             // xuất kho
             StatisticalResponseDTO statisticalExport = new StatisticalResponseDTO();
-            statisticalExport.setTotalExport(exportWareHouseRepository.getCountExport(cid, Constants.DELETE_FLG.NON_DELETE));
+            statisticalExport.setTotalExport(receiptExportWareHouseRepository.getCountExport(cid, Constants.DELETE_FLG.NON_DELETE) + orderRepositorry.getSumOrder(cid, Constants.DELETE_FLG.NON_DELETE));
             statisticaList.put("totalExport", statisticalExport);
             return statisticaList;
         }
