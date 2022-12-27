@@ -64,4 +64,14 @@ public interface ImportWareHouseRepository extends JpaRepository<ImportWareHouse
             @Param("deleteFlg")
                     Integer deleteFlg
     );
+
+    @Query("select i from ImportWareHouse i inner join ReceiptImportWareHouse r on r.id = i.idReceiptImport where i.deleteFlg = :delete" +
+            " and i.idItems = :idItems and i.companyIdWork = :cid  and (r.idWareHouse = :idWareHouse or coalesce(:idWareHouse, -1) = -1)")
+    public List<ImportWareHouse> getImportWareHouse(Integer delete, Long idItems, Long cid, Long idWareHouse);
+
+
+    @Query("select i from ImportWareHouse i inner join ReceiptImportWareHouse r on r.id = i.idReceiptImport where i.deleteFlg = :delete" +
+            " and i.idItems = :idItems and i.companyIdWork = :cid  and (r.idWareHouse = :idWareHouse or coalesce(:idWareHouse, -1) = -1) order by i.dateExpired desc")
+    public List<ImportWareHouse> findAllByDeleteFlgAndIdItemsAndCompanyIdWorkOrderByDateExpiredAscInWareHouse(Integer delete, Long idItems, Long cid, Long idWareHouse);
+
 }

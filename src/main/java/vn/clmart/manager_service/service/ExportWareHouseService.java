@@ -331,7 +331,7 @@ public class ExportWareHouseService {
         }
     }
 
-        public Long totalItemsInExport(Long idItem, Long cid){
+    public Long totalItemsInExport(Long idItem, Long cid){
         try {
             List<ExportWareHouse> exportWareHouses = exportWareHouseRepository.findAllByDeleteFlgAndIdItemsAndCompanyId(Constants.DELETE_FLG.NON_DELETE, idItem, cid);
             if(exportWareHouses.size() == 0) return 0l;
@@ -346,6 +346,23 @@ public class ExportWareHouseService {
             throw new BusinessException(ex.getMessage());
         }
     }
+
+    public Long totalItemsInExportIdWareHouse(Long idItem, Long cid, Long idWareHouse){
+        try {
+            List<ExportWareHouse> exportWareHouses = exportWareHouseRepository.getAllByIdWareHouse(Constants.DELETE_FLG.NON_DELETE, idItem, cid, idWareHouse);
+            if(exportWareHouses.size() == 0) return 0l;
+            Long total = 0l;
+            for(ExportWareHouse exportWareHouse : exportWareHouses){
+                if(exportWareHouse.getNumberBox() == null) exportWareHouse.setNumberBox(1);
+                total += exportWareHouse.getQuantity() * exportWareHouse.getNumberBox();
+            }
+            return total;
+        }
+        catch (Exception ex){
+            throw new BusinessException(ex.getMessage());
+        }
+    }
+
     public PageImpl<ExportWareHouseResponseDTO> search(Long cid, Integer status, String search, ItemsSearchDto itemsSearchDto, Pageable pageable){
         try {
             if(itemsSearchDto.getStartDate() == null) itemsSearchDto.setStartDate(DateUntils.minDate());

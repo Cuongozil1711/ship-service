@@ -120,15 +120,16 @@ public class ItemsApi {
         }
     }
 
-    @GetMapping("details/{id}")
+    @GetMapping("details/{id}/{idWareHouse}")
     protected @ResponseBody
     ResponseEntity<Object> getByIdDetails(
             @RequestHeader Long cid,
             @RequestHeader String uid,
-            @PathVariable("id") Long id
+            @PathVariable("id") Long id,
+            @PathVariable(value = "idWareHouse", required = false) Long idWareHousse
             ) {
         try {
-            return new ResponseEntity<>(ItemsService.getByIdtems(cid, uid, id), HttpStatus.OK);
+            return new ResponseEntity<>(ItemsService.getByIdtems(cid, uid, id, idWareHousse), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

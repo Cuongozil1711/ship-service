@@ -55,6 +55,7 @@ public class ReceiptImportWareHouseService {
     public ReceiptImportWareHouse update(ReceiptImportWareHouseDto receiptImportWareHouseDto, Long cid, String uid, Long id){
         try {
             ReceiptImportWareHouse receiptImportWareHouse = receiptImportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            if(receiptImportWareHouse.getState().equals(Constants.RECEIPT_WARE_HOUSE.COMPLETE)) return null;
             receiptImportWareHouse.setCompanyId(cid);
             receiptImportWareHouse.setUpdateBy(uid);
             receiptImportWareHouse.setIdWareHouse(receiptImportWareHouseDto.getIdWareHouse());

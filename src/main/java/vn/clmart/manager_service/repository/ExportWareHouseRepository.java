@@ -79,4 +79,7 @@ public interface ExportWareHouseRepository extends JpaRepository<ExportWareHouse
                     Integer deleteFlg
     );
 
+    @Query("select i from ExportWareHouse i inner join ReceiptImportWareHouse r on r.id = i.idReceiptImport where i.deleteFlg = :deleteFlg" +
+            " and i.idItems = :idItems and i.companyId = :cid and (r.idWareHouse = :idWareHouse or coalesce(:idWareHouse, -1) = -1)")
+    public List<ExportWareHouse> getAllByIdWareHouse(Integer deleteFlg, Long idItems, Long cid, Long idWareHouse);
 }

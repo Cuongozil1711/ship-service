@@ -50,9 +50,11 @@ public class ReceiptExportWareHouseService {
     public ReceiptExportWareHouse update(ReceiptExportWareHouseDto ReceiptExportWareHouseDto, Long cid, String uid, Long id){
         try {
             ReceiptExportWareHouse ReceiptExportWareHouse = ReceiptExportWareHouseRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            if(ReceiptExportWareHouse.getState().equals(Constants.RECEIPT_WARE_HOUSE.COMPLETE)) return null;
             ReceiptExportWareHouse.setCompanyId(cid);
             ReceiptExportWareHouse.setUpdateBy(uid);
             ReceiptExportWareHouse.setIdWareHouse(ReceiptExportWareHouseDto.getIdWareHouse());
+            ReceiptExportWareHouse.setIdWareHouseTo(ReceiptExportWareHouseDto.getIdWareHouseTo());
             ReceiptExportWareHouse.setName(ReceiptExportWareHouseDto.getName());
             ReceiptExportWareHouse.setCode(ReceiptExportWareHouseDto.getCode());
             ReceiptExportWareHouse.setDateExport(ReceiptExportWareHouseDto.getDateExport());

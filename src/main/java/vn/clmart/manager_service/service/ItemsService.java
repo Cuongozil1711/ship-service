@@ -130,8 +130,8 @@ public class ItemsService {
             for(Items items : list){
                 ItemsResponseDTO itemsResponseDTO = new ItemsResponseDTO();
                 BeanUtils.copyProperties(items, itemsResponseDTO);
-                itemsResponseDTO.setTotalInWareHouse(importWareHouseService.totalItemsInImport(itemsResponseDTO.getId(), cid) - exportWareHouseService.totalItemsInExport(itemsResponseDTO.getId(), cid));
-                itemsResponseDTO.setTotalSold(exportWareHouseService.totalItemsInExport(itemsResponseDTO.getId(), cid));
+                itemsResponseDTO.setTotalInWareHouse(importWareHouseService.totalItemsInImportWareHouse(itemsResponseDTO.getId(), cid, itemsDto.getIdWareHouse()) - exportWareHouseService.totalItemsInExportIdWareHouse(itemsResponseDTO.getId(), cid, itemsDto.getIdWareHouse()));
+                itemsResponseDTO.setTotalSold(exportWareHouseService.totalItemsInExportIdWareHouse(itemsResponseDTO.getId(), cid, itemsDto.getIdWareHouse()));
                 List<PriceItems> priceItems = priceItemsRepository.findAllByIdItemsAndDeleteFlg(items.getId(), Constants.DELETE_FLG.NON_DELETE);
                 itemsResponseDTO.setPriceItemsDtos(priceItems.stream().map(e -> of(e)).collect(Collectors.toList()));
                 responseDTOList.add(itemsResponseDTO);
@@ -192,10 +192,10 @@ public class ItemsService {
         }
     }
 
-    public List<ItemsResponseDto> getByIdtems(Long cid, String uid, Long idItems){
+    public List<ItemsResponseDto> getByIdtems(Long cid, String uid, Long idItems, Long idWareHouse){
         try {
             List<ItemsResponseDto> itemsResponseDtos = new ArrayList<>();
-            List<ImportWareHouse> importWareHouses = importWareHouseService.getByIdtems(cid, idItems);
+            List<ImportWareHouse> importWareHouses = importWareHouseService.getByIdtemsInWareHouse(cid, idItems, idWareHouse);
             itemsResponseDtos = importWareHouses.stream().map(importWareHouse -> {
                 ItemsResponseDto itemsResponseDTO = new ItemsResponseDto();
                 itemsResponseDTO.setId(importWareHouse.getId());

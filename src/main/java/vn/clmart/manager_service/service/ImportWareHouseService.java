@@ -152,6 +152,7 @@ public class ImportWareHouseService {
                     receiptImportWareHouse.setIdWareHouse(receiptExportWareHouse.getIdWareHouseTo());
                     receiptImportWareHouse.setName(receiptExportWareHouse.getName());
                     receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
+                    receiptExportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
                     receiptExportWareHouseService.save(receiptExportWareHouse);
                     receiptImportWareHouse =receiptImportWareHouseRepository.save(receiptImportWareHouse);
                     List<ExportWareHouse> wareHouseList = exportWareHouseRepository.findAllByIdReceiptExportAndCompanyId(idReceiptExport, receiptExportWareHouse.getCompanyId());
@@ -543,6 +544,23 @@ public class ImportWareHouseService {
         }
     }
 
+    public Long totalItemsInImportWareHouse(Long idItem, Long cid, Long idWareHouse){
+        try {
+            List<ImportWareHouse> importWareHouses =importWareHouseRepository.getImportWareHouse(Constants.DELETE_FLG.NON_DELETE, idItem, cid, idWareHouse);
+            if(importWareHouses.size() == 0) return 0l;
+            Long total = 0l;
+            for(ImportWareHouse importWareHouse : importWareHouses){
+                if(importWareHouse.getNumberBox() == null) importWareHouse.setNumberBox(1);
+                total += importWareHouse.getQuantity() * importWareHouse.getNumberBox();
+            }
+            return total;
+        }
+        catch (Exception ex){
+            logger.error(ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
     public PageImpl<ImportWareHouseResponseDTO> search(Long cid, String uid, Integer status, String search, ItemsSearchDto itemsSearchDto, Pageable pageable){
         try {
             if(itemsSearchDto.getStartDate() == null) itemsSearchDto.setStartDate(DateUntils.minDate());
@@ -619,6 +637,16 @@ public class ImportWareHouseService {
     public List<ImportWareHouse> getByIdtems(Long cid, Long idItems){
         try {
             return importWareHouseRepository.findAllByDeleteFlgAndIdItemsAndCompanyIdWorkOrderByDateExpiredAsc(Constants.DELETE_FLG.NON_DELETE, idItems, cid);
+        }
+        catch (Exception ex){
+            logger.error(ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public List<ImportWareHouse> getByIdtemsInWareHouse(Long cid, Long idItems, Long idWareHouse){
+        try {
+            return importWareHouseRepository.findAllByDeleteFlgAndIdItemsAndCompanyIdWorkOrderByDateExpiredAscInWareHouse(Constants.DELETE_FLG.NON_DELETE, idItems, cid, idWareHouse);
         }
         catch (Exception ex){
             logger.error(ex);
