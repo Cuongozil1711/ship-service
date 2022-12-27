@@ -62,6 +62,7 @@ public class ReceiptImportWareHouseService {
             receiptImportWareHouse.setCode(receiptImportWareHouseDto.getCode());
             receiptImportWareHouse.setDateImport(receiptImportWareHouseDto.getDateImport());
             receiptImportWareHouse.setTotalPrice(receiptImportWareHouseDto.getTotalPrice());
+            receiptImportWareHouse.setIdSupplier(receiptImportWareHouseDto.getIdSupplier());
             return receiptImportWareHouseRepository.save(receiptImportWareHouse);
         }
         catch (Exception ex){

@@ -40,7 +40,7 @@ public class SupplierService {
 
     public Supplier update(SupplierDto supplierDto, Long cid, String uid, Long id){
         try {
-            Supplier supplier = supplierRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Supplier supplier = supplierRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             supplier.setCompanyId(cid);
             supplier.setUpdateBy(uid);
             supplier.setAddress(supplierDto.getAddress());
@@ -55,7 +55,7 @@ public class SupplierService {
 
     public Supplier getById(Long cid, String uid, Long id){
         try {
-            return supplierRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            return supplierRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
         }
         catch (Exception ex){
             throw new RuntimeException(ex);
@@ -64,7 +64,7 @@ public class SupplierService {
 
     public PageImpl<Supplier> search(Long cid, Pageable pageable){
         try {
-            Page<Supplier> pageSearch = supplierRepository.findAllByCompanyIdAndDeleteFlg(cid, Constants.DELETE_FLG.NON_DELETE, pageable);
+            Page<Supplier> pageSearch = supplierRepository.findAllByDeleteFlg(Constants.DELETE_FLG.NON_DELETE, pageable);
             return new PageImpl(pageSearch.getContent(), pageable, pageSearch.getTotalElements());
         }
         catch (Exception ex){
@@ -74,7 +74,7 @@ public class SupplierService {
 
     public Supplier delete(Long cid, String uid, Long id){
         try {
-            Supplier supplier = supplierRepository.findByIdAndCompanyIdAndDeleteFlg(id, cid, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Supplier supplier = supplierRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             supplier.setDeleteFlg(Constants.DELETE_FLG.DELETE);
             supplier.setCompanyId(cid);
             supplier.setUpdateBy(uid);

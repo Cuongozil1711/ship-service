@@ -11,6 +11,10 @@ public class Constants {
         EXTEND
     }
 
+    public enum RECEIPT_TYPE_WARE_HOUSE{
+        BASIC, QUICKLY
+    }
+
     public enum EMPLOYEE_WARE_HOUSE{
         INIT, PENDING, PROCESSING, APPROVED, REJECTED, CANCELED, COMPLETE,
         EXTEND

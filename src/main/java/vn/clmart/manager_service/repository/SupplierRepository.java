@@ -10,8 +10,8 @@ import java.util.Optional;
 
 public interface SupplierRepository extends JpaRepository<Supplier, Long> {
 
-    Optional<Supplier> findByIdAndCompanyIdAndDeleteFlg(Long id, Long cid, Integer deleteFlg);
+    Optional<Supplier> findByIdAndDeleteFlg(Long id, Integer deleteFlg);
 
 
-    Page<Supplier> findAllByCompanyIdAndDeleteFlg(Long cid, Integer deleteFlg, Pageable pageable);
+    Page<Supplier> findAllByDeleteFlg(Integer deleteFlg, Pageable pageable);
 }

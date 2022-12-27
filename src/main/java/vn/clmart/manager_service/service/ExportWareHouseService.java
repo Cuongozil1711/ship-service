@@ -228,13 +228,10 @@ public class ExportWareHouseService {
     public boolean exportWareHouse(ExportWareHouseListDto exportWareHouseListDto, Long cid, String uid){
         try {
             ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.getById(cid, uid, exportWareHouseListDto.getIdReceiptExport());
-//            receiptExportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
-
             for(DetailsItemOrderDto itemExport : exportWareHouseListDto.getData()){
                 ExportWareHouseDto exportWareHouseDto = new ExportWareHouseDto();
                 exportWareHouseDto.setNumberBox(itemExport.getNumberBox());
                 Long idItems = itemExport.getIdItems();
-//                PriceItems priceItems = priceItemsRepository.findByIdItemsAndDeleteFlgAndDvtCode(idItems, Constants.DELETE_FLG.NON_DELETE, itemExport.getDvtCode()).orElse(null);
                 exportWareHouseDto.setQuantity(itemExport.getQuality());
                 exportWareHouseDto.setIdReceiptExport(exportWareHouseListDto.getIdReceiptExport());
                 ImportWareHouse importWareHouse = importWareHouseService.getById(cid, itemExport.getIdImportWareHouse());
@@ -248,7 +245,6 @@ public class ExportWareHouseService {
                 exportWareHouse.setCode(exportWareHouseListDto.getCode());
                 exportWareHouseRepository.save(exportWareHouse);
             }
-
             MailSendExport mailSendExport = new MailSendExport();
             mailSendExport.setCodeExport(receiptExportWareHouse.getCode());
             FullName fullName = userService.getFullName(receiptExportWareHouse.getCompanyId(), receiptExportWareHouse.getCreateBy());

@@ -23,7 +23,6 @@ import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.untils.Constants;
 import vn.clmart.manager_service.untils.DateUntils;
 import vn.clmart.manager_service.untils.MapUntils;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -148,11 +147,11 @@ public class ImportWareHouseService {
                     receiptImportWareHouse.setCompanyId(cid);
                     receiptImportWareHouse.setCreateBy(uid);
                     receiptImportWareHouse.setCode(receiptExportWareHouse.getCode());
-                    receiptExportWareHouse.setName("Nhập kho nhanh");
+                    receiptImportWareHouse.setName("Nhập kho nhanh");
+                    receiptImportWareHouse.setType(Constants.RECEIPT_TYPE_WARE_HOUSE.QUICKLY.name());
                     receiptImportWareHouse.setIdWareHouse(receiptExportWareHouse.getIdWareHouseTo());
                     receiptImportWareHouse.setName(receiptExportWareHouse.getName());
                     receiptImportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
-                    receiptExportWareHouse.setState(Constants.RECEIPT_WARE_HOUSE.COMPLETE.name());
                     receiptExportWareHouseService.save(receiptExportWareHouse);
                     receiptImportWareHouse =receiptImportWareHouseRepository.save(receiptImportWareHouse);
                     List<ExportWareHouse> wareHouseList = exportWareHouseRepository.findAllByIdReceiptExportAndCompanyId(idReceiptExport, receiptExportWareHouse.getCompanyId());
@@ -180,7 +179,7 @@ public class ImportWareHouseService {
                     tokenFirseBaseDTO.setPriority("high");
                     String[] token = new String[10];
                     Map<String, String> notification = new HashMap<>();
-                    notification.put("body", "Hoàn tất phiếu: " + receiptImportWareHouse.getName());
+                    notification.put("body", "Hoàn tất phiếu: " + receiptExportWareHouse.getName());
                     notification.put("title", "Nhập kho");
                     tokenFirseBaseDTO.setNotification(notification);
                     TokenFireBase tokenFireBase = tokenFireBaseRepository.findByDeleteFlgAndUserId(Constants.DELETE_FLG.NON_DELETE, uid).orElse(null);

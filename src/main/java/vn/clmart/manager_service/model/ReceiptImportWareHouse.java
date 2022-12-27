@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Description;
 import vn.clmart.manager_service.dto.ReceiptImportWareHouseDto;
 import vn.clmart.manager_service.dto.StallsDto;
 import vn.clmart.manager_service.model.config.PersistableEntity;
+import vn.clmart.manager_service.untils.Constants;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -33,6 +34,8 @@ public class ReceiptImportWareHouse extends PersistableEntity<Long> {
     private Double totalPrice;
     private Long idWareHouse;
     private String imageReceipt;
+    private Long idSupplier;
+    private String type;
 
     public static ReceiptImportWareHouse of(ReceiptImportWareHouseDto receiptImportWareHouseDto, Long cid, String uid){
         ReceiptImportWareHouse receiptImportWareHouse = ReceiptImportWareHouse.builder()
@@ -42,6 +45,8 @@ public class ReceiptImportWareHouse extends PersistableEntity<Long> {
                 .dateImport(receiptImportWareHouseDto.getDateImport())
                 .totalPrice(receiptImportWareHouseDto.getTotalPrice())
                 .idWareHouse(receiptImportWareHouseDto.getIdWareHouse())
+                .idSupplier(receiptImportWareHouseDto.getIdSupplier())
+                .type(Constants.RECEIPT_TYPE_WARE_HOUSE.BASIC.name())
                 .build();
         receiptImportWareHouse.setCreateBy(uid);
         receiptImportWareHouse.setCompanyId(cid);
