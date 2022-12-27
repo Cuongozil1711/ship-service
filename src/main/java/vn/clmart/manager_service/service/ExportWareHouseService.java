@@ -239,6 +239,7 @@ public class ExportWareHouseService {
                 exportWareHouseDto.setIdReceiptExport(exportWareHouseListDto.getIdReceiptExport());
                 ImportWareHouse importWareHouse = importWareHouseService.getById(cid, itemExport.getIdImportWareHouse());
                 exportWareHouseDto.setIdReceiptImport(importWareHouse.getIdReceiptImport());
+                exportWareHouseDto.setIdImportWareHouse(importWareHouse.getId());
                 exportWareHouseDto.setIdItems(idItems);
                 exportWareHouseDto.setTotalPrice(itemExport.getTotalPrice());
                 exportWareHouseDto.setDvtCode(itemExport.getDvtCode());

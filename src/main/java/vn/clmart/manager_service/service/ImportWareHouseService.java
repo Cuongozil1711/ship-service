@@ -159,7 +159,9 @@ public class ImportWareHouseService {
                     List<ImportWareHouse> importWareHouses = new ArrayList<>();
                     for(ExportWareHouse exportWareHouse: wareHouseList){
                         ImportWareHouse importWareHouse = new ImportWareHouse();
-                        importWareHouse.setId(FakeId.getInstance().nextId());
+                        if(exportWareHouse.getIdImportWareHouse() != null)
+                        importWareHouse.setId(exportWareHouse.getIdImportWareHouse());
+                        else importWareHouse.setId(FakeId.getInstance().nextId());
                         importWareHouse.setIdReceiptImport(receiptImportWareHouse.getId());
                         importWareHouse.setQuantity(exportWareHouse.getQuantity());
                         importWareHouse.setTotalPrice(exportWareHouse.getTotalPrice());

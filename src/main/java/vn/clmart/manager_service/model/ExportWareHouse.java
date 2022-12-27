@@ -33,6 +33,7 @@ public class ExportWareHouse extends PersistableEntity<Long> {
     private Long idOrder;
     private Long idReceiptExport;
     private Long idReceiptImport;
+    private Long idImportWareHouse;
     private Long idItems;
     private String dvtCode;
 
@@ -40,7 +41,8 @@ public class ExportWareHouse extends PersistableEntity<Long> {
         ExportWareHouse exportWareHouse = ExportWareHouse.builder()
                 .quantity(exportWareHouseDto.getQuantity())
                 .totalPrice(exportWareHouseDto.getTotalPrice())
-                .idReceiptExport(exportWareHouseDto.getIdReceiptExport())
+                .idImportWareHouse(exportWareHouseDto.getIdImportWareHouse())
+                .id(exportWareHouseDto.getIdReceiptExport())
                 .idItems(exportWareHouseDto.getIdItems())
                 .idOrder(exportWareHouseDto.getIdOrder())
                 .note(exportWareHouseDto.getNote())

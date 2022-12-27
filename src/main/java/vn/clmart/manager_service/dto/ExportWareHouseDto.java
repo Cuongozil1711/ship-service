@@ -14,6 +14,7 @@ public class ExportWareHouseDto {
     private Double totalPrice; // số lượng trên 1 đơn vị
     private Long idReceiptExport;
     private Long idReceiptImport;
+    private Long idImportWareHouse;
     private Long idOrder;
     private Long idItems;
     private String note;
