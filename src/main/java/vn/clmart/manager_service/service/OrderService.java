@@ -151,7 +151,7 @@ public class OrderService {
                 exportWareHouseDto.setIdReceiptImport(importWareHouse.getIdReceiptImport());
                 exportWareHouseDto.setDvtCode(items.getDvtCode());
                 exportWareHouseDto.setIdOrder(order.getId());
-                exportWareHouseDto.setTotalPrice(totalPrice);
+                exportWareHouseDto.setTotalPrice(priceSale);
                 priceTotal+=totalPrice;
                 exportWareHouseService.orderToExport(exportWareHouseDto, cid, uid);
             }
@@ -309,13 +309,16 @@ public class OrderService {
                         ItemsResponseDTO itemsResponseDTO1 = itemsService.getById(cid, "", item.getIdItems());
                         List<ExportWareHouse> exportWareHouses = exportWareHouseService.findAllByCompanyIdAndIdOrderAndIdItemsAndDvtCode(cid, item.getIdItems(), item.getIdOrder(), item.getDvtCode());
                         if(exportWareHouses.size() != 0){
-                            detailsItemOrderDto.setTotalPrice(exportWareHouses.get(0).getTotalPrice());
                             itemsResponseDTO1.setTotalSold(item.getQuality().longValue());
                             size += item.getQuality();
                             detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
                             if(item.getType().equals("SOLD")){
                                 totalSale += item.getTotalPrice();
                                 totalPrice += exportWareHouses.get(0).getTotalPrice();
+                                detailsItemOrderDto.setTotalPrice(exportWareHouses.get(0).getTotalPrice());
+                            }
+                            else{
+                                detailsItemOrderDto.setTotalPrice(item.getTotalPrice());
                             }
                         }
                     }
