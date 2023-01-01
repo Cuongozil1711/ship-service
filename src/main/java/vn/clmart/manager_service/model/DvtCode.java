@@ -1,5 +1,6 @@
 package vn.clmart.manager_service.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.springframework.context.annotation.Description;
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import javax.persistence.Id;
 public class DvtCode {
     @Id
     private String dvtCode;
-    private String quantity;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String quality;
     private String name;
 }

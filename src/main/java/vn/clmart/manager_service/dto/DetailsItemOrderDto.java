@@ -24,5 +24,6 @@ public class DetailsItemOrderDto {
     private Long idOrder;
     private Long idPromotion;
     private Date createDate;
+    private Long id;
     private ItemsResponseDTO itemsResponseDTO;
 }

@@ -37,6 +37,20 @@ public class ExportWareHouseApi {
         }
     }
 
+    @PostMapping("/update")
+    protected @ResponseBody
+    ResponseEntity<Object> updateList(
+            @RequestHeader Long cid,
+            @RequestHeader String uid,
+            @RequestBody ExportWareHouseListDto exportWareHouseDto
+    ) {
+        try {
+            return new ResponseEntity<>(exportWareHouseService.editWareHouse(exportWareHouseDto, cid, uid), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
     @PutMapping({"idReceiptExport"})
     protected @ResponseBody
     ResponseEntity<Object> create(

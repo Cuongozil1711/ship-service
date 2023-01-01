@@ -56,7 +56,7 @@ public class SecurityConfig{
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/index*", "/resources/**", "/*.js", "/*.json", "/*.ico")
                 .permitAll();
         http.authorizeRequests().antMatchers("/user/login", "/user/create","/pdf/export/**","/pdf/order/**", "/pdf/orderItem/**",
-                "/pdf/barcode/**"
+                "/pdf/barcode/**", "dvtCode/getAll/**"
                 ).permitAll();
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

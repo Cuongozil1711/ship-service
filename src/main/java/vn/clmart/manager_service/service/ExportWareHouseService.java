@@ -112,10 +112,11 @@ public class ExportWareHouseService {
                 detailsItemOrderDto.setTotalPrice(exportWareHouse.getTotalPrice());
                 ImportWareHouse importWareHouse = importWareHouseService.findByCompanyIdAndIdReceiptImportAndIdItems(exportWareHouse.getCompanyId(), exportWareHouse.getIdReceiptImport(), exportWareHouse.getIdItems());
                 detailsItemOrderDto.setIdReceiptImport(exportWareHouse.getIdReceiptImport());
-                detailsItemOrderDto.setIdImportWareHouse(importWareHouse.getIdItems());
+                detailsItemOrderDto.setIdImportWareHouse(importWareHouse.getId());
                 ItemsResponseDTO itemsResponseDTO1 = itemsService.getById(exportWareHouse.getCompanyId(), "", exportWareHouse.getIdItems());
                 detailsItemOrderDto.setItemsResponseDTO(itemsResponseDTO1);
                 detailsItemOrderDto.setCreateDate(exportWareHouse.getCreateDate());
+                detailsItemOrderDto.setId(exportWareHouse.getId());
                 detailsItemOrderDtoList.add(detailsItemOrderDto);
             });
             ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.getById(exportWareHouses.get(0).getCompanyId(), uid, idReceiptExport);
@@ -224,6 +225,24 @@ public class ExportWareHouseService {
         catch (Exception ex){
             throw new RuntimeException(ex);
         }
+    }
+
+    public boolean editWareHouse(ExportWareHouseListDto exportWareHouseListDto, Long cid, String uid){
+        ReceiptExportWareHouse receiptExportWareHouse = receiptExportWareHouseService.getById(cid, uid, exportWareHouseListDto.getIdReceiptExport());
+        if(receiptExportWareHouse.getState().equals(Constants.RECEIPT_WARE_HOUSE.COMPLETE)) return true;
+        for(DetailsItemOrderDto itemExport : exportWareHouseListDto.getData()){
+            ImportWareHouse importWareHouse = importWareHouseService.getById(cid, itemExport.getIdImportWareHouse());
+            Integer totalInWareHouse = importWareHouse.getNumberBox() * importWareHouse.getQuantity();
+            Integer totalExportWareHouse = this.qualityExport(cid, importWareHouse.getIdReceiptImport(), itemExport.getIdItems(), Constants.DELETE_FLG.NON_DELETE);
+            ExportWareHouse exportWareHouse = exportWareHouseRepository.findById(itemExport.getId()).orElse(null);
+            if(exportWareHouse == null) return false;
+            if(totalInWareHouse - totalExportWareHouse + exportWareHouse.getNumberBox() * exportWareHouse.getQuantity()  < itemExport.getNumberBox() * itemExport.getQuality()) return false;
+            exportWareHouse.setQuantity(itemExport.getQuality());
+            exportWareHouse.setTotalPrice(itemExport.getTotalPrice());
+            exportWareHouse.setNumberBox(itemExport.getNumberBox());
+            exportWareHouseRepository.save(exportWareHouse);
+        }
+        return true;
     }
     public boolean exportWareHouse(ExportWareHouseListDto exportWareHouseListDto, Long cid, String uid){
         try {

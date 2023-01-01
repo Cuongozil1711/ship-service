@@ -43,7 +43,7 @@ public class DvtCodeApi {
         try {
             DvtCode dvtCode = new DvtCode();
             dvtCode.setDvtCode(dvtCodeDto.getCode());
-            dvtCode.setQuantity(dvtCodeDto.getQuantity());
+            dvtCode.setQuality(dvtCodeDto.getQuality());
             dvtCode.setName(dvtCodeDto.getName());
             dvtCodeRepository.save(dvtCode);
             return new ResponseEntity<>(dvtCodeRepository.findAll(), HttpStatus.OK);
