@@ -255,7 +255,7 @@ public class ItemsService {
                         cal1.add(Calendar.DATE, -cal1.get(Calendar.DATE)/3);
                         cal1.getTime();
                         cal2.setTime(new Date());
-                        if(cal1.before(cal2) && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&  cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)){
+                        if((cal1.before(cal2) && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&  cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)) || cal1.after(cal2)){
                             Integer qualityExport = exportWareHouseService.qualityExport(cid, importWareHouse.getIdReceiptImport(), items.getId(), 1);
                             Integer qualityCanceled = exportWareHouseService.qualityExport(cid, importWareHouse.getIdReceiptImport(), items.getId(), 0);
                             Integer qualityImport = importWareHouse.getNumberBox() * importWareHouse.getQuantity();

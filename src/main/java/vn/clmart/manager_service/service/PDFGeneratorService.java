@@ -648,8 +648,6 @@ public class PDFGeneratorService {
         paragraph7.setSpacingBefore(10f);
         paragraph7.setSpacingAfter(10f);
         paragraph7.add (new Chunk(image, 0, 10, true));;
-        paragraph7.add (new Chunk(image1, 20, 10, true));;
-        paragraph7.add (new Chunk(image2, 40, 10, true));;
         paragraph7.setAlignment(Paragraph.ALIGN_CENTER);
 
         return paragraph7;
