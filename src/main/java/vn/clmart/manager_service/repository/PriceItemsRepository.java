@@ -10,4 +10,6 @@ public interface PriceItemsRepository extends JpaRepository<PriceItems, Long> {
 
     Optional<PriceItems> findByIdItemsAndDeleteFlgAndDvtCode(Long idItems, Integer deleteFlg, String dvtCode);
 
+    List<PriceItems> findAllByIdItemsAndDeleteFlgAndQuality(Long idItems, Integer deleteFlg, Integer quality);
+
 }

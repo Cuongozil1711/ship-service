@@ -22,4 +22,5 @@ public class ImportWareHouseDto {
     private String nameItems;
     private Date dateExpired;
     private Date createDate;
+    private String createBy;
 }

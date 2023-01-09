@@ -33,6 +33,18 @@ public class PDFExportController {
         this.pdfGeneratorService.exportWareHouse(response, idReceiptExport, cid);
     }
 
+    @GetMapping("/import/{idReceiptImport}/{cid}")
+    public void generatePDFImport(HttpServletResponse response, @PathVariable("idReceiptImport") Long idReceiptExport, @PathVariable("cid") Long cid) throws Exception {
+        response.setContentType("application/pdf");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=phieuxuat_" + currentDateTime + ".pdf";
+        response.setHeader(headerKey, headerValue);
+
+        this.pdfGeneratorService.importWareHouse(response, idReceiptExport, cid);
+    }
+
     @GetMapping("/order/{id}/{cid}")
     public void generatePDFOrder(HttpServletResponse response, @PathVariable("id") Long id, @PathVariable("cid") Long cid) throws Exception {
         response.setContentType("application/pdf");

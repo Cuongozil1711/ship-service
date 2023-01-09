@@ -445,6 +445,8 @@ public class ImportWareHouseService {
                 data = list.stream().map(importWareHouse -> of(importWareHouse,  cid, uid)).collect(Collectors.toList());
                 importListDataWareHouseDto.setData(data);
             }
+            FullName fullName = userService.getFullName(cid, importListDataWareHouseDto.getData().get(0).getCreateBy());
+            importListDataWareHouseDto.setCreateByName(fullName.getFirstName() + " " + fullName.getLastName());
             return importListDataWareHouseDto;
         }
         catch (Exception ex){
@@ -475,6 +477,7 @@ public class ImportWareHouseService {
         importWareHouseDto.setId(importWareHouse.getId());
         importWareHouseDto.setNameItems(itemsService.getById(cid, uid, importWareHouseDto.getIdItems()).getName());
         importWareHouseDto.setCreateDate(importWareHouse.getCreateDate());
+        importWareHouseDto.setCreateBy(importWareHouse.getCreateBy());
         return importWareHouseDto;
     }
 

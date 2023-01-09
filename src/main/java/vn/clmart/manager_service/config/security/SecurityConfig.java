@@ -55,7 +55,7 @@ public class SecurityConfig{
                 .csrf().disable();
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/index*", "/resources/**", "/*.js", "/*.json", "/*.ico")
                 .permitAll();
-        http.authorizeRequests().antMatchers("/user/login", "/user/create","/pdf/export/**","/pdf/order/**", "/pdf/orderItem/**",
+        http.authorizeRequests().antMatchers("/user/login", "/user/create","/pdf/export/**", "/pdf/import/**","/pdf/order/**", "/pdf/orderItem/**",
                 "/pdf/barcode/**", "dvtCode/getAll/**"
                 ).permitAll();
         http.authorizeRequests().anyRequest().authenticated();

@@ -55,7 +55,9 @@ public class SupplierService {
 
     public Supplier getById(Long cid, String uid, Long id){
         try {
-            return supplierRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            if(id != null)
+            return supplierRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElse(new Supplier());
+            else return new Supplier();
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

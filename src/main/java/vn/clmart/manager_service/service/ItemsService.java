@@ -116,6 +116,16 @@ public class ItemsService {
         }
     }
 
+    public Double getPriceItems(Long id){
+        try {
+            List<PriceItems> priceItems = priceItemsRepository.findAllByIdItemsAndDeleteFlgAndQuality(id, Constants.DELETE_FLG.NON_DELETE, 1);
+            return priceItems.get(0).getPriceItems();
+        }
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
     public PriceItemsDto of(PriceItems priceItems){
         PriceItemsDto priceItemsDto = new PriceItemsDto();
         BeanUtils.copyProperties(priceItems, priceItemsDto);

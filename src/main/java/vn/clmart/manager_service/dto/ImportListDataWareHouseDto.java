@@ -16,4 +16,5 @@ public class ImportListDataWareHouseDto {
     private String imageReceipt;
     private ReceiptImportWareHouseDto receiptImportWareHouseDto;
     private List<ImportWareHouseDto> data;
+    private String createByName;
 }
