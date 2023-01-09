@@ -65,13 +65,18 @@ public class OrderService {
     @Autowired
     BillRepositorry billRepositorry;
 
+    @Autowired
+    CompanyRepository companyRepository;
+
     public Order createOrder(OrderDto orderDto, Long cid, String uid){
         try {
             Order order = Order.of(orderDto, cid, uid);
+            List<Order> order1 = orderRepositorry.findAll();
+            Company company = companyRepository.findByIdAndDeleteFlg(order.getCompanyId(), Constants.DELETE_FLG.NON_DELETE).orElse(new Company());
+            order.setCode("OR" + company.getCode() + "" + (order1.size() + 1));
             if(!orderRepositorry.findAllByCompanyIdAndDeleteFlgAndCode(cid, Constants.DELETE_FLG.NON_DELETE, orderDto.getCode()).isEmpty()){
                 throw new BusinessException("Mã đã tồn tại");
             }
-            order.setCode("OR" + orderDto.getDetailsItemOrders().size() + new Date().getTime());
             // dat hang
             order = orderRepositorry.save(order);
             // check so luong dat hang
