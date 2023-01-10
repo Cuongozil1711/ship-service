@@ -171,6 +171,7 @@ public class ImportWareHouseService {
                         importWareHouse.setCompanyId(cid);
                         importWareHouse.setCompanyIdWork(cid);
                         importWareHouse.setCreateBy(uid);
+                        importWareHouse.setCreateDate(new Date());
                         importWareHouses.add(importWareHouse);
                     }
                     importWareHouseRepository.saveAll(importWareHouses);
