@@ -6,8 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import vn.clmart.manager_service.dto.BillDto;
 import vn.clmart.manager_service.dto.CustomerDto;
-import vn.clmart.manager_service.dto.DetailsItemOrderDto;
-import vn.clmart.manager_service.model.DetailsItemOrder;
 
 import java.util.Date;
 import java.util.List;
@@ -25,8 +23,6 @@ public class OrderItemResponseDTO {
     private Double totalPrice;
     private Double totalSale;
     private Integer deleteFlg;
-    private List<DetailsItemOrderDto> detailsItemOrders;
-    private List<DetailsItemOrderDto> detailsItemOrdersSale;
     private Date createDate;
     private String createBy;
     private BillDto billDto;

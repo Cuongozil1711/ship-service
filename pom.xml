@@ -9,7 +9,7 @@
     </parent>
     <groupId>vn.clmart</groupId>
     <packaging>war</packaging>
-    <artifactId>manager_service</artifactId>
+    <artifactId>lc_order_service</artifactId>
     <version>0.0.1</version>
     <name>manager_service</name>
     <description>manager_service</description>
@@ -207,6 +207,12 @@
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
         </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
 
 
     </dependencies>

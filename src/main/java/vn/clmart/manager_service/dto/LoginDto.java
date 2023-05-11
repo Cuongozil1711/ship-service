@@ -2,6 +2,8 @@ package vn.clmart.manager_service.dto;
 
 import lombok.*;
 
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -9,15 +11,16 @@ import lombok.*;
 public class LoginDto {
     private String accessToken;
     private String tokenType = "Bearer";
-    private Long companyId;
     private String uId;
     private String role;
-
     private String fullName;
+    private String name;
+    private String image;
+    private Date birthDay;
+    private String jwt;
 
-    public LoginDto(String accessToken, Long companyId, String uId, String role, String fullName) {
+    public LoginDto(String accessToken, String uId, String role, String fullName) {
         this.setAccessToken(accessToken);
-        this.companyId = companyId;
         this.uId = uId;
         this.role = role;
         this.fullName = fullName;

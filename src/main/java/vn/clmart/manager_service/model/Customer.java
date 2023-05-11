@@ -38,7 +38,6 @@ public class Customer extends PersistableEntity<Long> {
                                         .tel(customerDto.getTel()).build();
 
         customer.setCreateBy(uid);
-        customer.setCompanyId(cid);
         return customer;
     }
 }

@@ -29,13 +29,6 @@ public class Order extends PersistableEntity<Long> {
     private String name;
     private String code;
     private Long idCustomer;
-    @Convert(converter = ListHashMapConverter.class)
-    @Column(columnDefinition = "text")
-    private List<Map<String, Integer>> detailItems;// bỏ
-
-    public List<Map<String, Integer>> getDetailItems() {
-        return detailItems;
-    }
     private Long reasonId;
 
     public static Order of(OrderDto orderDto, Long cid, String uid){
@@ -43,7 +36,6 @@ public class Order extends PersistableEntity<Long> {
                 .name(orderDto.getName())
                 .code(orderDto.getCode())
                 .idCustomer(orderDto.getIdCustomer()).build();
-        order.setCompanyId(cid);
         order.setCreateBy(uid);
         return order;
     }

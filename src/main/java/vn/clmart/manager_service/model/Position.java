@@ -33,7 +33,6 @@ public class Position extends PersistableEntity<Long> {
                 .authority(positionDto.getAuthority())
                 .build();
         position.setCreateBy(uid);
-        position.setCompanyId(cid);
         return position;
     }
 }

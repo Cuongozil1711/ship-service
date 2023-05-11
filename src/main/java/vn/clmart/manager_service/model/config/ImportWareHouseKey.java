@@ -25,14 +25,6 @@ public class ImportWareHouseKey implements Serializable {
         this.id = id;
     }
 
-    public Long getCompanyIdWork() {
-        return companyIdWork;
-    }
-
-    public void setCompanyIdWork(Long companyIdWork) {
-        this.companyIdWork = companyIdWork;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

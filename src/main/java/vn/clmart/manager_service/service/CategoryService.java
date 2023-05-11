@@ -1,72 +1,75 @@
 package vn.clmart.manager_service.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.clmart.manager_service.config.exceptions.BusinessException;
 import vn.clmart.manager_service.dto.CategoryDto;
 import vn.clmart.manager_service.model.Category;
-import vn.clmart.manager_service.repository.CategoryRepository;
-import vn.clmart.manager_service.untils.Constants;
-import vn.clmart.manager_service.untils.MapUntils;
+import vn.clmart.manager_service.repository.CategoryRepo;
+import vn.clmart.manager_service.utils.Constants;
+import vn.clmart.manager_service.utils.MapUtils;
+
+import java.util.List;
 
 @Service
 @Transactional
 public class CategoryService {
 
     @Autowired
-    CategoryRepository categoryRepository;
+    CategoryRepo categoryRepo;
 
-    public Category create(CategoryDto CategoryDto, Long cid, String uid){
+    private void validate(CategoryDto categoryDto){
+        if(categoryDto.getName().isEmpty()) throw new BusinessException("empty");
+    }
+
+    public Category create(CategoryDto categoryDto, String uid){
         try {
-            Category category = Category.of(CategoryDto, cid, uid);
-            return categoryRepository.save(category);
+            validate(categoryDto);
+            Category category = Category.of(categoryDto, uid);
+            return categoryRepo.save(category);
         }
         catch (Exception ex){
             throw new RuntimeException(ex);
         }
     }
 
-    public Category update(CategoryDto categoryDto, Long cid, String uid, Long id){
+    public Category update(CategoryDto categoryDto, String uid, Long id){
         try {
-            Category item = categoryRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
-            MapUntils.copyWithoutAudit(categoryDto, item);
-            item.setCompanyId(cid);
+            Category item = categoryRepo.findById(id).orElseThrow();
+            MapUtils.copyWithoutAudit(categoryDto, item);
             item.setUpdateBy(uid);
-            return categoryRepository.save(item);
+            return categoryRepo.save(item);
         }
         catch (Exception ex){
             throw new RuntimeException(ex);
         }
     }
 
-    public Category getById(Long cid, String uid, Long id){
+    public Category getById(Long id){
         try {
-            return categoryRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            return categoryRepo.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
         }
         catch (Exception ex){
             throw new RuntimeException(ex);
         }
     }
 
-    public PageImpl<Category> search(Long cid, Pageable pageable){
+    public List<Category> search(){
         try {
-            Page<Category> pageSearch = categoryRepository.findAllByDeleteFlg(Constants.DELETE_FLG.NON_DELETE, pageable);
-            return new PageImpl(pageSearch.getContent(), pageable, pageSearch.getTotalElements());
+            return categoryRepo.findAll();
         }
         catch (Exception ex){
             throw new RuntimeException(ex);
         }
     }
 
-    public Category delete(Long cid, String uid, Long id){
+    public Category delete(String uid, Long id){
         try {
-            Category Category = categoryRepository.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
+            Category Category = categoryRepo.findByIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE).orElseThrow();
             Category.setDeleteFlg(Constants.DELETE_FLG.DELETE);
             Category.setUpdateBy(uid);
-            return categoryRepository.save(Category);
+            return categoryRepo.save(Category);
         }
         catch (Exception ex){
             throw new RuntimeException(ex);

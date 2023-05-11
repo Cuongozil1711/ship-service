@@ -11,7 +11,7 @@ import java.util.*;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class CategoryDto {
-    private String code;
     private String name;
-    private List<Map<String, String>> unit;// bỏ
+    private Long parentId;
+    private Integer deleteFlg;
 }

@@ -37,7 +37,6 @@ public class Address extends PersistableEntity<Long> {
                 .name(addressDto.getName())
                 .build();
         address.setCreateBy(uid);
-        address.setCompanyId(cid);
         return address;
     }
 }

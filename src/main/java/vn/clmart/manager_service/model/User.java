@@ -54,7 +54,6 @@ public class User extends PersistableEntity<String> {
                 .password(userLoginDto.getPassword())
                 .build();
         user.setCreateBy(uid);
-        user.setCompanyId(cid);
         return user;
     }
 }

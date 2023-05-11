@@ -10,10 +10,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import vn.clmart.manager_service.model.Employee;
 import vn.clmart.manager_service.model.Position;
-import vn.clmart.manager_service.repository.EmployeeRepository;
-import vn.clmart.manager_service.repository.PositionRepository;
-import vn.clmart.manager_service.repository.UserRepository;
-import vn.clmart.manager_service.untils.Constants;
+import vn.clmart.manager_service.repository.EmployeeRepo;
+import vn.clmart.manager_service.repository.PositionRepo;
+import vn.clmart.manager_service.repository.UserRepo;
+import vn.clmart.manager_service.utils.Constants;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,18 +22,18 @@ import java.util.Set;
 public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
-    UserRepository userRepository;
+    UserRepo userRepository;
 
     @Autowired
-    EmployeeRepository employeeRepository;
+    EmployeeRepo employeeRepo;
 
     @Autowired
-    PositionRepository positionRepository;
+    PositionRepo positionRepository;
 
     public UserDetails loadUserByCodeAndCid(String uid) throws UsernameNotFoundException {
         vn.clmart.manager_service.model.User user = userRepository.findUserByUidAndDeleteFlg(uid, Constants.DELETE_FLG.NON_DELETE).orElse(null);
         if (user != null) {
-            Employee employees = employeeRepository.findAllByIdUserAndDeleteFlg(user.getUid(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
+            Employee employees = employeeRepo.findAllByIdUserAndDeleteFlg(user.getUid(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
             if(employees.getIdPosition() != null){
                 Position position = positionRepository.findByIdAndDeleteFlg(employees.getIdPosition(),Constants.DELETE_FLG.NON_DELETE).orElseThrow();
                 boolean enabled = true;

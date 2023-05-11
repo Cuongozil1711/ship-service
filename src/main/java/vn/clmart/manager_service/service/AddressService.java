@@ -7,9 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.model.District;
 import vn.clmart.manager_service.model.Province;
 import vn.clmart.manager_service.model.Wards;
-import vn.clmart.manager_service.repository.DistrictRepository;
-import vn.clmart.manager_service.repository.ProvinceRepository;
-import vn.clmart.manager_service.repository.WardsRepository;
+import vn.clmart.manager_service.repository.DistrictRepo;
+import vn.clmart.manager_service.repository.ProvinceRepo;
+import vn.clmart.manager_service.repository.WardsRepo;
 
 import java.util.*;
 
@@ -20,13 +20,13 @@ public class AddressService {
     private static final Logger logger = Logger.getLogger(AddressService.class);
 
     @Autowired
-    ProvinceRepository provinceRepository;
+    ProvinceRepo provinceRepository;
 
     @Autowired
-    DistrictRepository districtRepository;
+    DistrictRepo districtRepo;
 
     @Autowired
-    WardsRepository wardsRepository;
+    WardsRepo wardsRepository;
 
 
     public List<Province> findAllProvince(){
@@ -41,7 +41,7 @@ public class AddressService {
 
     public List<District> findAllDistrict(){
         try {
-            return districtRepository.findAll();
+            return districtRepo.findAll();
         }
         catch (Exception ex){
             logger.error(ex);
@@ -50,7 +50,7 @@ public class AddressService {
     }
     public List<District> findAllDistrictByProvince(Integer proviceId){
         try {
-            return districtRepository.findAllByProvinceId(proviceId);
+            return districtRepo.findAllByProvinceId(proviceId);
         }
         catch (Exception ex){
             logger.error(ex);

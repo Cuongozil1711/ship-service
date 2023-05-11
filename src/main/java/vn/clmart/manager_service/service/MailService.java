@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import vn.clmart.manager_service.config.mail.Mail;
 import vn.clmart.manager_service.config.mail.MailFormNew;
 import vn.clmart.manager_service.dto.request.MailSendExport;
-import vn.clmart.manager_service.untils.Constants;
+import vn.clmart.manager_service.utils.Constants;
 
 import java.io.File;
 import java.text.SimpleDateFormat;

@@ -20,8 +20,6 @@ public class ManagerServiceApplication extends SpringBootServletInitializer {
     }
 
     public static void main(String[] args) {
-        System.out.println(String.format("file.encoding: %s", System.getProperty("file.encoding")));
-        System.out.println(String.format("defaultCharset: %s", Charset.defaultCharset().name()));
         SpringApplication.run(ManagerServiceApplication.class, args);
     }
 

@@ -19,11 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.config.security.CustomUserDetailsService;
 import vn.clmart.manager_service.config.security.JwtTokenProvider;
 import vn.clmart.manager_service.dto.*;
-import vn.clmart.manager_service.dto.request.EmployeeResponseDTO;
 import vn.clmart.manager_service.model.*;
 import vn.clmart.manager_service.repository.*;
-import vn.clmart.manager_service.untils.Constants;
-import vn.clmart.manager_service.untils.ResponseAPI;
+import vn.clmart.manager_service.utils.Constants;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -33,19 +31,19 @@ import java.util.stream.Collectors;
 @Transactional
 public class UserService {
     @Autowired
-    UserRepository userRepository;
+    UserRepo userRepository;
 
     @Autowired
     JwtTokenProvider tokenProvider;
 
     @Autowired
-    FullNameRepository fullNameRepository;
+    FullNameRepo fullNameRepo;
 
     @Autowired
-    AddressRepository addressRepository;
+    AddressRepo addressRepo;
 
     @Autowired
-    EmployeeRepository employeeRepository;
+    EmployeeRepo employeeRepo;
 
     @Autowired
     CustomUserDetailsService customUserDetailsService;
@@ -57,19 +55,16 @@ public class UserService {
     AddressService addressService;
 
     @Autowired
-    TokenFireBaseRepository tokenFireBaseRepository;
-
-    @Autowired
-    CompanyService companyService;
+    TokenFireBaseRepo tokenFireBaseRepository;
 
     private static final Logger logger = LogManager.getLogger(UserService.class);
 
     public LoginDto authenticateUserHandler(UserLoginDto userLoginDto,  HttpServletRequest request) {
-        LoginDto result = new LoginDto(null, null, null, null, null);
+        LoginDto result = new LoginDto(null, null, null, null);
         try {
             User user = userRepository.findAllByUsernameAndDeleteFlg(userLoginDto.getUsername(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
             if(user != null ){
-                Employee employee = employeeRepository.findAllByIdUserAndDeleteFlg(user.getId(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
+                Employee employee = employeeRepo.findAllByIdUserAndDeleteFlg(user.getId(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
                 if(employee != null){
                     BCryptPasswordEncoder bc = new BCryptPasswordEncoder();
                     boolean checkPass = bc.matches(userLoginDto.getPassword(), user.getPassword());
@@ -90,8 +85,8 @@ public class UserService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = tokenProvider.generateToken(user);
             logger.info("Login on: " + new Date() + " username: " + userLoginDto.getUsername());
-            Employee employee = employeeRepository.findAllByIdUserAndDeleteFlg(user.getId(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
-            FullName fullName = fullNameRepository.findById(employee.getIdFullName()).orElse(new FullName());
+            Employee employee = employeeRepo.findAllByIdUserAndDeleteFlg(user.getId(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
+            FullName fullName = fullNameRepo.findById(employee.getIdFullName()).orElse(new FullName());
             TokenFireBase tokenFireBase = tokenFireBaseRepository.findByDeleteFlgAndUserId(Constants.DELETE_FLG.NON_DELETE, user.getUid()).orElse(null);
             if(tokenFireBase != null && userLoginDto.getTokenFirebase() != null){
                 tokenFireBase.setToken(userLoginDto.getTokenFirebase());
@@ -103,7 +98,10 @@ public class UserService {
                 tokenFireBaseOnline.setToken(userLoginDto.getTokenFirebase());
                 tokenFireBaseRepository.save(tokenFireBaseOnline);
             }
-            result = new LoginDto(jwt, user.getCompanyId(), user.getUid(), userDetails.getAuthorities().stream().collect(Collectors.toList()).get(0).toString(), fullName.getFirstName() + " " + fullName.getLastName());
+            result = new LoginDto(jwt, user.getUid(), userDetails.getAuthorities().stream().collect(Collectors.toList()).get(0).toString(), fullName.getFirstName() + " " + fullName.getLastName());
+            result.setName(fullName.getFirstName() + " " + fullName.getLastName());
+            result.setImage(employee.getImage());
+            result.setBirthDay(employee.getBirthDay());
         } catch (BadCredentialsException e) {
             logger.error(e.getMessage(), e);
             throw new BadCredentialsException(e.getMessage(), e);
@@ -122,8 +120,8 @@ public class UserService {
             if(user != null){
                 return null;
             }
-            FullName fullName = fullNameRepository.save(FullName.of(employeeDto.getFullNameDto(), cid, uid));
-            Address address = addressRepository.save(Address.of(employeeDto.getAddressDto(), cid, uid));
+            FullName fullName = fullNameRepo.save(FullName.of(employeeDto.getFullNameDto(), cid, uid));
+            Address address = addressRepo.save(Address.of(employeeDto.getAddressDto(), cid, uid));
             employeeDto.getUserLoginDto().setPassword(new BCryptPasswordEncoder().encode(employeeDto.getUserLoginDto().getPassword()));
             User user1 = userRepository.save(User.of(employeeDto.getUserLoginDto(), cid, uid));
             Employee employee = new Employee();
@@ -132,11 +130,10 @@ public class UserService {
             employee.setIdFullName(fullName.getId());
             employee.setTel(employeeDto.getTel());
             employee.setIdPosition(employeeDto.getIdPosition());
-            employee.setCompanyId(cid);
             employee.setCreateBy(uid);
             employee.setCode(employeeDto.getCmt());
             employee.setBirthDay(employeeDto.getBirthDay());
-            employee = employeeRepository.save(employee);
+            employee = employeeRepo.save(employee);
             return employee;
         } catch (BadCredentialsException e) {
             logger.error(e.getMessage(), e);
@@ -148,19 +145,19 @@ public class UserService {
     }
 
     public Employee updateEmployeee(EmployeeDto employeeDto, Long cid, String uid){
-        Employee employee = employeeRepository.findById(employeeDto.getId()).orElse(null);
+        Employee employee = employeeRepo.findById(employeeDto.getId()).orElse(null);
         if(employee != null){
-            FullName fullName = fullNameRepository.findByCompanyIdAndId(cid, employee.getIdFullName());
+            FullName fullName = fullNameRepo.findById(employee.getIdFullName()).orElseThrow();
             fullName.setFirstName(employeeDto.getFullNameDto().getFirstName());
             fullName.setLastName(employeeDto.getFullNameDto().getLastName());
-            fullNameRepository.save(fullName);
+            fullNameRepo.save(fullName);
 
-            Address address = addressRepository.findById(employee.getIdAddress()).orElse(new Address());
+            Address address = addressRepo.findById(employee.getIdAddress()).orElse(new Address());
             address.setProvinceId(employeeDto.getAddressDto().getProvinceId());
             address.setDistrictId(employeeDto.getAddressDto().getDistrictId());
             address.setWardId(employeeDto.getAddressDto().getWardId());
             address.setName(employeeDto.getAddressDto().getName());
-            addressRepository.save(address);
+            addressRepo.save(address);
 
 //            User user = userRepository.findUserByUidAndDeleteFlg(employee.getIdUser(), Constants.DELETE_FLG.NON_DELETE).orElse(null);
 //            if(user != null)
@@ -170,31 +167,29 @@ public class UserService {
             employee.setIdFullName(fullName.getId());
             employee.setTel(employeeDto.getTel());
             employee.setIdPosition(employeeDto.getIdPosition());
-            employee.setCompanyId(cid);
             employee.setCreateBy(uid);
             employee.setCode(employeeDto.getCmt());
             employee.setTel(employeeDto.getTel());
             employee.setBirthDay(employeeDto.getBirthDay());
             employee.setCode(employeeDto.getCmt());
-            employeeRepository.save(employee);
+            employeeRepo.save(employee);
         }
         return employee;
     }
 
-    public PageImpl<EmployeeDto> search(Long cid,  Pageable pageable){
+    public PageImpl<EmployeeDto> search(Pageable pageable){
         try {
-            Page<Employee> pageSearch = employeeRepository.findAllByCompanyId(cid, pageable);
+            Page<Employee> pageSearch = employeeRepo.findAll(pageable);
             List<EmployeeDto> responseDTOList = new ArrayList<>();
             for(Employee employee : pageSearch.getContent()){
                 EmployeeDto employeeResponseDTO = new EmployeeDto();
-                employeeResponseDTO.setCid(employee.getCompanyId());
                 employeeResponseDTO.setId(employee.getId());
                 employeeResponseDTO.setIdUser(employee.getIdUser());
-                FullName fullName = fullNameRepository.findById(employee.getIdFullName()).orElse(new FullName());
+                FullName fullName = fullNameRepo.findById(employee.getIdFullName()).orElse(new FullName());
                 employeeResponseDTO.setFullNameDto(new FullNameDto(fullName.getFirstName(), fullName.getLastName()));
                 employeeResponseDTO.setCmt(employee.getCode());
                 employeeResponseDTO.setTel(employee.getTel());
-                Position position = positionService.getById(cid, "", employee.getIdPosition());
+                Position position = positionService.getById(employee.getIdPosition());
                 employeeResponseDTO.setIdPosition(position.getId());
                 employeeResponseDTO.setNamePosition(position.getName());
                 employeeResponseDTO.setStatus(employee.getDeleteFlg());
@@ -207,7 +202,7 @@ public class UserService {
 
                 if(employee.getIdAddress() != null){
                     AddressDto addressDto = new AddressDto();
-                    Address address = addressRepository.findById(employee.getIdAddress()).orElse(new Address());
+                    Address address = addressRepo.findById(employee.getIdAddress()).orElse(new Address());
                     BeanUtils.copyProperties(address, addressDto);
                     employeeResponseDTO.setAddressDto(addressDto);
                 }
@@ -220,14 +215,14 @@ public class UserService {
         }
     }
 
-    public void deleteEmployee(Long cid, String uid, Long id){
+    public void deleteEmployee(String uid, Long id){
         try {
-            Employee employee = employeeRepository.findByCompanyIdAndId(cid, id).orElse(null);
+            Employee employee = employeeRepo.findById(id).orElse(null);
             if(employee != null){
                 employee.setDeleteFlg(Constants.DELETE_FLG.DELETE);
                 employee.setUpdateBy(uid);
-                employeeRepository.save(employee);
-                User user = userRepository.findByCompanyIdAndUidAndDeleteFlg(cid, employee.getIdUser(), Constants.DELETE_FLG.NON_DELETE).orElse(null);
+                employeeRepo.save(employee);
+                User user = userRepository.findByUidAndDeleteFlg(employee.getIdUser(), Constants.DELETE_FLG.NON_DELETE).orElse(null);
                 if(user != null){
                     user.setDeleteFlg(Constants.DELETE_FLG.DELETE);
                     employee.setUpdateBy(uid);
@@ -243,23 +238,23 @@ public class UserService {
     public FullName getFullName(Long cid, String uid){
         User user = userRepository.findUserByUidAndDeleteFlg(uid, Constants.DELETE_FLG.NON_DELETE).orElse(null);
         if(user != null){
-            Employee employee = employeeRepository.findAllByIdUserAndDeleteFlg(user.getId(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
-            FullName fullName = fullNameRepository.findById(employee.getIdFullName()).orElse(new FullName());
+            Employee employee = employeeRepo.findAllByIdUserAndDeleteFlg(user.getId(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
+            FullName fullName = fullNameRepo.findById(employee.getIdFullName()).orElse(new FullName());
             return fullName;
         }
         return new FullName();
     }
 
-    public EmployeeDto getByUid(Long cid, String uid){
-        Employee employee = employeeRepository.findByCompanyIdAndIdUser(cid, uid).orElseThrow(() -> new RuntimeException());
+    public EmployeeDto getByUid(String uid){
+        Employee employee = employeeRepo.findByIdUser(uid).orElseThrow(() -> new RuntimeException());
         EmployeeDto employeeResponseDTO = new EmployeeDto();
         employeeResponseDTO.setId(employee.getId());
         employeeResponseDTO.setIdUser(employee.getIdUser());
-        FullName fullName = fullNameRepository.findById(employee.getIdFullName()).orElse(new FullName());
+        FullName fullName = fullNameRepo.findById(employee.getIdFullName()).orElse(new FullName());
         employeeResponseDTO.setFullNameDto(new FullNameDto(fullName.getFirstName(), fullName.getLastName()));
         employeeResponseDTO.setCmt(employee.getCode());
         employeeResponseDTO.setTel(employee.getTel());
-        Position position = positionService.getById(cid, "", employee.getIdPosition());
+        Position position = positionService.getById(employee.getIdPosition());
         employeeResponseDTO.setIdPosition(position.getId());
         employeeResponseDTO.setNamePosition(position.getName());
         employeeResponseDTO.setStatus(employee.getDeleteFlg());
@@ -267,15 +262,10 @@ public class UserService {
         employeeResponseDTO.setImage(employee.getImage());
         if(employee.getIdAddress() != null){
             AddressDto addressDto = new AddressDto();
-            Address address = addressRepository.findById(employee.getIdAddress()).orElse(new Address());
+            Address address = addressRepo.findById(employee.getIdAddress()).orElse(new Address());
             BeanUtils.copyProperties(address, addressDto);
             employeeResponseDTO.setAddressDto(addressDto);
         }
-        employeeResponseDTO.setCompanyName(companyService.getById(cid, uid, cid).getName());
         return employeeResponseDTO;
-    }
-
-    public List<Employee> getUserMappingLeader(Long cid){
-        return employeeRepository.getListUserIdByAuthority(cid);
     }
 }

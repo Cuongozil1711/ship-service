@@ -83,11 +83,9 @@ public class UserApi {
     @PostMapping("/employee/search")
     protected @ResponseBody
     ResponseEntity<Object> search(
-            @RequestHeader Long cid,
-            @RequestHeader String uid
-            , Pageable pageable) {
+            Pageable pageable) {
         try {
-            return new ResponseEntity<>(userService.search(cid, pageable), HttpStatus.OK);
+            return new ResponseEntity<>(userService.search(pageable), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -96,11 +94,10 @@ public class UserApi {
     @GetMapping("/delete/{id}")
     protected @ResponseBody
     ResponseEntity<Object> delete(
-            @RequestHeader Long cid,
             @RequestHeader String uid
             ,@PathVariable(value = "id") Long id ) {
         try {
-            userService.deleteEmployee(cid, uid, id);
+            userService.deleteEmployee(uid, id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
@@ -110,11 +107,10 @@ public class UserApi {
     @GetMapping("/getByUser")
     protected @ResponseBody
     ResponseEntity<Object> getByUser(
-            @RequestHeader Long cid,
             @RequestHeader String uid)
      {
         try {
-            return new ResponseEntity<>(userService.getByUid(cid, uid),HttpStatus.OK);
+            return new ResponseEntity<>(userService.getByUid(uid),HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

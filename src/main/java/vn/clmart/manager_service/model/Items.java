@@ -44,7 +44,6 @@ public class Items extends PersistableEntity<Long> {
                 .weight(itemsDto.getWeight())
                 .idStall(itemsDto.getIdStall()).build();
         items.setCreateBy(uid);
-        items.setCompanyId(cid);
         return items;
     }
 }

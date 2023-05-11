@@ -31,7 +31,6 @@ public abstract class PersistableEntity<ID> implements Persistable<ID>, Serializ
     )
     private Date modifiedDate;
     private Integer deleteFlg;
-    private Long companyId;
     @CreatedBy
     private String createBy;
     @LastModifiedBy
@@ -99,14 +98,6 @@ public abstract class PersistableEntity<ID> implements Persistable<ID>, Serializ
         this.deleteFlg = deleteFlg;
     }
 
-    public Long getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(Long companyId) {
-        this.companyId = companyId;
-    }
-
     public String getCreateBy() {
         return createBy;
     }
@@ -134,7 +125,6 @@ public abstract class PersistableEntity<ID> implements Persistable<ID>, Serializ
                 "createDate=" + createDate +
                 ", modifiedDate=" + modifiedDate +
                 ", deleteFlg=" + deleteFlg +
-                ", companyId=" + companyId +
                 ", createBy='" + createBy + '\'' +
                 ", updateBy='" + updateBy + '\'' +
                 ", isNew=" + isNew +

@@ -17,5 +17,4 @@ public class OrderDto {
     private Long idCustomer;
     private String namePayment;
     private Long totalPriceCustomer;
-    private List<DetailsItemOrderDto> detailsItemOrders;
 }

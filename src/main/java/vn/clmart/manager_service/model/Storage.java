@@ -23,5 +23,7 @@ public class Storage extends PersistableEntity<Long> {
     @GeneratedValue(generator = "id")
     private Long id;
     private String typeCode;
-    private Long rootId;
+    private String rootId;
+    private Long entityId;
+    private String linkedId;
 }

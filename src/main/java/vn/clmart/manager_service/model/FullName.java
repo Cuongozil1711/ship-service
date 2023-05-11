@@ -30,7 +30,6 @@ public class FullName extends PersistableEntity<Long> {
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
                 .build();
-        fullName.setCompanyId(companyId);
         fullName.setCreateBy(uId);
         return fullName;
     }

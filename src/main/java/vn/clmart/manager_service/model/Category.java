@@ -4,13 +4,9 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.context.annotation.Description;
 import vn.clmart.manager_service.dto.CategoryDto;
-import vn.clmart.manager_service.model.config.ListHashMapConverter;
-import vn.clmart.manager_service.model.config.ListHashMapConverterString;
 import vn.clmart.manager_service.model.config.PersistableEntity;
 
 import javax.persistence.*;
-import java.util.List;
-import java.util.Map;
 
 @Entity
 @Getter
@@ -26,20 +22,15 @@ public class Category extends PersistableEntity<Long> {
     @GenericGenerator(name = "id",strategy = "vn.clmart.manager_service.generator.SnowflakeId")
     @GeneratedValue(generator = "id")
     private Long id;
-    private String code;
     private String name;
-    @Convert(converter = ListHashMapConverterString.class)
-    @Column(columnDefinition = "text")
-    private List<Map<String, String>> unit;// đơn vị tính theo loại sản phẩm
+    private Long parentId;
 
-    public static Category of(CategoryDto categoryDto, Long cid, String uid){
+    public static Category of(CategoryDto categoryDto, String uid){
         Category category = Category.builder()
-                .code(categoryDto.getCode())
                 .name(categoryDto.getName())
+                .parentId(categoryDto.getParentId())
                 .build();
-        category.setUnit(categoryDto.getUnit());
         category.setCreateBy(uid);
-        category.setCompanyId(cid);
         return category;
     }
 }

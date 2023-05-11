@@ -19,6 +19,5 @@ public class ItemsDto {
     private Long idWareHouse;
     private Long idStall;
     private String state;
-    private List<PriceItemsDto> priceItemsDtos;
     private Double weight;
 }
