@@ -80,17 +80,6 @@ public class UserApi {
         }
     }
 
-    @PostMapping("/employee/search")
-    protected @ResponseBody
-    ResponseEntity<Object> search(
-            Pageable pageable) {
-        try {
-            return new ResponseEntity<>(userService.search(pageable), HttpStatus.OK);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
-        }
-    }
-
     @GetMapping("/delete/{id}")
     protected @ResponseBody
     ResponseEntity<Object> delete(
@@ -111,6 +100,23 @@ public class UserApi {
      {
         try {
             return new ResponseEntity<>(userService.getByUid(uid),HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @PostMapping("/otp/login")
+    protected @ResponseBody
+    ResponseEntity<Object> loginOtp(
+            @RequestBody UserLoginDto userLoginDto,
+            HttpServletRequest request
+    ) {
+        try {
+            return new ResponseEntity<>(userService.loginCustomer(userLoginDto.getPhone(), userLoginDto.getOtp()), HttpStatus.OK);
+        } catch (BadCredentialsException e) {
+            return new ResponseEntity<>(e,  HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (NullPointerException ex) {
+            return new ResponseEntity<>(ex,  HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

@@ -12,5 +12,7 @@ import lombok.NoArgsConstructor;
 public class UserLoginDto {
     private String username;
     private String password;
+    private String phone;
+    private String otp;
     private String tokenFirebase;
 }

@@ -11,6 +11,7 @@ import vn.clmart.manager_service.config.exceptions.BusinessException;
 import vn.clmart.manager_service.dto.ListTypeProductDto;
 import vn.clmart.manager_service.dto.ProductDto;
 import vn.clmart.manager_service.dto.ReviewProductDto;
+import vn.clmart.manager_service.dto.request.SearchDTO;
 import vn.clmart.manager_service.model.ListTypeProduct;
 import vn.clmart.manager_service.model.Product;
 import vn.clmart.manager_service.model.ReviewProduct;
@@ -94,6 +95,7 @@ public class ProductService {
 
             return productDto;
         } catch (Exception ex) {
+            logger.error("CREATE_PRODUCT", ex);
             throw new BusinessException(ex.getMessage());
         }
     }
@@ -139,76 +141,82 @@ public class ProductService {
     }
 
     public ProductDto update(ProductDto productDto, Long id, String uid) {
-        Product product = productRepo.findById(id).orElseThrow(EntityExistsException::new);
-        BeanUtils.copyProperties(productDto, product);
-        product.setUpdateBy(uid);
-        product = productRepo.save(product);
+        try {
+            Product product = productRepo.findById(id).orElseThrow(EntityExistsException::new);
+            BeanUtils.copyProperties(productDto, product);
+            product.setUpdateBy(uid);
+            product = productRepo.save(product);
 
-        Product finalProduct = product;
+            Product finalProduct = product;
 
-        if (productDto.getImages() != null) {
-            List<String> images = new ArrayList<>();
+            if (productDto.getImages() != null) {
+                List<String> images = new ArrayList<>();
 
-            List<String> listImages = cloudinaryService.getListImage(List.of(id.toString()), Constants.MODEL_IMAGE.PRODUCT.name(), id);
-            listImages.forEach(e -> {
-                if (!Arrays.asList(productDto.getImages()).contains(e)) {
-                    images.add(e);
-                }
-            });
-            cloudinaryService.deleteAll(List.of(id.toString()), Constants.MODEL_IMAGE.PRODUCT.name(), images, id);
+                List<String> listImages = cloudinaryService.getListImage(List.of(id.toString()), Constants.MODEL_IMAGE.PRODUCT.name(), id);
+                listImages.forEach(e -> {
+                    if (!Arrays.asList(productDto.getImages()).contains(e)) {
+                        images.add(e);
+                    }
+                });
+                cloudinaryService.deleteAll(List.of(id.toString()), Constants.MODEL_IMAGE.PRODUCT.name(), images, id);
 
 
-            Arrays.stream(productDto.getImages()).distinct().forEach(image -> {
-                String imageSplit = splitBase64(image);
-                if (Base64Utils.isBase64String(imageSplit)) {
-                    cloudinaryService.uploadByte(splitBase64(imageSplit), Constants.MODEL_IMAGE.PRODUCT.name(), finalProduct.getId().toString(), id);
-                }
-            });
+                Arrays.stream(productDto.getImages()).distinct().forEach(image -> {
+                    String imageSplit = splitBase64(image);
+                    if (Base64Utils.isBase64String(imageSplit)) {
+                        cloudinaryService.uploadByte(splitBase64(imageSplit), Constants.MODEL_IMAGE.PRODUCT.name(), finalProduct.getId().toString(), id);
+                    }
+                });
+            }
+
+            if (productDto.getListTypeProduct() != null) {
+                List<ListTypeProduct> listAllTypeProducts = listTypeProductRepo.findAllByProductId(id);
+                Map<Long, ListTypeProduct> listTypeProductMap = listAllTypeProducts.stream().collect(Collectors.toMap(ListTypeProduct::getId, Function.identity(), (o, n) -> n));
+
+                List<ListTypeProduct> listTypeProducts = productDto.getListTypeProduct().stream().map(lt -> {
+                    lt.setProductId(finalProduct.getId());
+                    ListTypeProduct listTypeProduct = ListTypeProduct.of(uid, lt);
+                    if (lt.getId() != null) {
+                        if (listTypeProductMap.containsKey(lt.getId()))
+                            listTypeProduct = listTypeProductMap.get(lt.getId());
+                    }
+                    BeanUtils.copyProperties(lt, listTypeProduct);
+                    listTypeProduct.setUpdateBy(uid);
+                    return listTypeProduct;
+                }).collect(Collectors.toList());
+
+                listTypeProductRepo.saveAll(listTypeProducts);
+
+                productDto.getListTypeProduct().stream().filter(lt -> lt.getImage() != null).forEach(lt -> {
+                    if (Base64Utils.isBase64String(lt.getImage()))
+                        cloudinaryService.uploadByte(splitBase64(lt.getImage()), Constants.MODEL_IMAGE.TYPE_PRODUCT.name(), lt.getKeyIndex().toString(), id);
+                });
+            }
+
+            List<ReviewProduct> reviewAllProduct = reviewProductRepo.findAllByProductId(id);
+            Map<Long, ReviewProduct> reviewAllProductMap = reviewAllProduct.stream().collect(Collectors.toMap(ReviewProduct::getId, Function.identity(), (o, n) -> n));
+
+
+            if (productDto.getReview() != null) {
+                List<ReviewProduct> reviewProducts = productDto.getReview().stream().map(rv -> {
+                    rv.setProductId(finalProduct.getId());
+                    ReviewProduct reviewProduct = ReviewProduct.of(uid, rv);
+                    if (rv.getId() != null) {
+                        if (reviewAllProductMap.containsKey(rv.getId()))
+                            reviewProduct = reviewAllProductMap.get(rv.getId());
+                    }
+                    BeanUtils.copyProperties(rv, reviewProduct);
+                    return reviewProduct;
+                }).collect(Collectors.toList());
+
+                reviewProductRepo.saveAll(reviewProducts);
+            }
+
+            return productDto;
+        } catch (Exception ex) {
+            logger.error("UPDATE_PRODUCT", ex);
+            throw new RuntimeException(ex);
         }
-
-        if (productDto.getListTypeProduct() != null) {
-            List<ListTypeProduct> listAllTypeProducts = listTypeProductRepo.findAllByProductId(id);
-            Map<Long, ListTypeProduct> listTypeProductMap = listAllTypeProducts.stream().collect(Collectors.toMap(ListTypeProduct::getId, Function.identity(), (o, n) -> n));
-
-            List<ListTypeProduct> listTypeProducts = productDto.getListTypeProduct().stream().map(lt -> {
-                lt.setProductId(finalProduct.getId());
-                ListTypeProduct listTypeProduct = ListTypeProduct.of(uid, lt);
-                if (lt.getId() != null) {
-                    if (listTypeProductMap.containsKey(lt.getId()))
-                        listTypeProduct = listTypeProductMap.get(lt.getId());
-                }
-                BeanUtils.copyProperties(lt, listTypeProduct);
-                listTypeProduct.setUpdateBy(uid);
-                return listTypeProduct;
-            }).collect(Collectors.toList());
-
-            listTypeProductRepo.saveAll(listTypeProducts);
-
-            productDto.getListTypeProduct().stream().filter(lt -> lt.getImage() != null).forEach(lt -> {
-                    if(Base64Utils.isBase64String(lt.getImage())) cloudinaryService.uploadByte(splitBase64(lt.getImage()), Constants.MODEL_IMAGE.TYPE_PRODUCT.name(), lt.getKeyIndex().toString(), id);
-            });
-        }
-
-        List<ReviewProduct> reviewAllProduct = reviewProductRepo.findAllByProductId(id);
-        Map<Long, ReviewProduct> reviewAllProductMap = reviewAllProduct.stream().collect(Collectors.toMap(ReviewProduct::getId, Function.identity(), (o, n) -> n));
-
-
-        if (productDto.getReview() != null) {
-            List<ReviewProduct> reviewProducts = productDto.getReview().stream().map(rv -> {
-                rv.setProductId(finalProduct.getId());
-                ReviewProduct reviewProduct = ReviewProduct.of(uid, rv);
-                if(rv.getId() != null) {
-                    if (reviewAllProductMap.containsKey(rv.getId()))
-                        reviewProduct = reviewAllProductMap.get(rv.getId());
-                }
-                BeanUtils.copyProperties(rv, reviewProduct);
-                return reviewProduct;
-            }).collect(Collectors.toList());
-
-            reviewProductRepo.saveAll(reviewProducts);
-        }
-
-        return productDto;
     }
 
     private String splitBase64(String base64) {
@@ -218,15 +226,20 @@ public class ProductService {
 
 
     public void delete(Long id, String uid) {
-        Product product = productRepo.findById(id).orElseThrow(EntityExistsException::new);
-        product.setDeleteFlg(Constants.DELETE_FLG.DELETE);
-        product.setUpdateBy(uid);
-        productRepo.save(product);
+        try {
+            Product product = productRepo.findById(id).orElseThrow(EntityExistsException::new);
+            product.setDeleteFlg(Constants.DELETE_FLG.DELETE);
+            product.setUpdateBy(uid);
+            productRepo.save(product);
+        } catch (Exception ex) {
+            logger.error("DELETE_PRODUCT", ex);
+            throw new RuntimeException(ex);
+        }
     }
 
-    public Page<ProductDto> findAll(Pageable pageable) {
+    public Page<ProductDto> findAll(Pageable pageable, SearchDTO<Long> request) {
         try {
-            Page<Product> page = productRepo.findAll(pageable);
+            Page<Product> page = productRepo.search(request.getSearch(), request.getId(), pageable);
             List<Long> productId = page.get().collect(Collectors.toList()).stream().map(Product::getId).collect(Collectors.toList());
 
             List<Storage> storageImage = cloudinaryService.getListStorage(productId.stream().map(String::valueOf).collect(Collectors.toList()), Constants.MODEL_IMAGE.PRODUCT.name(), null);
@@ -242,6 +255,7 @@ public class ProductService {
 
             return new PageImpl(product, pageable, page.getTotalElements());
         } catch (Exception ex) {
+            logger.error("FIND_ALL_PRODUCT", ex);
             throw new BusinessException(ex.getMessage());
         }
     }

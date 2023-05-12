@@ -25,6 +25,8 @@ public class Product extends PersistableEntity<Long> {
     @GenericGenerator(name = "id", strategy = "vn.clmart.manager_service.generator.SnowflakeId")
     @GeneratedValue(generator = "id")
     private Long id;
+    @GeneratedValue()
+    private String code;
     @Column(columnDefinition = "text")
     private String content;
     private String nameProduct;

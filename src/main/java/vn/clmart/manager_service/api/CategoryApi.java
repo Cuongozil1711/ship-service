@@ -1,4 +1,4 @@
-package vn.clmart.manager_service.api.shophouse;
+package vn.clmart.manager_service.api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

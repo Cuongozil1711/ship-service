@@ -10,5 +10,17 @@ public class Constants {
         PRODUCT, TYPE_PRODUCT
     }
 
+    public enum TYPE_ROLE {
+        ADMIN, CUSTOMER
+    }
+
+    public enum TYPE_ORDER {
+        INIT, // đã thêm vào giỏ hàng
+        PROCESSING, // đã đặt hàng
+
+        COMPLETE, // hoàn thành
+        CANCELED // huỷ hỏ
+    }
+
     public static final String MAIL_ON_SUCCESS_03 = "./template/fileBz003.vm";
 }

@@ -12,7 +12,11 @@ import java.util.Date;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class UserDTO {
-    private String name;
-    private String image;
-    private Date birthDay;
+    private String phone;
+    private String birthDay;
+    private String address;
+    private String fullName;
+    private String districtCode;
+    private String provinceCode;
+    private String wardsCode;
 }

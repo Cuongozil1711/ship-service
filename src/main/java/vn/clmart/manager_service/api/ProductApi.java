@@ -1,31 +1,28 @@
-package vn.clmart.manager_service.api.shophouse;
+package vn.clmart.manager_service.api;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.clmart.manager_service.dto.CustomerDto;
-import vn.clmart.manager_service.service.CustomerService;
+import vn.clmart.manager_service.dto.ProductDto;
+import vn.clmart.manager_service.dto.request.SearchDTO;
+import vn.clmart.manager_service.service.ProductService;
 
 @RestController
-@RequestMapping("/customer")
-public class CustomerApi {
+@RequestMapping("/product")
+public class ProductApi {
+    private final vn.clmart.manager_service.service.ProductService productService;
 
-    private final CustomerService customerService;
-
-    public CustomerApi(CustomerService customerService) {
-        this.customerService = customerService;
+    public ProductApi(ProductService productService) {
+        this.productService = productService;
     }
 
 
     @PostMapping("/search")
     protected @ResponseBody
-    ResponseEntity<Object> search(
-            @RequestHeader Long cid,
-            @RequestHeader String uid
-            , Pageable pageable) {
+    ResponseEntity<Object> search(Pageable pageable, @RequestBody SearchDTO<Long> request) {
         try {
-            return new ResponseEntity<>(customerService.search(cid, pageable), HttpStatus.OK);
+            return new ResponseEntity<>(productService.findAll(pageable, request), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -34,12 +31,9 @@ public class CustomerApi {
     @GetMapping("{id}")
     protected @ResponseBody
     ResponseEntity<Object> getById(
-            @RequestHeader Long cid,
-            @RequestHeader String uid,
-            @PathVariable("id") Long id
-            , Pageable pageable) {
+            @PathVariable("id") Long id) {
         try {
-            return new ResponseEntity<>(customerService.getById(cid, uid, id), HttpStatus.OK);
+            return new ResponseEntity<>(productService.get(id), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -48,13 +42,12 @@ public class CustomerApi {
     @PutMapping("{id}")
     protected @ResponseBody
     ResponseEntity<Object> update(
-            @RequestHeader Long cid,
             @RequestHeader String uid,
             @PathVariable("id") Long id,
-            @RequestBody CustomerDto customerDto
+            @RequestBody ProductDto productDto
     ) {
         try {
-            return new ResponseEntity<>(customerService.update(customerDto, cid, uid, id), HttpStatus.OK);
+            return new ResponseEntity<>(productService.update(productDto, id, uid), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -63,12 +56,11 @@ public class CustomerApi {
     @PostMapping()
     protected @ResponseBody
     ResponseEntity<Object> create(
-            @RequestHeader Long cid,
             @RequestHeader String uid,
-            @RequestBody CustomerDto customerDto
+            @RequestBody ProductDto productDto
     ) {
         try {
-            return new ResponseEntity<>(customerService.create(customerDto, cid, uid), HttpStatus.OK);
+            return new ResponseEntity<>(productService.create(productDto, uid), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -77,12 +69,12 @@ public class CustomerApi {
     @PutMapping("/delete/{id}")
     protected @ResponseBody
     ResponseEntity<Object> delete(
-            @RequestHeader Long cid,
             @RequestHeader String uid,
             @PathVariable("id") Long id
     ) {
         try {
-            return new ResponseEntity<>(customerService.delete(cid, uid, id), HttpStatus.OK);
+            productService.delete(id, uid);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

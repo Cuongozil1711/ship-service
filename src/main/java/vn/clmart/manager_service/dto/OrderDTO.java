@@ -11,10 +11,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class OrderDto {
+public class OrderDTO {
+    private String id;
     private String name;
     private String code;
     private Long idCustomer;
-    private String namePayment;
-    private Long totalPriceCustomer;
+    private String state; // trạng thái đơn hàng
+    private List<OrderDetailDTO> orderDetailDTOList;
+    private String phone;
+    private String address;
 }
