@@ -16,7 +16,7 @@ public class AdminApi {
         this.orderService = orderService;
     }
 
-    @PutMapping("/order")
+    @PutMapping("/order/{id}")
     protected @ResponseBody
     ResponseEntity<Object> update(
             @RequestHeader String uid,

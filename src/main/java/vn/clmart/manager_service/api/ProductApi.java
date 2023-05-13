@@ -22,6 +22,7 @@ public class ProductApi {
     protected @ResponseBody
     ResponseEntity<Object> search(Pageable pageable, @RequestBody SearchDTO<Long> request) {
         try {
+            if (request.getSearch() == null) request.setSearch("");
             return new ResponseEntity<>(productService.findAll(pageable, request), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);

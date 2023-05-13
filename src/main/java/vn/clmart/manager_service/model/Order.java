@@ -8,6 +8,7 @@ import vn.clmart.manager_service.dto.OrderDTO;
 import vn.clmart.manager_service.model.config.PersistableEntity;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -28,12 +29,16 @@ public class Order extends PersistableEntity<String> {
     private String state; // trạng thái đơn hàng
     private String phone;
     private String address;
+    private String fullName;
+    private Date dateReceived;
 
     public static Order of(OrderDTO orderDto, String uid){
         Order order = Order.builder()
                 .name(orderDto.getName())
                 .code(orderDto.getCode())
                 .address(orderDto.getAddress())
+                .fullName(orderDto.getFullName())
+                .dateReceived(orderDto.getDateReceived())
                 .phone(orderDto.getPhone()).build();
         order.setCreateBy(uid);
         return order;

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -20,4 +21,7 @@ public class OrderDTO {
     private List<OrderDetailDTO> orderDetailDTOList;
     private String phone;
     private String address;
+    private Date createDate;
+    private String fullName;
+    private Date dateReceived;
 }

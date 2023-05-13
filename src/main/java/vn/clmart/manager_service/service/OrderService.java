@@ -55,19 +55,21 @@ public class OrderService {
             order.setState(Constants.TYPE_ORDER.INIT.name());
             order = orderRepo.save(order);
 
-            List<Long> typeProductIds = orderDTO.getOrderDetailDTOList().stream().filter(orderDetail -> orderDetail.getTypeProductId() != null).map(OrderDetailDTO::getTypeProductId).collect(Collectors.toList());;
-            List<ListTypeProduct> listTypeProducts = listTypeProductRepo.findAllByIdIn(typeProductIds);
 
             List<Long> productIds = orderDTO.getOrderDetailDTOList().stream().filter(orderDetail -> orderDetail.getProductId() != null).map(OrderDetailDTO::getProductId).collect(Collectors.toList());;
             List<Product> products = productRepo.findAllByIdIn(productIds);
             Map<Long, Product> productMap = products.stream().collect(Collectors.toMap(Product::getId, Function.identity(), (o, n) -> n));
 
-            List<Storage> storageImage = cloudinaryService.getListStorageByEntityId(listTypeProducts.stream().map(ListTypeProduct::getKeyIndex).collect(Collectors.toList()), Constants.MODEL_IMAGE.TYPE_PRODUCT.name(), productIds);
-            Map<String, Storage> imagesListTypeMap = storageImage.stream().collect(Collectors.toMap(Storage::getRootId, Function.identity(), (o, n) -> o));
+            List<ListTypeProduct> listTypeProduct = listTypeProductRepo.findAllByProductIdIn(productIds);
+            List<Storage> storageImage = cloudinaryService.getListStorageByEntityId(listTypeProduct.stream().map(ListTypeProduct::getKeyIndex).collect(Collectors.toList()), Constants.MODEL_IMAGE.TYPE_PRODUCT.name(), productIds);
+            Map<Long, Storage> imagesListTypeMap = storageImage.stream().collect(Collectors.toMap(Storage::getEntityId, Function.identity(), (o, n) -> o));
             Map<Long, String> imageMapTypeProduct = new HashMap<>();
-            listTypeProducts.stream().forEach(listTypeProduct -> {
-                if (imagesListTypeMap.containsKey(listTypeProduct.getKeyIndex()) && !imageMapTypeProduct.containsKey(listTypeProduct.getId())) {
-                    imageMapTypeProduct.put(listTypeProduct.getId(), imagesListTypeMap.get(listTypeProduct.getKeyIndex()).getLinkedId());
+            listTypeProduct.stream().forEach(e -> {
+                if (imagesListTypeMap.containsKey(e.getProductId())) {
+                    imageMapTypeProduct.put(e.getId(), imagesListTypeMap.get(e.getProductId()).getLinkedId());
+                    if (e.getKeyIndex().equals(imagesListTypeMap.get(e.getProductId()).getRootId())){
+                        imageMapTypeProduct.put(e.getId(), imagesListTypeMap.get(e.getProductId()).getLinkedId());
+                    }
                 }
             });
 
@@ -120,7 +122,10 @@ public class OrderService {
             Order finalOrder = order;
             List<OrderDetail> orderDetailUpdate = orderDTO.getOrderDetailDTOList().stream().map(orderDetailDTO -> {
                 OrderDetail orderDetail;
-                if(orderDetailDTO.getId() != null) orderDetail = orderDetails.stream().filter(o -> o.getId().equals(orderDetailDTO.getId())).findFirst().orElseThrow(EntityExistsException::new);
+                if(orderDetailDTO.getId() != null) {
+                    orderDetail = orderDetails.stream().filter(o -> o.getId().equals(orderDetailDTO.getId())).findFirst().orElseThrow(EntityExistsException::new);
+                    BeanUtils.copyProperties(orderDetailDTO, orderDetail);
+                }
                 else orderDetail = OrderDetail.of(uid, orderDetailDTO);
                 orderDetail.setOrderId(finalOrder.getId());
                 orderDetail.setUpdateBy(uid);

@@ -242,14 +242,32 @@ public class ProductService {
             Page<Product> page = productRepo.search(request.getSearch(), request.getId(), pageable);
             List<Long> productId = page.get().collect(Collectors.toList()).stream().map(Product::getId).collect(Collectors.toList());
 
-            List<Storage> storageImage = cloudinaryService.getListStorage(productId.stream().map(String::valueOf).collect(Collectors.toList()), Constants.MODEL_IMAGE.PRODUCT.name(), null);
-            Map<String, List<Storage>> imagesListTypeMap = storageImage.stream().collect(Collectors.groupingBy(Storage::getRootId));
+            List<ListTypeProduct> listTypeProduct = listTypeProductRepo.findAllByProductIdIn(productId);
+
+            List<Storage> storageImage = cloudinaryService.getListStorageByEntityId(listTypeProduct.stream().map(ListTypeProduct::getKeyIndex).collect(Collectors.toList()), Constants.MODEL_IMAGE.TYPE_PRODUCT.name(), productId);
+
+            List<ListTypeProductDto> listTypeProducts = listTypeProduct.stream().map(ltp -> {
+                ListTypeProductDto listTypeProductDto = new ListTypeProductDto();
+                BeanUtils.copyProperties(ltp, listTypeProductDto);
+                storageImage.stream().filter(s -> s.getRootId().equals(listTypeProductDto.getKeyIndex()) && s.getEntityId().equals(ltp.getProductId())).findFirst().ifPresent(st -> {
+                    listTypeProductDto.setImage(st.getLinkedId());
+                });
+                return listTypeProductDto;
+            }).collect(Collectors.toList());
+            Map<Long, List<ListTypeProductDto>> listTypeProductsMap = listTypeProducts.stream().collect(Collectors.groupingBy(ListTypeProductDto::getProductId));
+
 
             List<ProductDto> product = page.get().collect(Collectors.toList()).stream().map(p -> {
                 ProductDto productDto = new ProductDto();
                 BeanUtils.copyProperties(p, productDto);
-                if (imagesListTypeMap.containsKey(p.getId().toString()))
-                    productDto.setImages(imagesListTypeMap.get(p.getId().toString()).stream().map(Storage::getLinkedId).collect(Collectors.toList()).toArray(new String[0]));
+                if(listTypeProductsMap.containsKey(p.getId())) {
+                    productDto.setListTypeProduct(listTypeProductsMap.get(p.getId()));
+                    List<String> images = new ArrayList<>();
+                    listTypeProductsMap.get(p.getId()).stream().filter(ltp -> ltp.getImage() != null).findFirst().ifPresent(ptp -> {
+                        images.add(ptp.getImage());
+                    });
+                    productDto.setImages(new String[0]);
+                }
                 return productDto;
             }).collect(Collectors.toList());
 

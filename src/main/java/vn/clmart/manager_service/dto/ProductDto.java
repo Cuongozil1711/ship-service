@@ -19,6 +19,7 @@ public class ProductDto {
     private Long madeInId;
     private Long expiredId;
     private String information;
+    private String code;
     private String images[];
     private List<ReviewProductDto> review;
     private List<ListTypeProductDto> listTypeProduct;
