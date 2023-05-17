@@ -11,15 +11,10 @@ import vn.clmart.manager_service.config.exceptions.BusinessException;
 import vn.clmart.manager_service.dto.ListTypeProductDto;
 import vn.clmart.manager_service.dto.ProductDto;
 import vn.clmart.manager_service.dto.ReviewProductDto;
+import vn.clmart.manager_service.dto.TypeAttributeDto;
 import vn.clmart.manager_service.dto.request.SearchDTO;
-import vn.clmart.manager_service.model.ListTypeProduct;
-import vn.clmart.manager_service.model.Product;
-import vn.clmart.manager_service.model.ReviewProduct;
-import vn.clmart.manager_service.model.Storage;
-import vn.clmart.manager_service.repository.CategoryRepo;
-import vn.clmart.manager_service.repository.ListTypeProductRepo;
-import vn.clmart.manager_service.repository.ProductRepo;
-import vn.clmart.manager_service.repository.ReviewProductRepo;
+import vn.clmart.manager_service.model.*;
+import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.utils.Base64Utils;
 import vn.clmart.manager_service.utils.Constants;
 
@@ -46,13 +41,15 @@ public class ProductService {
     private final ProductRepo productRepo;
     private final ListTypeProductRepo listTypeProductRepo;
     private final CloudinaryService cloudinaryService;
+    private final TypeAttributeRepo typeAttributeRepo;
 
-    public ProductService(CategoryRepo categoryRepo, ReviewProductRepo reviewProductRepo, ProductRepo productRepo, ListTypeProductRepo listTypeProductRepo, CloudinaryService cloudinaryService) {
+    public ProductService(CategoryRepo categoryRepo, ReviewProductRepo reviewProductRepo, ProductRepo productRepo, ListTypeProductRepo listTypeProductRepo, CloudinaryService cloudinaryService, TypeAttributeRepo typeAttributeRepo) {
         this.categoryRepo = categoryRepo;
         this.reviewProductRepo = reviewProductRepo;
         this.productRepo = productRepo;
         this.listTypeProductRepo = listTypeProductRepo;
         this.cloudinaryService = cloudinaryService;
+        this.typeAttributeRepo = typeAttributeRepo;
     }
 
     public ProductDto create(ProductDto productDto, String uid) {
@@ -93,6 +90,20 @@ public class ProductService {
                 });
             }
 
+            if (productDto.getListTypeAttribute() != null) {
+                Product finalProduct2 = product;
+                List<TypeAttribute> typeAttributeList = productDto.getListTypeAttribute().stream().map(lt -> {
+                    TypeAttribute typeAttribute = new TypeAttribute();
+                    typeAttribute.setKeyIndex(lt.getKeyIndex());
+                    typeAttribute.setName(lt.getName());
+                    typeAttribute.setValue(lt.getValue());
+                    typeAttribute.setProductId(finalProduct2.getId());
+                    typeAttribute.setTypeCode(lt.getTypeCode());
+                    return typeAttribute;
+                }).collect(Collectors.toList());
+                typeAttributeRepo.saveAll(typeAttributeList);
+            }
+
             return productDto;
         } catch (Exception ex) {
             logger.error("CREATE_PRODUCT", ex);
@@ -129,6 +140,14 @@ public class ProductService {
                 return listTypeProductDto;
             }).collect(Collectors.toList());
 
+            List<TypeAttribute> attributeList = typeAttributeRepo.findAllByProductIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE);
+            List<TypeAttributeDto> attributeDtoList = attributeList.stream().map(typeAttribute -> {
+                TypeAttributeDto typeAttributeDto = new TypeAttributeDto();
+                BeanUtils.copyProperties(typeAttribute, typeAttributeDto);
+                return typeAttributeDto;
+            }).collect(Collectors.toList());
+            Map<String, List<TypeAttributeDto>> listTypeAttributeRes = attributeDtoList.stream().collect(Collectors.groupingBy(TypeAttributeDto::getTypeCode));
+            productDto.setListTypeAttributeRes(listTypeAttributeRes);
 
             productDto.setListTypeProduct(listTypeProducts);
             productDto.setReview(ReviewProductDtos);
@@ -191,6 +210,26 @@ public class ProductService {
                     if (Base64Utils.isBase64String(lt.getImage()))
                         cloudinaryService.uploadByte(splitBase64(lt.getImage()), Constants.MODEL_IMAGE.TYPE_PRODUCT.name(), lt.getKeyIndex().toString(), id);
                 });
+            }
+
+            List<TypeAttribute> attributeList = typeAttributeRepo.findAllByProductIdAndDeleteFlg(id, Constants.DELETE_FLG.NON_DELETE);
+            attributeList.stream().map(x -> {
+                x.setDeleteFlg(Constants.DELETE_FLG.DELETE);
+                return x;
+            }).collect(Collectors.toList());
+            typeAttributeRepo.saveAll(attributeList);
+
+            if (productDto.getListTypeAttribute() != null) {
+                List<TypeAttribute> typeAttributeList = productDto.getListTypeAttribute().stream().map(lt -> {
+                    TypeAttribute typeAttribute = new TypeAttribute();
+                    typeAttribute.setKeyIndex(lt.getKeyIndex());
+                    typeAttribute.setName(lt.getName());
+                    typeAttribute.setValue(lt.getValue());
+                    typeAttribute.setTypeCode(lt.getTypeCode());
+                    typeAttribute.setProductId(id);
+                    return typeAttribute;
+                }).collect(Collectors.toList());
+                typeAttributeRepo.saveAll(typeAttributeList);
             }
 
             List<ReviewProduct> reviewAllProduct = reviewProductRepo.findAllByProductId(id);
@@ -260,7 +299,7 @@ public class ProductService {
             List<ProductDto> product = page.get().collect(Collectors.toList()).stream().map(p -> {
                 ProductDto productDto = new ProductDto();
                 BeanUtils.copyProperties(p, productDto);
-                if(listTypeProductsMap.containsKey(p.getId())) {
+                if (listTypeProductsMap.containsKey(p.getId())) {
                     productDto.setListTypeProduct(listTypeProductsMap.get(p.getId()));
                     List<String> images = new ArrayList<>();
                     listTypeProductsMap.get(p.getId()).stream().filter(ltp -> ltp.getImage() != null).findFirst().ifPresent(ptp -> {
