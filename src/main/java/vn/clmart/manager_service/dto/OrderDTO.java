@@ -5,16 +5,23 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class OrderDto {
+public class OrderDTO {
+    private String id;
     private String name;
     private String code;
     private Long idCustomer;
-    private String namePayment;
-    private Long totalPriceCustomer;
+    private String state; // trạng thái đơn hàng
+    private List<OrderDetailDTO> orderDetailDTOList;
+    private String phone;
+    private String address;
+    private Date createDate;
+    private String fullName;
+    private Date dateReceived;
 }

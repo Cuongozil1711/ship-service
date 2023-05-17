@@ -13,4 +13,5 @@ public interface UserRepo extends JpaRepository<User, String> {
     List<User> findAllByUsernameAndDeleteFlg(String userName, Integer deleteFlg);
 
     Optional<User> findByUidAndDeleteFlg(String id, Integer deleteFlg);
+    Optional<User> findByPhoneAndDeleteFlg(String phone, Integer deleteFlg);
 }

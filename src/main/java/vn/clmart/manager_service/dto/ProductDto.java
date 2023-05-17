@@ -3,6 +3,7 @@ package vn.clmart.manager_service.dto;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class ProductDto {
@@ -19,7 +20,10 @@ public class ProductDto {
     private Long madeInId;
     private Long expiredId;
     private String information;
+    private String code;
     private String images[];
     private List<ReviewProductDto> review;
     private List<ListTypeProductDto> listTypeProduct;
+    private List<TypeAttributeDto> listTypeAttribute;
+    private Map<String, List<TypeAttributeDto>> listTypeAttributeRes;
 }

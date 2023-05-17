@@ -114,6 +114,15 @@ public class CloudinaryService {
         }
     }
 
+    public List<Storage> getListStorageByEntityId(List<String> rootIds, String modelType, List<Long> entityIds) {
+        try {
+            return storageRepository.findAllByRootIdInAndTypeCodeAndDeleteFlgAndEntityIdIn(rootIds, modelType, Constants.DELETE_FLG.NON_DELETE, entityIds);
+        } catch (Exception ex) {
+            logger.error(ex.getMessage());
+            return null;
+        }
+    }
+
 
     public void deleteAll(List<String> rootIds, String modelType, List<String> images, Long entityId) {
         try {

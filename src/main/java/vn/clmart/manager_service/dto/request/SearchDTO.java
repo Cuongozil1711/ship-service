@@ -2,13 +2,14 @@ package vn.clmart.manager_service.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import vn.clmart.manager_service.model.Bill;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BillResponseDTO {
-    private Bill bill;
-    private OrderItemResponseDTO orderItemResponseDTO;
+@EqualsAndHashCode(callSuper = false)
+public class SearchDTO<T> {
+    private T id;
+    private String search;
 }

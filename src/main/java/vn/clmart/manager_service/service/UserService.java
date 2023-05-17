@@ -57,6 +57,9 @@ public class UserService {
     @Autowired
     TokenFireBaseRepo tokenFireBaseRepository;
 
+    @Autowired
+    UserOTPRepo userOTPRepo;
+
     private static final Logger logger = LogManager.getLogger(UserService.class);
 
     public LoginDto authenticateUserHandler(UserLoginDto userLoginDto,  HttpServletRequest request) {
@@ -123,7 +126,7 @@ public class UserService {
             FullName fullName = fullNameRepo.save(FullName.of(employeeDto.getFullNameDto(), cid, uid));
             Address address = addressRepo.save(Address.of(employeeDto.getAddressDto(), cid, uid));
             employeeDto.getUserLoginDto().setPassword(new BCryptPasswordEncoder().encode(employeeDto.getUserLoginDto().getPassword()));
-            User user1 = userRepository.save(User.of(employeeDto.getUserLoginDto(), cid, uid));
+            User user1 = userRepository.save(User.of(employeeDto.getUserLoginDto(), uid));
             Employee employee = new Employee();
             employee.setIdUser(user1.getId());
             employee.setIdAddress(address.getId());
@@ -177,44 +180,6 @@ public class UserService {
         return employee;
     }
 
-    public PageImpl<EmployeeDto> search(Pageable pageable){
-        try {
-            Page<Employee> pageSearch = employeeRepo.findAll(pageable);
-            List<EmployeeDto> responseDTOList = new ArrayList<>();
-            for(Employee employee : pageSearch.getContent()){
-                EmployeeDto employeeResponseDTO = new EmployeeDto();
-                employeeResponseDTO.setId(employee.getId());
-                employeeResponseDTO.setIdUser(employee.getIdUser());
-                FullName fullName = fullNameRepo.findById(employee.getIdFullName()).orElse(new FullName());
-                employeeResponseDTO.setFullNameDto(new FullNameDto(fullName.getFirstName(), fullName.getLastName()));
-                employeeResponseDTO.setCmt(employee.getCode());
-                employeeResponseDTO.setTel(employee.getTel());
-                Position position = positionService.getById(employee.getIdPosition());
-                employeeResponseDTO.setIdPosition(position.getId());
-                employeeResponseDTO.setNamePosition(position.getName());
-                employeeResponseDTO.setStatus(employee.getDeleteFlg());
-                employeeResponseDTO.setBirthDay(employee.getBirthDay());
-                employeeResponseDTO.setImage(employee.getImage());
-
-                User user = userRepository.findUserByUidAndDeleteFlg(employee.getIdUser(), Constants.DELETE_FLG.NON_DELETE).orElse(null);
-                if(user != null)
-                    employeeResponseDTO.setUserLoginDto(new UserLoginDto(user.getUsername(), "", ""));
-
-                if(employee.getIdAddress() != null){
-                    AddressDto addressDto = new AddressDto();
-                    Address address = addressRepo.findById(employee.getIdAddress()).orElse(new Address());
-                    BeanUtils.copyProperties(address, addressDto);
-                    employeeResponseDTO.setAddressDto(addressDto);
-                }
-                responseDTOList.add(employeeResponseDTO);
-            }
-            return new PageImpl(responseDTOList, pageable, pageSearch.getTotalElements());
-        }
-        catch (Exception ex){
-            throw new RuntimeException(ex);
-        }
-    }
-
     public void deleteEmployee(String uid, Long id){
         try {
             Employee employee = employeeRepo.findById(id).orElse(null);
@@ -233,16 +198,6 @@ public class UserService {
         catch (Exception ex){
             throw new RuntimeException(ex);
         }
-    }
-
-    public FullName getFullName(Long cid, String uid){
-        User user = userRepository.findUserByUidAndDeleteFlg(uid, Constants.DELETE_FLG.NON_DELETE).orElse(null);
-        if(user != null){
-            Employee employee = employeeRepo.findAllByIdUserAndDeleteFlg(user.getId(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
-            FullName fullName = fullNameRepo.findById(employee.getIdFullName()).orElse(new FullName());
-            return fullName;
-        }
-        return new FullName();
     }
 
     public EmployeeDto getByUid(String uid){
@@ -267,5 +222,27 @@ public class UserService {
             employeeResponseDTO.setAddressDto(addressDto);
         }
         return employeeResponseDTO;
+    }
+
+    public UserDTO loginCustomer(String phone, String otp) {
+        User user = userRepository.findByPhoneAndDeleteFlg(phone, Constants.DELETE_FLG.NON_DELETE).orElse(null);
+
+        if (user == null) {
+            User userNew = new User();
+            userNew.setPhone(phone);
+            userNew.setUsername(phone);
+            userNew.setRole(Constants.TYPE_ROLE.CUSTOMER.name());
+            user = userRepository.save(userNew);
+        }
+
+        UserOTP userOTP = new UserOTP();
+        userOTP.setOtp(otp);
+        userOTP.setUserId(user.getId());
+        userOTPRepo.save(userOTP);
+
+        UserDTO userDTO = new UserDTO();
+        BeanUtils.copyProperties(user, userDTO);
+
+        return userDTO;
     }
 }

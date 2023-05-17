@@ -1,31 +1,30 @@
-package vn.clmart.manager_service.api.shophouse;
+package vn.clmart.manager_service.api;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.clmart.manager_service.dto.CustomerDto;
-import vn.clmart.manager_service.service.CustomerService;
+import vn.clmart.manager_service.dto.CategoryDto;
+import vn.clmart.manager_service.service.CategoryService;
+import vn.clmart.manager_service.service.CloudinaryService;
+
+import java.util.Base64;
 
 @RestController
-@RequestMapping("/customer")
-public class CustomerApi {
+@RequestMapping("/category")
+public class CategoryApi {
 
-    private final CustomerService customerService;
+    private final vn.clmart.manager_service.service.CategoryService categoryService;
 
-    public CustomerApi(CustomerService customerService) {
-        this.customerService = customerService;
+    public CategoryApi(CategoryService CategoryService) {
+        this.categoryService = CategoryService;
     }
 
 
     @PostMapping("/search")
     protected @ResponseBody
-    ResponseEntity<Object> search(
-            @RequestHeader Long cid,
-            @RequestHeader String uid
-            , Pageable pageable) {
+    ResponseEntity<Object> search() {
         try {
-            return new ResponseEntity<>(customerService.search(cid, pageable), HttpStatus.OK);
+            return new ResponseEntity<>(categoryService.search(), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -34,12 +33,9 @@ public class CustomerApi {
     @GetMapping("{id}")
     protected @ResponseBody
     ResponseEntity<Object> getById(
-            @RequestHeader Long cid,
-            @RequestHeader String uid,
-            @PathVariable("id") Long id
-            , Pageable pageable) {
+            @PathVariable("id") Long id) {
         try {
-            return new ResponseEntity<>(customerService.getById(cid, uid, id), HttpStatus.OK);
+            return new ResponseEntity<>(categoryService.getById(id), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -48,13 +44,12 @@ public class CustomerApi {
     @PutMapping("{id}")
     protected @ResponseBody
     ResponseEntity<Object> update(
-            @RequestHeader Long cid,
             @RequestHeader String uid,
             @PathVariable("id") Long id,
-            @RequestBody CustomerDto customerDto
+            @RequestBody CategoryDto CategoryDto
     ) {
         try {
-            return new ResponseEntity<>(customerService.update(customerDto, cid, uid, id), HttpStatus.OK);
+            return new ResponseEntity<>(categoryService.update(CategoryDto, uid, id), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -63,12 +58,11 @@ public class CustomerApi {
     @PostMapping()
     protected @ResponseBody
     ResponseEntity<Object> create(
-            @RequestHeader Long cid,
             @RequestHeader String uid,
-            @RequestBody CustomerDto customerDto
+            @RequestBody CategoryDto CategoryDto
     ) {
         try {
-            return new ResponseEntity<>(customerService.create(customerDto, cid, uid), HttpStatus.OK);
+            return new ResponseEntity<>(categoryService.create(CategoryDto, uid), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -77,14 +71,14 @@ public class CustomerApi {
     @PutMapping("/delete/{id}")
     protected @ResponseBody
     ResponseEntity<Object> delete(
-            @RequestHeader Long cid,
             @RequestHeader String uid,
             @PathVariable("id") Long id
     ) {
         try {
-            return new ResponseEntity<>(customerService.delete(cid, uid, id), HttpStatus.OK);
+            return new ResponseEntity<>(categoryService.delete(uid, id), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
+
 }

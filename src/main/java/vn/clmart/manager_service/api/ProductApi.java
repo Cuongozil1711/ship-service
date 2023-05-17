@@ -1,30 +1,29 @@
-package vn.clmart.manager_service.api.shophouse;
+package vn.clmart.manager_service.api;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.clmart.manager_service.dto.CategoryDto;
-import vn.clmart.manager_service.service.CategoryService;
-import vn.clmart.manager_service.service.CloudinaryService;
-
-import java.util.Base64;
+import vn.clmart.manager_service.dto.ProductDto;
+import vn.clmart.manager_service.dto.request.SearchDTO;
+import vn.clmart.manager_service.service.ProductService;
 
 @RestController
-@RequestMapping("/category")
-public class CategoryApi {
+@RequestMapping("/product")
+public class ProductApi {
+    private final vn.clmart.manager_service.service.ProductService productService;
 
-    private final vn.clmart.manager_service.service.CategoryService categoryService;
-
-    public CategoryApi(CategoryService CategoryService) {
-        this.categoryService = CategoryService;
+    public ProductApi(ProductService productService) {
+        this.productService = productService;
     }
 
 
     @PostMapping("/search")
     protected @ResponseBody
-    ResponseEntity<Object> search() {
+    ResponseEntity<Object> search(Pageable pageable, @RequestBody SearchDTO<Long> request) {
         try {
-            return new ResponseEntity<>(categoryService.search(), HttpStatus.OK);
+            if (request.getSearch() == null) request.setSearch("");
+            return new ResponseEntity<>(productService.findAll(pageable, request), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -35,7 +34,7 @@ public class CategoryApi {
     ResponseEntity<Object> getById(
             @PathVariable("id") Long id) {
         try {
-            return new ResponseEntity<>(categoryService.getById(id), HttpStatus.OK);
+            return new ResponseEntity<>(productService.get(id), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -46,10 +45,10 @@ public class CategoryApi {
     ResponseEntity<Object> update(
             @RequestHeader String uid,
             @PathVariable("id") Long id,
-            @RequestBody CategoryDto CategoryDto
+            @RequestBody ProductDto productDto
     ) {
         try {
-            return new ResponseEntity<>(categoryService.update(CategoryDto, uid, id), HttpStatus.OK);
+            return new ResponseEntity<>(productService.update(productDto, id, uid), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -59,10 +58,10 @@ public class CategoryApi {
     protected @ResponseBody
     ResponseEntity<Object> create(
             @RequestHeader String uid,
-            @RequestBody CategoryDto CategoryDto
+            @RequestBody ProductDto productDto
     ) {
         try {
-            return new ResponseEntity<>(categoryService.create(CategoryDto, uid), HttpStatus.OK);
+            return new ResponseEntity<>(productService.create(productDto, uid), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
@@ -75,10 +74,10 @@ public class CategoryApi {
             @PathVariable("id") Long id
     ) {
         try {
-            return new ResponseEntity<>(categoryService.delete(uid, id), HttpStatus.OK);
+            productService.delete(id, uid);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
-
 }

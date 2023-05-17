@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface ListTypeProductRepo extends JpaRepository<ListTypeProduct, Long> {
     List<ListTypeProduct> findAllByProductId(Long productId);
+    List<ListTypeProduct> findAllByProductIdIn(List<Long> productIds);
+    List<ListTypeProduct> findAllByIdIn(List<Long> ids);
 }

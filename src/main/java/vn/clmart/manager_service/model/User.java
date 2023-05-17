@@ -29,6 +29,14 @@ public class User extends PersistableEntity<String> {
     @Column(name = "user_name")
     private String username;
     private String password;
+    private String phone;
+    private String role;
+    private String birthDay;
+    private String address;
+    private String fullName;
+    private String districtCode;
+    private String provinceCode;
+    private String wardsCode;
 
     @Override
     public String getId() {
@@ -48,7 +56,7 @@ public class User extends PersistableEntity<String> {
         return getClass().hashCode();
     }
 
-    public static User of(UserLoginDto userLoginDto, Long cid, String uid){
+    public static User of(UserLoginDto userLoginDto, String uid){
         User user = User.builder()
                 .username(userLoginDto.getUsername())
                 .password(userLoginDto.getPassword())

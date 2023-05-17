@@ -40,7 +40,7 @@ public class ListTypeProduct extends PersistableEntity<Long> {
         ListTypeProduct listTypeProduct = ListTypeProduct.builder()
                 .nameOne(listTypeProductDto.getNameOne())
                 .valueOne(listTypeProductDto.getValueOne())
-                .nameTwo(listTypeProductDto.getValueTwo())
+                .nameTwo(listTypeProductDto.getNameTwo())
                 .valueTwo(listTypeProductDto.getValueTwo())
                 .number(listTypeProductDto.getNumber())
                 .price(listTypeProductDto.getPrice())
