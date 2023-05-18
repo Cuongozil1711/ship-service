@@ -21,7 +21,7 @@ import java.util.Date;
 @Description("Table don hang")
 public class Order extends PersistableEntity<String> {
     @Id
-    @GenericGenerator(name = "id",strategy = "vn.clmart.manager_service.generator.OrderGenerator")
+    @GenericGenerator(name = "id", strategy = "vn.clmart.manager_service.generator.OrderGenerator")
     @GeneratedValue(generator = "id")
     private String id;
     private String name;
@@ -31,14 +31,26 @@ public class Order extends PersistableEntity<String> {
     private String address;
     private String fullName;
     private Date dateReceived;
+    private String detailAddress;
+    private Integer provinceId;
+    private Integer districtId;
+    private Integer wardId;
+    private String email;
+    private String note;
 
-    public static Order of(OrderDTO orderDto, String uid){
+    public static Order of(OrderDTO orderDto, String uid) {
         Order order = Order.builder()
                 .name(orderDto.getName())
                 .code(orderDto.getCode())
                 .address(orderDto.getAddress())
                 .fullName(orderDto.getFullName())
                 .dateReceived(orderDto.getDateReceived())
+                .detailAddress(orderDto.getDetailAddress())
+                .provinceId(orderDto.getProvinceId())
+                .districtId(orderDto.getDistrictId())
+                .wardId(orderDto.getWardId())
+                .email(orderDto.getEmail())
+                .note(orderDto.getNote())
                 .phone(orderDto.getPhone()).build();
         order.setCreateBy(uid);
         return order;
