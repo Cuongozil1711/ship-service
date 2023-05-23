@@ -34,7 +34,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         vn.clmart.manager_service.model.User user = userRepository.findUserByUidAndDeleteFlg(uid, Constants.DELETE_FLG.NON_DELETE).orElse(null);
         if (user != null) {
             Employee employees = employeeRepo.findAllByIdUserAndDeleteFlg(user.getUid(), Constants.DELETE_FLG.NON_DELETE).stream().findFirst().orElse(null);
-            if(employees.getIdPosition() != null){
+            if(employees != null){
                 Position position = positionRepository.findByIdAndDeleteFlg(employees.getIdPosition(),Constants.DELETE_FLG.NON_DELETE).orElseThrow();
                 boolean enabled = true;
                 boolean accountNonExpired = true;
@@ -43,6 +43,16 @@ public class CustomUserDetailsService implements UserDetailsService {
                 Set<GrantedAuthority> authorities = new HashSet<>();
                 authorities.add(new SimpleGrantedAuthority("ROLE_" + position.getAuthority()));
                 return new User(user.getUsername(), user.getPassword(), enabled, accountNonExpired, credentialsNonExpired,
+                        accountNonLocked, authorities);
+            }
+            else if(user.getRole().equals(Constants.TYPE_ROLE.CUSTOMER.name())){
+                boolean enabled = true;
+                boolean accountNonExpired = true;
+                boolean credentialsNonExpired = true;
+                boolean accountNonLocked = true;
+                Set<GrantedAuthority> authorities = new HashSet<>();
+                authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+                return new User(uid, uid, enabled, accountNonExpired, credentialsNonExpired,
                         accountNonLocked, authorities);
             }
             else{

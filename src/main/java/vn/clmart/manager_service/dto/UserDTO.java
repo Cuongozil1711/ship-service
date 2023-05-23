@@ -19,4 +19,6 @@ public class UserDTO {
     private String districtCode;
     private String provinceCode;
     private String wardsCode;
+    private String accessToken;
+    private String userId;
 }
