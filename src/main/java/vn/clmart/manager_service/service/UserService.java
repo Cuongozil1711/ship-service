@@ -9,6 +9,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,6 +25,7 @@ import vn.clmart.manager_service.model.*;
 import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.utils.Constants;
 
+import javax.persistence.EntityExistsException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -224,7 +227,7 @@ public class UserService {
         return employeeResponseDTO;
     }
 
-    public UserDTO loginCustomer(String phone, String otp) {
+    public UserDTO loginCustomer(String phone, String otp, HttpServletRequest request) {
         User user = userRepository.findByPhoneAndDeleteFlg(phone, Constants.DELETE_FLG.NON_DELETE).orElse(null);
 
         if (user == null) {
@@ -242,6 +245,21 @@ public class UserService {
 
         UserDTO userDTO = new UserDTO();
         BeanUtils.copyProperties(user, userDTO);
+        userDTO.setUserId(user.getId());
+
+        boolean enabled = true;
+        boolean accountNonExpired = true;
+        boolean credentialsNonExpired = true;
+        boolean accountNonLocked = true;
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        UserDetails userDetails =  new org.springframework.security.core.userdetails.User(user.getUid(), user.getUid(), enabled, accountNonExpired, credentialsNonExpired,
+                accountNonLocked, authorities);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.generateToken(user);
+        userDTO.setAccessToken(jwt);
 
         return userDTO;
     }

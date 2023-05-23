@@ -112,7 +112,7 @@ public class UserApi {
             HttpServletRequest request
     ) {
         try {
-            return new ResponseEntity<>(userService.loginCustomer(userLoginDto.getPhone(), userLoginDto.getOtp()), HttpStatus.OK);
+            return new ResponseEntity<>(userService.loginCustomer(userLoginDto.getPhone(), userLoginDto.getOtp(), request), HttpStatus.OK);
         } catch (BadCredentialsException e) {
             return new ResponseEntity<>(e,  HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (NullPointerException ex) {

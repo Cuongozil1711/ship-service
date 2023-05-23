@@ -24,4 +24,11 @@ public class OrderDTO {
     private Date createDate;
     private String fullName;
     private Date dateReceived;
+    private AddressDto addressDto;
+    private String email;
+    private String note;
+    private String detailAddress;
+    private Integer provinceId;
+    private Integer districtId;
+    private Integer wardId;
 }
