@@ -38,4 +38,15 @@ public class ProductUserApi {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
     }
+
+    @GetMapping("/find-other/{id}")
+    protected @ResponseBody
+    ResponseEntity<Object> findOther(
+            @PathVariable("id") Long id) {
+        try {
+            return new ResponseEntity<>(productService.productOther(id), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
 }
