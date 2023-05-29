@@ -11,8 +11,8 @@
     <packaging>war</packaging>
     <artifactId>lc_order_service</artifactId>
     <version>0.0.1</version>
-    <name>manager_service</name>
-    <description>manager_service</description>
+    <name>lc_order_service</name>
+    <description>lc_order_service</description>
 
     <properties>
         <java.version>11</java.version>

@@ -16,4 +16,6 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
     Page<Product> search(String search, Long idCategory, Pageable pageable);
 
     List<Product> findAllByIdIn(List<Long> ids);
+
+    List<Product> findAllByDeleteFlgAndIdCategoryIn(Integer deleteFlg, List<Long> categoryIn);
 }

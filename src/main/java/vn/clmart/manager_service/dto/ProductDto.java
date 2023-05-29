@@ -2,12 +2,14 @@ package vn.clmart.manager_service.dto;
 
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 @Data
 public class ProductDto {
     private Long id;
+    private Date createDate;
     private String content;
     private String nameProduct;
     private Long idCategory;

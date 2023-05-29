@@ -281,40 +281,50 @@ public class ProductService {
             Page<Product> page = productRepo.search(request.getSearch(), request.getId(), pageable);
             List<Long> productId = page.get().collect(Collectors.toList()).stream().map(Product::getId).collect(Collectors.toList());
 
-            List<ListTypeProduct> listTypeProduct = listTypeProductRepo.findAllByProductIdIn(productId);
-
-            List<Storage> storageImage = cloudinaryService.getListStorageByEntityId(listTypeProduct.stream().map(ListTypeProduct::getKeyIndex).collect(Collectors.toList()), Constants.MODEL_IMAGE.TYPE_PRODUCT.name(), productId);
-
-            List<ListTypeProductDto> listTypeProducts = listTypeProduct.stream().map(ltp -> {
-                ListTypeProductDto listTypeProductDto = new ListTypeProductDto();
-                BeanUtils.copyProperties(ltp, listTypeProductDto);
-                storageImage.stream().filter(s -> s.getRootId().equals(listTypeProductDto.getKeyIndex()) && s.getEntityId().equals(ltp.getProductId())).findFirst().ifPresent(st -> {
-                    listTypeProductDto.setImage(st.getLinkedId());
-                });
-                return listTypeProductDto;
-            }).collect(Collectors.toList());
-            Map<Long, List<ListTypeProductDto>> listTypeProductsMap = listTypeProducts.stream().collect(Collectors.groupingBy(ListTypeProductDto::getProductId));
-
-
-            List<ProductDto> product = page.get().collect(Collectors.toList()).stream().map(p -> {
-                ProductDto productDto = new ProductDto();
-                BeanUtils.copyProperties(p, productDto);
-                if (listTypeProductsMap.containsKey(p.getId())) {
-                    productDto.setListTypeProduct(listTypeProductsMap.get(p.getId()));
-                    List<String> images = new ArrayList<>();
-                    listTypeProductsMap.get(p.getId()).stream().filter(ltp -> ltp.getImage() != null).findFirst().ifPresent(ptp -> {
-                        images.add(ptp.getImage());
-                    });
-                    productDto.setImages(new String[0]);
-                }
-                return productDto;
-            }).collect(Collectors.toList());
-
-            return new PageImpl(product, pageable, page.getTotalElements());
+            return new PageImpl(parseDTO(productId, page.getContent()), pageable, page.getTotalElements());
         } catch (Exception ex) {
             logger.error("FIND_ALL_PRODUCT", ex);
             throw new BusinessException(ex.getMessage());
         }
     }
 
+    private List<ProductDto> parseDTO(List<Long> productId, List<Product> page) {
+
+        List<ListTypeProduct> listTypeProduct = listTypeProductRepo.findAllByProductIdIn(productId);
+
+        List<Storage> storageImage = cloudinaryService.getListStorageByEntityId(listTypeProduct.stream().map(ListTypeProduct::getKeyIndex).collect(Collectors.toList()), Constants.MODEL_IMAGE.TYPE_PRODUCT.name(), productId);
+
+        List<ListTypeProductDto> listTypeProducts = listTypeProduct.stream().map(ltp -> {
+            ListTypeProductDto listTypeProductDto = new ListTypeProductDto();
+            BeanUtils.copyProperties(ltp, listTypeProductDto);
+            storageImage.stream().filter(s -> s.getRootId().equals(listTypeProductDto.getKeyIndex()) && s.getEntityId().equals(ltp.getProductId())).findFirst().ifPresent(st -> {
+                listTypeProductDto.setImage(st.getLinkedId());
+            });
+            return listTypeProductDto;
+        }).collect(Collectors.toList());
+        Map<Long, List<ListTypeProductDto>> listTypeProductsMap = listTypeProducts.stream().collect(Collectors.groupingBy(ListTypeProductDto::getProductId));
+
+
+        List<ProductDto> product = page.stream().map(p -> {
+            ProductDto productDto = new ProductDto();
+            BeanUtils.copyProperties(p, productDto);
+            if (listTypeProductsMap.containsKey(p.getId())) {
+                productDto.setListTypeProduct(listTypeProductsMap.get(p.getId()));
+                List<String> images = new ArrayList<>();
+                listTypeProductsMap.get(p.getId()).stream().filter(ltp -> ltp.getImage() != null).findFirst().ifPresent(ptp -> {
+                    images.add(ptp.getImage());
+                });
+                productDto.setImages(new String[0]);
+            }
+            return productDto;
+        }).collect(Collectors.toList());
+        return product;
+    }
+
+    public List<ProductDto> productOther(Long idProduct) {
+        Product product = productRepo.findById(idProduct).orElseThrow(EntityExistsException::new);
+        Category category = categoryRepo.findByIdAndDeleteFlg(product.getIdCategory(), Constants.DELETE_FLG.NON_DELETE).orElseThrow(EntityExistsException::new);
+        List<Product> page =  productRepo.findAllByDeleteFlgAndIdCategoryIn(Constants.DELETE_FLG.NON_DELETE, category.getParentId() != null ? List.of(product.getIdCategory(), category.getParentId()) : List.of(product.getIdCategory()));
+        return parseDTO(page.stream().map(Product::getId).collect(Collectors.toList()), page);
+    }
 }
