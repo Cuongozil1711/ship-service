@@ -280,6 +280,7 @@ public class ProductService {
         try {
             Page<Product> page = productRepo.search(request.getSearch(), request.getId(), pageable);
             List<Long> productId = page.get().collect(Collectors.toList()).stream().map(Product::getId).collect(Collectors.toList());
+
             return new PageImpl(parseDTO(productId, page.getContent()), pageable, page.getTotalElements());
         } catch (Exception ex) {
             logger.error("FIND_ALL_PRODUCT", ex);
