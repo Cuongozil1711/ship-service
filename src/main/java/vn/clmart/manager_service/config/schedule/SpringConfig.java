@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import vn.clmart.manager_service.repository.*;
-import vn.clmart.manager_service.service.NotificationService;
 import vn.clmart.manager_service.service.UserService;
 import java.io.IOException;
 
@@ -13,9 +12,6 @@ import java.io.IOException;
 @Configuration
 @EnableScheduling
 public class SpringConfig {
-
-    @Autowired
-    NotificationService notificationService;
 
     @Autowired
     TokenFireBaseRepo tokenFireBaseRepository;

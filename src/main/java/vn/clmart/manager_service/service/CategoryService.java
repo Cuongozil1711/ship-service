@@ -1,6 +1,5 @@
 package vn.clmart.manager_service.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.config.exceptions.BusinessException;
@@ -16,8 +15,11 @@ import java.util.List;
 @Transactional
 public class CategoryService {
 
-    @Autowired
-    CategoryRepo categoryRepo;
+    private final CategoryRepo categoryRepo;
+
+    public CategoryService(CategoryRepo categoryRepo) {
+        this.categoryRepo = categoryRepo;
+    }
 
     private void validate(CategoryDto categoryDto){
         if(categoryDto.getName().isEmpty()) throw new BusinessException("empty");

@@ -1,5 +1,7 @@
 package vn.clmart.manager_service.config.exceptions;
 
+import vn.clmart.manager_service.config.message.MessageContext;
+
 public class BusinessException extends RuntimeException {
     private String code;
     private String message;
@@ -9,8 +11,8 @@ public class BusinessException extends RuntimeException {
     }
 
     public BusinessException(String message) {
-        super(message);
-        this.message = message;
+        super(MessageContext.getMessage(message));
+        this.message = MessageContext.getMessage(message);
         this.code = "500";
     }
 

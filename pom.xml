@@ -8,7 +8,7 @@
         <version>2.7.3</version>
     </parent>
     <groupId>vn.clmart</groupId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <artifactId>lc_order_service</artifactId>
     <version>0.0.1</version>
     <name>lc_order_service</name>

@@ -4,6 +4,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.clmart.manager_service.config.exceptions.BusinessException;
+import vn.clmart.manager_service.config.message.MessageContext;
 import vn.clmart.manager_service.dto.request.SearchDTO;
 import vn.clmart.manager_service.service.ProductService;
 
@@ -45,6 +47,19 @@ public class ProductUserApi {
             @PathVariable("id") Long id) {
         try {
             return new ResponseEntity<>(productService.productOther(id), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @GetMapping("/find/{id}")
+    protected @ResponseBody
+    ResponseEntity<Object> find(
+            @PathVariable("id") Long id) {
+        try {
+            String text = MessageContext.getMessage("app.lang.vi");
+            throw new BusinessException(text);
+//            return new ResponseEntity<>(productService.productOther(id), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }
