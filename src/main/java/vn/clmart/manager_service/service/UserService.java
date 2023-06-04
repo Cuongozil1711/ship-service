@@ -3,10 +3,6 @@ package vn.clmart.manager_service.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,7 +21,6 @@ import vn.clmart.manager_service.model.*;
 import vn.clmart.manager_service.repository.*;
 import vn.clmart.manager_service.utils.Constants;
 
-import javax.persistence.EntityExistsException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,37 +28,31 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class UserService {
-    @Autowired
-    UserRepo userRepository;
-
-    @Autowired
-    JwtTokenProvider tokenProvider;
-
-    @Autowired
-    FullNameRepo fullNameRepo;
-
-    @Autowired
-    AddressRepo addressRepo;
-
-    @Autowired
-    EmployeeRepo employeeRepo;
-
-    @Autowired
-    CustomUserDetailsService customUserDetailsService;
-
-    @Autowired
-    PositionService positionService;
-
-    @Autowired
-    AddressService addressService;
-
-    @Autowired
-    TokenFireBaseRepo tokenFireBaseRepository;
-
-    @Autowired
-    UserOTPRepo userOTPRepo;
+    private final UserRepo userRepository;
+    private final JwtTokenProvider tokenProvider;
+    private final FullNameRepo fullNameRepo;
+    private final AddressRepo addressRepo;
+    private final EmployeeRepo employeeRepo;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final PositionService positionService;
+    private final  AddressService addressService;
+    private final TokenFireBaseRepo tokenFireBaseRepository;
+    private final UserOTPRepo userOTPRepo;
 
     private static final Logger logger = LogManager.getLogger(UserService.class);
+
+    public UserService(UserRepo userRepository, JwtTokenProvider tokenProvider, FullNameRepo fullNameRepo, AddressRepo addressRepo, EmployeeRepo employeeRepo, CustomUserDetailsService customUserDetailsService, PositionService positionService, AddressService addressService, TokenFireBaseRepo tokenFireBaseRepository, UserOTPRepo userOTPRepo) {
+        this.userRepository = userRepository;
+        this.tokenProvider = tokenProvider;
+        this.fullNameRepo = fullNameRepo;
+        this.addressRepo = addressRepo;
+        this.employeeRepo = employeeRepo;
+        this.customUserDetailsService = customUserDetailsService;
+        this.positionService = positionService;
+        this.addressService = addressService;
+        this.tokenFireBaseRepository = tokenFireBaseRepository;
+        this.userOTPRepo = userOTPRepo;
+    }
 
     public LoginDto authenticateUserHandler(UserLoginDto userLoginDto,  HttpServletRequest request) {
         LoginDto result = new LoginDto(null, null, null, null);

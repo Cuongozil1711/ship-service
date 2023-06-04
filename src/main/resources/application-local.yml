@@ -1,0 +1,51 @@
+## =============MySQL config==================
+#spring:
+#  datasource:
+#    driver-class-name: com.mysql.jdbc.Driver
+#    url: jdbc:mysql://103.159.51.154:3306/lcOrder
+#    username: root
+#    password: Cuonglinh1711@
+#  jpa:
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: update
+#    properties:
+#      hibernate:
+#        current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
+#        globally_quoted_identifiers: true
+#        dialect: org.hibernate.dialect.MySQL8Dialect
+#  mandatory-file-encoding: UTF-8
+#  mail:
+#    host: smtp.gmail.com
+#    port: 587
+#    username: cuongptit1711@gmail.com
+#    password: lbccoluqrqpypriu
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          starttls.enable: true
+#  messages:
+#    basename: classspath:message
+#
+## ============LOG4J / HIBERNATE=================
+#logging:
+#  level:
+#    org.springframework.web: DEBUG
+#    vn.clmart.manager_service: INFO
+#    org.hibernate.type: error
+#server:
+#  port: 8080
+#  error:
+#    include-message: always
+#  servlet:
+#    session:
+#      timeout: 1000m
+#    multipart:
+#      max-file-size: 10MB
+#      max-request-size: 10MB
+#      mvc:
+#        hiddenmethod:
+#          filter:
+#            enabled: true
+#

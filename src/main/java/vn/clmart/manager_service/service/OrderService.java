@@ -3,14 +3,12 @@ package vn.clmart.manager_service.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.config.exceptions.BusinessException;
-import vn.clmart.manager_service.dto.ListTypeProductDto;
 import vn.clmart.manager_service.dto.OrderDTO;
 import vn.clmart.manager_service.dto.OrderDetailDTO;
 import vn.clmart.manager_service.model.*;
@@ -33,20 +31,23 @@ public class OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
 
-    @Autowired
-    OrderRepo orderRepo;
+    private final OrderRepo orderRepo;
 
-    @Autowired
-    OrderDetailRepo orderDetailRepo;
+    private final OrderDetailRepo orderDetailRepo;
 
-    @Autowired
-    ListTypeProductRepo listTypeProductRepo;
+    private final ListTypeProductRepo listTypeProductRepo;
 
-    @Autowired
-    ProductRepo productRepo;
+    private final ProductRepo productRepo;
 
-    @Autowired
-    CloudinaryService cloudinaryService;
+    private final CloudinaryService cloudinaryService;
+
+    public OrderService(OrderRepo orderRepo, OrderDetailRepo orderDetailRepo, ListTypeProductRepo listTypeProductRepo, ProductRepo productRepo, CloudinaryService cloudinaryService) {
+        this.orderRepo = orderRepo;
+        this.orderDetailRepo = orderDetailRepo;
+        this.listTypeProductRepo = listTypeProductRepo;
+        this.productRepo = productRepo;
+        this.cloudinaryService = cloudinaryService;
+    }
 
 
     public OrderDTO createOrder(String uid, OrderDTO orderDTO) {

@@ -1,7 +1,6 @@
 package vn.clmart.manager_service.service;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.model.District;
@@ -19,14 +18,17 @@ public class AddressService {
 
     private static final Logger logger = Logger.getLogger(AddressService.class);
 
-    @Autowired
-    ProvinceRepo provinceRepository;
+    private final ProvinceRepo provinceRepository;
 
-    @Autowired
-    DistrictRepo districtRepo;
+    private final DistrictRepo districtRepo;
 
-    @Autowired
-    WardsRepo wardsRepository;
+    private final WardsRepo wardsRepository;
+
+    public AddressService(ProvinceRepo provinceRepository, DistrictRepo districtRepo, WardsRepo wardsRepository) {
+        this.provinceRepository = provinceRepository;
+        this.districtRepo = districtRepo;
+        this.wardsRepository = wardsRepository;
+    }
 
 
     public List<Province> findAllProvince(){

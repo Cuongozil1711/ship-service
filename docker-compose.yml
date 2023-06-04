@@ -1,0 +1,14 @@
+version: '2'
+services:
+  manager_service:
+    container_name: manager_service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8080"
+    networks:
+      - spring-cloud-network
+networks:
+  spring-cloud-network:
+    driver: bridge

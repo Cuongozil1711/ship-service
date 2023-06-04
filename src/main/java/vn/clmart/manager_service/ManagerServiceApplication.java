@@ -7,9 +7,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import java.nio.charset.Charset;
+import java.util.Locale;
 
 @SpringBootApplication
 public class ManagerServiceApplication extends SpringBootServletInitializer {
@@ -31,5 +34,4 @@ public class ManagerServiceApplication extends SpringBootServletInitializer {
                 "api_secret", "IE-g1b_4a2vWhJeh-kqrtbIaA-A"));
         return cloudinary;
     }
-
 }

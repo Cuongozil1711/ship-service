@@ -1,6 +1,5 @@
 package vn.clmart.manager_service.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.clmart.manager_service.dto.PositionDto;
@@ -12,8 +11,11 @@ import vn.clmart.manager_service.utils.Constants;
 @Transactional
 public class PositionService {
 
-    @Autowired
-    PositionRepo positionRepository;
+    private final PositionRepo positionRepository;
+
+    public PositionService(PositionRepo positionRepository) {
+        this.positionRepository = positionRepository;
+    }
 
     public Position create(PositionDto positionDto, Long cid, String uid){
         try {
