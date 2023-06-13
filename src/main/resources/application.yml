@@ -40,6 +40,9 @@ server:
   servlet:
     session:
       timeout: 1000m
+      cookie:
+        http-only: true
+      tracking-modes: cookie
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
@@ -47,4 +50,8 @@ server:
         hiddenmethod:
           filter:
             enabled: true
+  session:
+    tracking-modes: cookie
+
+
 

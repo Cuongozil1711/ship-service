@@ -53,7 +53,7 @@ public class SecurityConfig{
         http.cors(withDefaults())
                 // 禁用 CSRF
                 .csrf().disable();
-        http.authorizeRequests().antMatchers(HttpMethod.GET, "/index*", "/resources/**", "/*.js", "/*.json", "/*.ico")
+        http.authorizeRequests().antMatchers(HttpMethod.GET, "/index*", "/resources/**", "/*.js", "/*.json", "/*.ico", "/error", "/swagger-ui/**", "/v2/api-docs/**")
                 .permitAll();
         http.authorizeRequests().antMatchers("/user/login", "/user/otp/login", "/user/product/**", "/user/category/**", "/user/order/**", "/user/order/**", "/address/**", "/user/order"
                 ).permitAll();
