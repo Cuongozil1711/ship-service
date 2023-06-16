@@ -10,8 +10,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import vn.clmart.manager_service.dto.EmployeeDto;
 import vn.clmart.manager_service.dto.UserLoginDto;
+import vn.clmart.manager_service.dto.request.TokenRefreshRequest;
 import vn.clmart.manager_service.service.UserService;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 @Controller
 @RequestMapping("/user")
@@ -117,6 +119,15 @@ public class UserApi {
             return new ResponseEntity<>(e,  HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (NullPointerException ex) {
             return new ResponseEntity<>(ex,  HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<Object> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
+        try {
+            return new ResponseEntity<>(userService.refreshToken(request), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

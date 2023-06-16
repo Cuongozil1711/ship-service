@@ -2,21 +2,20 @@ package vn.clmart.manager_service.config.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import vn.clmart.manager_service.model.User;
 import java.util.Date;
+import io.jsonwebtoken.*;
 
 @Component
 public class JwtTokenProvider {
-
     private static final Logger logger = LogManager.getLogger(JwtTokenProvider.class);
-    private final String JWT_SECRET = "JWT_SECRET_1584547915594";
-
+    @Value("${app.security.jwtSecret}")
+    private String JWT_SECRET;
+    @Value("${app.security.jwtExpirationMs}")
     //Thời gian có hiệu lực của chuỗi jwt
-    private final long JWT_EXPIRATION = 288000000;
+    private Long JWT_EXPIRATION;
 
     // Tạo ra jwt từ thông tin user
     public String generateToken(User userDetails) {
@@ -30,6 +29,19 @@ public class JwtTokenProvider {
                 .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
                 .compact();
     }
+
+    public String generateTokenFromUserId(String userId) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
+        // Tạo chuỗi json web token từ id của user.
+        return Jwts.builder()
+                .setSubject(userId)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
+                .compact();
+    }
+
 
     // Lấy thông tin user từ jwt
     public String getUserIdFromJWT(String token) {
@@ -45,10 +57,18 @@ public class JwtTokenProvider {
         try {
             Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(authToken);
             return true;
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(),ex);
-            return false;
+        } catch (SignatureException e) {
+            logger.error("Invalid JWT signature: {}", e.getMessage());
+        } catch (MalformedJwtException e) {
+            logger.error("Invalid JWT token: {}", e.getMessage());
+        } catch (ExpiredJwtException e) {
+            logger.error("JWT token is expired: {}", e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            logger.error("JWT token is unsupported: {}", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            logger.error("JWT claims string is empty: {}", e.getMessage());
         }
+        return false;
     }
 
 }

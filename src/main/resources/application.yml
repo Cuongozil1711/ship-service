@@ -27,7 +27,10 @@ spring:
           starttls.enable: true
   messages:
     basename: classspath:message
-
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: cuongnv
 # ============LOG4J / HIBERNATE=================
 logging:
   level:
@@ -53,5 +56,10 @@ server:
   session:
     tracking-modes: cookie
 
-
+# ============SECURITY=================
+app:
+  security:
+    jwtSecret: JWT_SECRET_1584547915594
+    jwtExpirationMs: 3600000
+    jwtRefreshExpirationMs: 86400000
 

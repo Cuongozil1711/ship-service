@@ -1,0 +1,2 @@
+Sử dụng @Temporal(TemporalType.TIMESTAMP) trong jpa để set mặc định dạng date hay time hoặc tất cả trong CSDL
+JsonObject.mapFrom(planResp.get("task")).mapTo(ResignationLetter.class); // vd: Map to Model.class

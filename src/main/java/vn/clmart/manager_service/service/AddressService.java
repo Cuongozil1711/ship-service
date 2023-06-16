@@ -12,71 +12,29 @@ import vn.clmart.manager_service.repository.WardsRepo;
 
 import java.util.*;
 
-@Service
-@Transactional
-public class AddressService {
 
-    private static final Logger logger = Logger.getLogger(AddressService.class);
+public interface AddressService {
 
-    private final ProvinceRepo provinceRepository;
+    List<Province> findAllProvince();
 
-    private final DistrictRepo districtRepo;
+    List<District> findAllDistrict();
 
-    private final WardsRepo wardsRepository;
+    List<District> findAllDistrictByProvince(Integer provinceId);
 
-    public AddressService(ProvinceRepo provinceRepository, DistrictRepo districtRepo, WardsRepo wardsRepository) {
-        this.provinceRepository = provinceRepository;
-        this.districtRepo = districtRepo;
-        this.wardsRepository = wardsRepository;
+    List<Wards> findAllWards();
+
+    List<Wards> findAllWardsByDistrictId(Integer districtId);
+
+
+    // có thể định nghĩa thêm các interface method sử dụng default (có thể @Override)
+    default void log(String str){
+        System.out.println("This method is default implementation" + str);
     }
 
+    // tương tự có thể thêm các interface method sử dụng static (nhưng k thể @Override)
+    static boolean isNull(String string) {
+        System.out.println("Interface Null Check");
 
-    public List<Province> findAllProvince(){
-        try {
-            return provinceRepository.findAll();
-        }
-        catch (Exception ex){
-            logger.error(ex);
-            throw new RuntimeException(ex);
-        }
+        return string == null ? true : "".equals(string) ? true : false;
     }
-
-    public List<District> findAllDistrict(){
-        try {
-            return districtRepo.findAll();
-        }
-        catch (Exception ex){
-            logger.error(ex);
-            throw new RuntimeException(ex);
-        }
-    }
-    public List<District> findAllDistrictByProvince(Integer proviceId){
-        try {
-            return districtRepo.findAllByProvinceId(proviceId);
-        }
-        catch (Exception ex){
-            logger.error(ex);
-            throw new RuntimeException(ex);
-        }
-    }
-
-    public List<Wards> findAllWards(){
-        try {
-            return wardsRepository.findAll();
-        }
-        catch (Exception ex){
-            logger.error(ex);
-            throw new RuntimeException(ex);
-        }
-    }
-    public List<Wards> findAllWardsByDistrictId(Integer districtId){
-        try {
-            return wardsRepository.findAllByDistrictId(districtId);
-        }
-        catch (Exception ex){
-            logger.error(ex);
-            throw new RuntimeException(ex);
-        }
-    }
-
 }

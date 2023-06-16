@@ -18,6 +18,7 @@ public class LoginDto {
     private String image;
     private Date birthDay;
     private String jwt;
+    private String refreshToken;
 
     public LoginDto(String accessToken, String uId, String role, String fullName) {
         this.setAccessToken(accessToken);
