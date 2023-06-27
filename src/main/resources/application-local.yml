@@ -1,51 +1,82 @@
-## =============MySQL config==================
-#spring:
-#  datasource:
-#    driver-class-name: com.mysql.jdbc.Driver
-#    url: jdbc:mysql://103.159.51.154:3306/lcOrder
-#    username: root
-#    password: Cuonglinh1711@
-#  jpa:
-#    show-sql: true
-#    hibernate:
-#      ddl-auto: update
-#    properties:
-#      hibernate:
-#        current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
-#        globally_quoted_identifiers: true
-#        dialect: org.hibernate.dialect.MySQL8Dialect
-#  mandatory-file-encoding: UTF-8
-#  mail:
-#    host: smtp.gmail.com
-#    port: 587
-#    username: cuongptit1711@gmail.com
-#    password: lbccoluqrqpypriu
-#    properties:
-#      mail:
-#        smtp:
-#          auth: true
-#          starttls.enable: true
-#  messages:
-#    basename: classspath:message
-#
-## ============LOG4J / HIBERNATE=================
-#logging:
-#  level:
-#    org.springframework.web: DEBUG
-#    vn.clmart.manager_service: INFO
-#    org.hibernate.type: error
-#server:
-#  port: 8080
-#  error:
-#    include-message: always
-#  servlet:
-#    session:
-#      timeout: 1000m
-#    multipart:
-#      max-file-size: 10MB
-#      max-request-size: 10MB
-#      mvc:
-#        hiddenmethod:
-#          filter:
-#            enabled: true
-#
+# =============MySQL config==================
+spring:
+  application: lc-service
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://103.159.51.154:3306/lcOrder
+    username: root
+    password: Cuonglinh1711@
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
+        globally_quoted_identifiers: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  mandatory-file-encoding: UTF-8
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: cuongptit1711@gmail.com
+    password: lbccoluqrqpypriu
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+  messages:
+    basename: classspath:message
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: cuongnv
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+  redis:
+    host: localhost
+    port: 6379
+    password: 12345678
+# ============LOG4J / HIBERNATE=================
+logging:
+  level:
+    org.springframework.web: DEBUG
+    vn.clmart.manager_service: INFO
+    org.hibernate.type: error
+server:
+  port: 8088
+  error:
+    include-message: always
+  servlet:
+    session:
+      timeout: 1000m
+      cookie:
+        http-only: true
+      tracking-modes: cookie
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      mvc:
+        hiddenmethod:
+          filter:
+            enabled: true
+  session:
+    tracking-modes: cookie
+
+
+# ============SECURITY=================
+app:
+  security:
+    jwtSecret: JWT_SECRET_1584547915594
+    jwtExpirationMs: 3600000
+    jwtRefreshExpirationMs: 86400000
+
+# ============SECURITY=================
+rabbitmp:
+  queue_name: queue_name
+  exchange_name: exchange_name
+  routing_key: rabbitmq.*
+
+

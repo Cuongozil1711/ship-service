@@ -1,5 +1,8 @@
 # =============MySQL config==================
 spring:
+  application: lc-service
+  profiles:
+    active: local
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://103.159.51.154:3306/lcOrder
@@ -31,6 +34,13 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: cuongnv
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+  redis:
+    host: localhost
+    port: 6379
+    password: 12345678
 # ============LOG4J / HIBERNATE=================
 logging:
   level:
@@ -38,6 +48,7 @@ logging:
     vn.clmart.manager_service: INFO
     org.hibernate.type: error
 server:
+  port: 8087
   error:
     include-message: always
   servlet:
@@ -56,10 +67,18 @@ server:
   session:
     tracking-modes: cookie
 
+
 # ============SECURITY=================
 app:
   security:
     jwtSecret: JWT_SECRET_1584547915594
     jwtExpirationMs: 3600000
     jwtRefreshExpirationMs: 86400000
+
+# ============RABBIT MQ=================
+rabbitmp:
+  queue_name: queue_name
+  exchange_name: exchange_name
+  routing_key: rabbitmq.*
+
 
