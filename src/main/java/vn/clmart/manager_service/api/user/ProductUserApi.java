@@ -57,9 +57,7 @@ public class ProductUserApi {
     ResponseEntity<Object> find(
             @PathVariable("id") Long id) {
         try {
-            String text = MessageContext.getMessage("app.lang.vi");
-            throw new BusinessException(text);
-//            return new ResponseEntity<>(productService.productOther(id), HttpStatus.OK);
+            return new ResponseEntity<>(productService.productOther(id), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(ex, HttpStatus.EXPECTATION_FAILED);
         }

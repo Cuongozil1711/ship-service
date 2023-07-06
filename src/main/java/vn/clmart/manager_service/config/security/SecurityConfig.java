@@ -55,7 +55,7 @@ public class SecurityConfig{
                 .csrf().disable();
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/index*", "/resources/**", "/*.js", "/*.json", "/*.ico", "/error", "/swagger-ui/**", "/v2/api-docs/**")
                 .permitAll();
-        http.authorizeRequests().antMatchers("/user/login", "/user/refresh-token", "/user/otp/login", "/user/message/**", "/user/product/**", "/user/category/**", "/user/order/**", "/user/order/**", "/address/**", "/user/order"
+        http.authorizeRequests().antMatchers("/user/login", "/user/refresh-token", "/user/otp/login", "/user/message/**", "/user/product/**", "/user/category/**", "/user/order/**", "/user/order/**", "/address/**", "/user/order", "/user/payment/**"
                 ).permitAll();
 
         http.authorizeRequests().anyRequest().authenticated();

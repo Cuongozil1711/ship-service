@@ -51,7 +51,7 @@ public class EventRequest<E> implements Serializable {
         this.responseTopic = responseTopic;
     }
 
-    public boolean equals(Object o) {
+    public boolean equals(Object o) {   
         if (o == this) {
             return true;
         } else if (!(o instanceof EventRequest)) {
