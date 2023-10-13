@@ -1,9 +1,9 @@
 # =============MySQL config==================
 spring:
-  application: lc-service
+  application: ship-service
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://103.159.51.154:3306/lcOrder
+    url: jdbc:mysql://103.159.51.154:3306/ship_service
     username: root
     password: Cuonglinh1711@
   jpa:
@@ -16,16 +16,6 @@ spring:
         globally_quoted_identifiers: true
         dialect: org.hibernate.dialect.MySQL8Dialect
   mandatory-file-encoding: UTF-8
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: cuongptit1711@gmail.com
-    password: lbccoluqrqpypriu
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls.enable: true
   messages:
     basename: classspath:message
   kafka:
@@ -39,6 +29,13 @@ spring:
     host: localhost
     port: 6379
     password: 12345678
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+
+springdoc:
+  api-docs:
+    path:  /javainuse-openapi
 # ============LOG4J / HIBERNATE=================
 logging:
   level:
@@ -46,7 +43,7 @@ logging:
     vn.clmart.manager_service: INFO
     org.hibernate.type: error
 server:
-  port: 8088
+  port: 8087
   error:
     include-message: always
   servlet:
@@ -64,19 +61,10 @@ server:
             enabled: true
   session:
     tracking-modes: cookie
-
-
 # ============SECURITY=================
-app:
-  security:
-    jwtSecret: JWT_SECRET_1584547915594
-    jwtExpirationMs: 3600000
-    jwtRefreshExpirationMs: 86400000
-
-# ============SECURITY=================
-rabbitmp:
-  queue_name: queue_name
-  exchange_name: exchange_name
-  routing_key: rabbitmq.*
+#rabbitmp:
+#  queue_name: queue_name
+#  exchange_name: exchange_name
+#  routing_key: rabbitmq.*
 
 

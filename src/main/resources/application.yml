@@ -1,11 +1,11 @@
 # =============MySQL config==================
 spring:
-  application: lc-service
+  application: ship-service
   profiles:
     active: local
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://103.159.51.154:3306/lcOrder
+    url: jdbc:mysql://103.159.51.154:3306/ship_service
     username: root
     password: Cuonglinh1711@
   jpa:
@@ -66,19 +66,10 @@ server:
             enabled: true
   session:
     tracking-modes: cookie
-
-
-# ============SECURITY=================
-app:
-  security:
-    jwtSecret: JWT_SECRET_1584547915594
-    jwtExpirationMs: 3600000
-    jwtRefreshExpirationMs: 86400000
-
 # ============RABBIT MQ=================
-rabbitmp:
-  queue_name: queue_name
-  exchange_name: exchange_name
-  routing_key: rabbitmq.*
+#rabbitmp:
+#  queue_name: queue_name
+#  exchange_name: exchange_name
+#  routing_key: rabbitmq.*
 
 

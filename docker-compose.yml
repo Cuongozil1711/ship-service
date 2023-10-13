@@ -1,7 +1,7 @@
 version: '2'
 services:
-  manager_service:
-    container_name: manager_service
+  ship_service:
+    container_name: ship_service
     build:
       context: .
       dockerfile: Dockerfile
