@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import vn.soft.ship_service.config.base.BaseDTO;
 
 
 @Data
@@ -12,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ShipperDTO {
+public class ShipperDTO extends BaseDTO {
     private Long id;
     private String userId;
     private Long[] shopId;
